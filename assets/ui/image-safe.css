@@ -1,0 +1,3 @@
+.ttx-img,.menuItem img,.drink-img,.snack-img,.customer-img,.staff-img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
+.ttx-header-banner{aspect-ratio:3/1;width:100%;overflow:hidden;border-radius:20px}
+.ttx-header-banner img{width:100%;height:100%;object-fit:contain;object-position:center}

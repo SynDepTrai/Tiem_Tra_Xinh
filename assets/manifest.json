@@ -1,0 +1,213 @@
+{
+  "shop/background_main.png": {
+    "fit": "contain"
+  },
+  "shop/background_alt_1.png": {
+    "fit": "contain"
+  },
+  "shop/background_alt_2.png": {
+    "fit": "contain"
+  },
+  "shop/background_alt_3.png": {
+    "fit": "contain"
+  },
+  "shop/background_exterior.png": {
+    "fit": "contain"
+  },
+  "screens/prep.png": {
+    "fit": "contain"
+  },
+  "screens/reviews.png": {
+    "fit": "contain"
+  },
+  "screens/settings.png": {
+    "fit": "contain"
+  },
+  "screens/menu.png": {
+    "fit": "contain"
+  },
+  "ui/popup.png": {
+    "fit": "contain"
+  },
+  "ui/buttons.png": {
+    "fit": "contain"
+  },
+  "ui/status_bars.png": {
+    "fit": "contain"
+  },
+  "ui/frames.png": {
+    "fit": "contain"
+  },
+  "decor/decor_catalog.png": {
+    "fit": "contain"
+  },
+  "ingredients/ingredients_catalog.png": {
+    "fit": "contain"
+  },
+  "toppings/toppings_catalog.png": {
+    "fit": "contain"
+  },
+  "customers/customer_catalog.png": {
+    "fit": "contain"
+  },
+  "staff/staff_catalog.png": {
+    "fit": "contain"
+  },
+  "ui/icons_catalog.png": {
+    "fit": "contain"
+  },
+  "shop/header_banner.png": {
+    "fit": "contain",
+    "aspect_ratio": 2.999
+  },
+  "drinks/tra_sua_truyen_thong.png": {
+    "fit": "contain"
+  },
+  "drinks/tra_dao.png": {
+    "fit": "contain"
+  },
+  "drinks/matcha_latte.png": {
+    "fit": "contain"
+  },
+  "drinks/tra_chanh.png": {
+    "fit": "contain"
+  },
+  "drinks/hong_tra.png": {
+    "fit": "contain"
+  },
+  "drinks/socola.png": {
+    "fit": "contain"
+  },
+  "drinks/dau_tay.png": {
+    "fit": "contain"
+  },
+  "drinks/viet_quat.png": {
+    "fit": "contain"
+  },
+  "drinks/kiwi.png": {
+    "fit": "contain"
+  },
+  "drinks/khoai_mon.png": {
+    "fit": "contain"
+  },
+  "drinks/tra_o_long.png": {
+    "fit": "contain"
+  },
+  "drinks/tra_vai.png": {
+    "fit": "contain"
+  },
+  "drinks/tra_nhai.png": {
+    "fit": "contain"
+  },
+  "drinks/bac_ha.png": {
+    "fit": "contain"
+  },
+  "drinks/sua_tuoi.png": {
+    "fit": "contain"
+  },
+  "drinks/cappuccino.png": {
+    "fit": "contain"
+  },
+  "snacks/banh_waffle.png": {
+    "fit": "contain"
+  },
+  "snacks/khoai_tay_chien.png": {
+    "fit": "contain"
+  },
+  "snacks/ga_ran.png": {
+    "fit": "contain"
+  },
+  "snacks/banh_takoyaki.png": {
+    "fit": "contain"
+  },
+  "snacks/banh_ngot.png": {
+    "fit": "contain"
+  },
+  "snacks/banh_trang_tron.png": {
+    "fit": "contain"
+  },
+  "snacks/xuc_xich.png": {
+    "fit": "contain"
+  },
+  "snacks/banh_mochi.png": {
+    "fit": "contain"
+  },
+  "snacks/donut.png": {
+    "fit": "contain"
+  },
+  "snacks/com_nam.png": {
+    "fit": "contain"
+  },
+  "customers/khach_1.png": {
+    "fit": "contain"
+  },
+  "customers/khach_2.png": {
+    "fit": "contain"
+  },
+  "customers/khach_3.png": {
+    "fit": "contain"
+  },
+  "customers/khach_4.png": {
+    "fit": "contain"
+  },
+  "customers/khach_5.png": {
+    "fit": "contain"
+  },
+  "customers/khach_6.png": {
+    "fit": "contain"
+  },
+  "customers/khach_7.png": {
+    "fit": "contain"
+  },
+  "customers/khach_8.png": {
+    "fit": "contain"
+  },
+  "customers/khach_9.png": {
+    "fit": "contain"
+  },
+  "customers/khach_10.png": {
+    "fit": "contain"
+  },
+  "customers/khach_11.png": {
+    "fit": "contain"
+  },
+  "customers/khach_12.png": {
+    "fit": "contain"
+  },
+  "customers/khach_13.png": {
+    "fit": "contain"
+  },
+  "customers/khach_14.png": {
+    "fit": "contain"
+  },
+  "customers/khach_15.png": {
+    "fit": "contain"
+  },
+  "staff/phu_quay.png": {
+    "fit": "contain"
+  },
+  "staff/pha_che.png": {
+    "fit": "contain"
+  },
+  "staff/don_online.png": {
+    "fit": "contain"
+  },
+  "staff/phu_quay_2.png": {
+    "fit": "contain"
+  },
+  "cups/ly_s.png": {
+    "fit": "contain"
+  },
+  "cups/ly_m.png": {
+    "fit": "contain"
+  },
+  "cups/ly_l.png": {
+    "fit": "contain"
+  },
+  "cups/ly_xl.png": {
+    "fit": "contain"
+  },
+  "cups/ly_xxl.png": {
+    "fit": "contain"
+  }
+}
