@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#d97951">
-<title>Tiệm Trà Xinh — V21</title>
+<title>Tiệm Trà Xinh — V22</title>
 <style>
 :root{--bg:#fff7ed;--paper:#fffdf9;--ink:#3e3028;--muted:#90796b;--brand:#d97850;--brand2:#f4b36d;--green:#70a56f;--red:#c95e59;--gold:#e4a52f;--line:#ead9ca;--shadow:0 12px 35px #6e493016}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% 0,#fff1dc,transparent 30%),linear-gradient(#fff8ef,#fffdf9);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
@@ -22,13 +22,13 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 .assetImg{width:64px;height:64px;object-fit:contain;object-position:center;display:block;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:64px;height:64px;float:right;margin-left:8px}.snackChoice .assetImg,.choice .assetImg{width:42px;height:42px;object-fit:contain;object-position:center;vertical-align:middle}.customerImg{width:112px;height:112px;object-fit:contain;object-position:center;display:block;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/shop/storefront.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
 .inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style><!-- Tiệm Trà Xinh V19 favicon -->
 <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/favicon-512.png?v=21">
-<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/favicon-192.png?v=21">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/favicon-192.png?v=22">
 <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96.png?v=21">
 <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48.png?v=21">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=21">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png?v=21">
-<link rel="apple-touch-icon" sizes="192x192" href="assets/icons/favicon-192.png?v=21">
-<link rel="manifest" href="assets/icons/site.webmanifest?v=21">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/icons/favicon-192.png?v=22">
+<link rel="manifest" href="assets/icons/site.webmanifest?v=22">
 </head>
 <body>
 <div class="app">
@@ -100,6 +100,14 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 </div>
 
 <script>
+function imgIcon(src,alt=""){return `<img class="inlineIcon" src="${src}" alt="${alt}" draggable="false">`}
+const ICONS={"🥤":"assets/drinks/tra_sua_truyen_thong.png","🧋":"assets/drinks/tra_sua_truyen_thong.png","🍵":"assets/drinks/tra_sua_matcha.png","🫖":"assets/drinks/tra_sua_o_long.png","🍑":"assets/drinks/tra_dao.png","🍋":"assets/drinks/tra_chanh.png","🍊":"assets/drinks/tra_vai.png","🍓":"assets/drinks/tra_dau.png","🍫":"assets/drinks/tra_sua_socola.png","🥭":"assets/drinks/tra_xoai.png","🍠":"assets/drinks/tra_sua_khoai_mon.png","🍯":"assets/ingredients/trai_cay.png","🥛":"assets/ingredients/sua_tuoi.png","☕":"assets/drinks/tra_sua_den.png","🥫":"assets/ingredients/sua_dac.png","🧀":"assets/toppings/kem_cheese.png","🍮":"assets/toppings/pudding.png","🥥":"assets/toppings/thach_dua.png","🍡":"assets/toppings/thach_trai_cay.png","🍪":"assets/snacks/banh_trang_tron.png","🍟":"assets/snacks/khoai_tay_lac.png","🌭":"assets/snacks/xuc_xich_nuong_da.png","🥓":"assets/snacks/lap_xuong_nuong_da.png","🍢":"assets/snacks/ca_vien_chien.png","🥟":"assets/snacks/nem_chua_ran.png","🧪":"assets/ingredients/tra_den.png","🏆":"assets/ui_new/achievements.png","⚙️":"assets/ui_new/settings.png","🛒":"assets/ui_new/shop.png","📋":"assets/ui_new/quests.png","💾":"assets/ui_new/save.png","▶️":"assets/ui_new/start.png","✨":"assets/effects_new/sparkle.png","🌿":"assets/shop/plant.png","💖":"assets/effects_new/heart.png","⚫":"assets/ingredients_new/black_pearls.png","⚪":"assets/ingredients_new/white_pearls.png","🟢":"assets/ingredients_new/strawberry.png","🟡":"assets/ingredients_new/pudding.png","🫘":"assets/ingredients_new/red_pearls.png","🌰":"assets/ingredients_new/black_pearls.png","🍦":"assets/ingredients_new/pudding.png","🍇":"assets/ingredients_new/red_pearls.png","🥢":"assets/snacks_new/croissant.png","🧈":"assets/snacks_new/egg_ball.png"};
+function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
+function assetTea(n){const m={"Truyền thống":"tra_sua_truyen_thong","Matcha":"tra_sua_matcha","Trà đào":"tra_dao","Trà chanh":"tra_chanh","Bạc xỉu":"tra_sua_den","Soda chanh":"tra_chanh","Ô long":"tra_sua_o_long","Cà phê sữa":"tra_sua_caramel","Trà sữa":"tra_sua_truyen_thong","Yakult chanh":"tra_chanh","Nước cam":"tra_vai","Sinh tố dâu":"tra_dau","Socola":"tra_sua_socola","Matcha latte":"tra_sua_matcha","Sữa tươi trân châu đường đen":"tra_sua_den","Trà kem cheese":"tra_sua_dau","Dâu sữa":"tra_sua_dau","Matcha dâu":"tra_sua_dau","Xoài kem cheese":"tra_xoai","Khoai môn sữa":"tra_sua_khoai_mon","Matcha mật ong":"tra_sua_matcha"};return m[n]?`assets/drinks/${m[n]}.png`:null}
+function assetTop(n){const m={"Trân châu đen":"tran_chau_den","Thạch trái cây":"thach_trai_cay","Pudding trứng":"pudding","Trân châu trắng":"tran_chau_trang","Thạch dừa":"thach_dua","Nha đam":"thach_dua","Trân châu hoàng kim":"tran_chau_trang","Hạt sen":"tran_chau_den","Đậu đỏ":"tran_chau_den","Kem cheese":"kem_cheese","Oreo vụn":"thach_ca_phe","Thạch nho":"thach_trai_cay","Thạch đào":"thach_trai_cay","Bánh flan":"pudding","Kem vani":"kem_cheese","Mochi":"thach_trai_cay"};return m[n]?`assets/toppings/${m[n]}.png`:null}
+function assetSnack(n){const m={"Xúc xích nướng đá":"xuc_xich_nuong_da","Lạp xưởng nướng đá":"lap_xuong_nuong_da","Cá viên chiên":"ca_vien_chien","Bò viên chiên":"bo_vien_chien","Khoai tây lắc":"khoai_tay_lac","Bánh tráng trộn":"banh_trang_tron","Bánh tráng nhúng nước":"banh_trang_tron","Phô mai que":"pho_mai_que","Nem chua rán":"nem_chua_ran","Đậu hũ chiên sốt":"ca_vien_chien"};return m[n]?`assets/snacks/${m[n]}.png`:null}
+function assetTag(src,alt,cls="assetImg"){return src?`<img class="${cls}" src="${src}" alt="${alt}" draggable="false">`:""}
+
 const SIZES={
  "S":{price:-2,unlock:1,emoji:emojiImg("🥤"),stockMax:30},
  "M":{price:0,unlock:1,emoji:emojiImg("🥤"),stockMax:30},
@@ -203,13 +211,6 @@ function wipe(){
   const second=confirm("🚨 XÁC NHẬN LẦN CUỐI\n\nThao tác này không thể hoàn tác. Nhấn OK để xóa toàn bộ dữ liệu, hoặc Hủy để giữ nguyên tiến trình.");
   if(second){localStorage.removeItem("TTX_FULL_SAVE");location.reload();}
 }
-function imgIcon(src,alt=""){return `<img class="inlineIcon" src="${src}" alt="${alt}" draggable="false">`}
-const ICONS={"🥤":"assets/drinks/tra_sua_truyen_thong.png","🧋":"assets/drinks/tra_sua_truyen_thong.png","🍵":"assets/drinks/tra_sua_matcha.png","🫖":"assets/drinks/tra_sua_o_long.png","🍑":"assets/drinks/tra_dao.png","🍋":"assets/drinks/tra_chanh.png","🍊":"assets/drinks/tra_vai.png","🍓":"assets/drinks/tra_dau.png","🍫":"assets/drinks/tra_sua_socola.png","🥭":"assets/drinks/tra_xoai.png","🍠":"assets/drinks/tra_sua_khoai_mon.png","🍯":"assets/ingredients/trai_cay.png","🥛":"assets/ingredients/sua_tuoi.png","☕":"assets/drinks/tra_sua_den.png","🥫":"assets/ingredients/sua_dac.png","🧀":"assets/toppings/kem_cheese.png","🍮":"assets/toppings/pudding.png","🥥":"assets/toppings/thach_dua.png","🍡":"assets/toppings/thach_trai_cay.png","🍪":"assets/snacks/banh_trang_tron.png","🍟":"assets/snacks/khoai_tay_lac.png","🌭":"assets/snacks/xuc_xich_nuong_da.png","🥓":"assets/snacks/lap_xuong_nuong_da.png","🍢":"assets/snacks/ca_vien_chien.png","🥟":"assets/snacks/nem_chua_ran.png","🧪":"assets/ingredients/tra_den.png","🏆":"assets/ui_new/achievements.png","⚙️":"assets/ui_new/settings.png","🛒":"assets/ui_new/shop.png","📋":"assets/ui_new/quests.png","💾":"assets/ui_new/save.png","▶️":"assets/ui_new/start.png","✨":"assets/effects_new/sparkle.png","🌿":"assets/shop/plant.png","💖":"assets/effects_new/heart.png","⚫":"assets/ingredients_new/black_pearls.png","⚪":"assets/ingredients_new/white_pearls.png","🟢":"assets/ingredients_new/strawberry.png","🟡":"assets/ingredients_new/pudding.png","🫘":"assets/ingredients_new/red_pearls.png","🌰":"assets/ingredients_new/black_pearls.png","🍦":"assets/ingredients_new/pudding.png","🍇":"assets/ingredients_new/red_pearls.png","🥢":"assets/snacks_new/croissant.png","🧈":"assets/snacks_new/egg_ball.png"};
-function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
-function assetTea(n){const m={"Truyền thống":"tra_sua_truyen_thong","Matcha":"tra_sua_matcha","Trà đào":"tra_dao","Trà chanh":"tra_chanh","Bạc xỉu":"tra_sua_den","Soda chanh":"tra_chanh","Ô long":"tra_sua_o_long","Cà phê sữa":"tra_sua_caramel","Trà sữa":"tra_sua_truyen_thong","Yakult chanh":"tra_chanh","Nước cam":"tra_vai","Sinh tố dâu":"tra_dau","Socola":"tra_sua_socola","Matcha latte":"tra_sua_matcha","Sữa tươi trân châu đường đen":"tra_sua_den","Trà kem cheese":"tra_sua_dau","Dâu sữa":"tra_sua_dau","Matcha dâu":"tra_sua_dau","Xoài kem cheese":"tra_xoai","Khoai môn sữa":"tra_sua_khoai_mon","Matcha mật ong":"tra_sua_matcha"};return m[n]?`assets/drinks/${m[n]}.png`:null}
-function assetTop(n){const m={"Trân châu đen":"tran_chau_den","Thạch trái cây":"thach_trai_cay","Pudding trứng":"pudding","Trân châu trắng":"tran_chau_trang","Thạch dừa":"thach_dua","Nha đam":"thach_dua","Trân châu hoàng kim":"tran_chau_trang","Hạt sen":"tran_chau_den","Đậu đỏ":"tran_chau_den","Kem cheese":"kem_cheese","Oreo vụn":"thach_ca_phe","Thạch nho":"thach_trai_cay","Thạch đào":"thach_trai_cay","Bánh flan":"pudding","Kem vani":"kem_cheese","Mochi":"thach_trai_cay"};return m[n]?`assets/toppings/${m[n]}.png`:null}
-function assetSnack(n){const m={"Xúc xích nướng đá":"xuc_xich_nuong_da","Lạp xưởng nướng đá":"lap_xuong_nuong_da","Cá viên chiên":"ca_vien_chien","Bò viên chiên":"bo_vien_chien","Khoai tây lắc":"khoai_tay_lac","Bánh tráng trộn":"banh_trang_tron","Bánh tráng nhúng nước":"banh_trang_tron","Phô mai que":"pho_mai_que","Nem chua rán":"nem_chua_ran","Đậu hũ chiên sốt":"ca_vien_chien"};return m[n]?`assets/snacks/${m[n]}.png`:null}
-function assetTag(src,alt,cls="assetImg"){return src?`<img class="${cls}" src="${src}" alt="${alt}" draggable="false">`:""}
 function startPrep(){renderPrep();show("prep")}
 function renderPrep(){
  document.getElementById("prepDay").textContent=S.day;
