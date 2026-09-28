@@ -1,4 +1,2 @@
-Tiệm Trà Xinh V14
-- Thêm thanh Kinh nghiệm (XP) ngay trên giao diện chính.
-- Hiển thị XP hiện tại / XP cần để lên cấp và thanh tiến trình.
-- Giữ nguyên save localStorage và toàn bộ tính năng V13.
+Tiệm Trà Xinh V16
+Đã sửa: tên web cố định, bảng hiệu mới cho phép đổi tên quán với phí 50k.
