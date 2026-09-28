@@ -19,12 +19,12 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 @media(max-width:780px){.sign{cursor:pointer;font-size:clamp(8px,1.9vw,13px);padding:5px 6px}.shopStatus{font-size:clamp(17px,6vw,27px)}}
 .sign{font:inherit;text-align:left;color:inherit;appearance:none;-webkit-appearance:none}
 </style><style>
-.assetImg{width:42px;height:42px;object-fit:contain;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:58px;height:58px;float:right;margin-left:8px}.snackChoice .assetImg,.choice .assetImg{width:30px;height:30px}.customerImg{width:92px;height:92px;object-fit:contain;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/shop/storefront.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
-</style></head>
+.assetImg{width:64px;height:64px;object-fit:contain;object-position:center;display:block;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:64px;height:64px;float:right;margin-left:8px}.snackChoice .assetImg,.choice .assetImg{width:42px;height:42px;object-fit:contain;object-position:center;vertical-align:middle}.customerImg{width:112px;height:112px;object-fit:contain;object-position:center;display:block;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/shop/storefront.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
+.inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style></head>
 <body>
 <div class="app">
-<header class="top"><div class="logo">🧋 Tiệm Trà Xinh</div><div class="topRight"><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">300k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div><div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div></div></header>
-<div class="scene"><div class="awning"></div><button class="sign" type="button" onclick="openRenameModal()" title="Đổi tên quán">🧋 <span id="signShopName">TIỆM TRÀ XINH</span></button><div class="window"><b id="signStatus">CLOSE</b></div><div class="plant">🌿</div></div>
+<header class="top"><div class="logo"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> Tiệm Trà Xinh</div><div class="topRight"><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">300k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div><div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div></div></header>
+<div class="scene"><div class="awning"></div><button class="sign" type="button" onclick="openRenameModal()" title="Đổi tên quán"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> <span id="signShopName">TIỆM TRÀ XINH</span></button><div class="window"><b id="signStatus">CLOSE</b></div><div class="plant">🌿</div></div>
 
 <section id="home" class="screen active">
  <div class="card hero"><div style="font-size:70px">🧋</div><h1 id="homeShopName">Tiệm Trà Xinh</h1><p class="muted">Quản lý • Pha chế • Mở rộng • Trở thành chủ tiệm</p>
@@ -92,52 +92,52 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 
 <script>
 const SIZES={
- "S":{price:-2,unlock:1,emoji:"🥤",stockMax:30},
- "M":{price:0,unlock:1,emoji:"🥤",stockMax:30},
- "L":{price:4,unlock:1,emoji:"🥤",stockMax:25},
- "XL":{price:8,unlock:3,emoji:"🥤",stockMax:20},
- "XXL":{price:12,unlock:6,emoji:"🥤",stockMax:15}
+ "S":{price:-2,unlock:1,emoji:emojiImg("🥤"),stockMax:30},
+ "M":{price:0,unlock:1,emoji:emojiImg("🥤"),stockMax:30},
+ "L":{price:4,unlock:1,emoji:emojiImg("🥤"),stockMax:25},
+ "XL":{price:8,unlock:3,emoji:emojiImg("🥤"),stockMax:20},
+ "XXL":{price:12,unlock:6,emoji:emojiImg("🥤"),stockMax:15}
 };
 const INGREDIENTS={
- "Trà đen":{emoji:"🍂",cost:2},"Bột matcha":{emoji:"🍵",cost:4},"Syrup đào":{emoji:"🍑",cost:3},"Chanh tươi":{emoji:"🍋",cost:2},
- "Sữa tươi":{emoji:"🥛",cost:3},"Cà phê":{emoji:"☕",cost:3},"Sữa đặc":{emoji:"🥫",cost:3},"Soda":{emoji:"🥤",cost:2},
- "Trà ô long":{emoji:"🫖",cost:3},"Bột sữa":{emoji:"🥛",cost:3},"Yakult":{emoji:"🧃",cost:4},"Cam tươi":{emoji:"🍊",cost:3},
- "Dâu tươi":{emoji:"🍓",cost:4},"Bột cacao":{emoji:"🍫",cost:3},"Đường đen":{emoji:"🟤",cost:2},"Kem cheese":{emoji:"🧀",cost:4},
- "Xoài tươi":{emoji:"🥭",cost:4},"Khoai môn":{emoji:"🍠",cost:4},"Mật ong":{emoji:"🍯",cost:3}
+ "Trà đen":{emoji:emojiImg("🍂"),cost:2},"Bột matcha":{emoji:emojiImg("🍵"),cost:4},"Syrup đào":{emoji:emojiImg("🍑"),cost:3},"Chanh tươi":{emoji:emojiImg("🍋"),cost:2},
+ "Sữa tươi":{emoji:emojiImg("🥛"),cost:3},"Cà phê":{emoji:emojiImg("☕"),cost:3},"Sữa đặc":{emoji:emojiImg("🥫"),cost:3},"Soda":{emoji:emojiImg("🥤"),cost:2},
+ "Trà ô long":{emoji:emojiImg("🫖"),cost:3},"Bột sữa":{emoji:emojiImg("🥛"),cost:3},"Yakult":{emoji:emojiImg("🧃"),cost:4},"Cam tươi":{emoji:emojiImg("🍊"),cost:3},
+ "Dâu tươi":{emoji:emojiImg("🍓"),cost:4},"Bột cacao":{emoji:emojiImg("🍫"),cost:3},"Đường đen":{emoji:emojiImg("🟤"),cost:2},"Kem cheese":{emoji:emojiImg("🧀"),cost:4},
+ "Xoài tươi":{emoji:emojiImg("🥭"),cost:4},"Khoai môn":{emoji:emojiImg("🍠"),cost:4},"Mật ong":{emoji:emojiImg("🍯"),cost:3}
 };
 const TEAS={
- "Truyền thống":{price:22,recipe:0,emoji:"🫖",type:"normal",ingredients:["Trà đen"]},
- "Matcha":{price:27,recipe:25,emoji:"🍵",type:"normal",ingredients:["Bột matcha"]},
- "Trà đào":{price:25,recipe:30,emoji:"🍑",type:"normal",ingredients:["Trà đen","Syrup đào"]},
- "Trà chanh":{price:24,recipe:30,emoji:"🍋",type:"normal",ingredients:["Trà đen","Chanh tươi"]},
- "Bạc xỉu":{price:33,recipe:35,emoji:"🥛",type:"normal",ingredients:["Cà phê","Sữa tươi"]},
- "Soda chanh":{price:29,recipe:35,emoji:"🥤",type:"normal",ingredients:["Soda","Chanh tươi"]},
- "Ô long":{price:30,recipe:40,emoji:"🫖",type:"normal",ingredients:["Trà ô long"]},
- "Cà phê sữa":{price:32,recipe:45,emoji:"☕",type:"normal",ingredients:["Cà phê","Sữa đặc"]},
- "Trà sữa":{price:34,recipe:50,emoji:"🧋",type:"normal",ingredients:["Trà đen","Bột sữa"]},
- "Yakult chanh":{price:35,recipe:55,emoji:"🍋",type:"normal",ingredients:["Yakult","Chanh tươi"]},
- "Nước cam":{price:31,recipe:60,emoji:"🍊",type:"normal",ingredients:["Cam tươi"]},
- "Sinh tố dâu":{price:40,recipe:65,emoji:"🍓",type:"normal",ingredients:["Dâu tươi","Sữa tươi"]},
- "Socola":{price:38,recipe:70,emoji:"🍫",type:"normal",ingredients:["Bột cacao","Sữa tươi"]},
- "Matcha latte":{price:37,special:1,emoji:"🍵",type:"special",ingredients:["Bột matcha","Sữa tươi"]},
- "Sữa tươi trân châu đường đen":{price:42,special:2,emoji:"🧋",type:"special",ingredients:["Sữa tươi","Đường đen"]},
- "Trà kem cheese":{price:46,special:3,emoji:"🧀",type:"special",ingredients:["Trà đen","Kem cheese"]},
- "Dâu sữa":{price:48,special:4,emoji:"🍓",type:"special",ingredients:["Dâu tươi","Sữa tươi"]},
- "Matcha dâu":{price:52,special:5,emoji:"🍓",type:"special",ingredients:["Bột matcha","Dâu tươi","Sữa tươi"]},
- "Xoài kem cheese":{price:55,special:6,emoji:"🥭",type:"special",ingredients:["Xoài tươi","Kem cheese"]},
- "Khoai môn sữa":{price:50,special:7,emoji:"🍠",type:"special",ingredients:["Khoai môn","Sữa tươi"]},
- "Matcha mật ong":{price:53,special:8,emoji:"🍯",type:"special",ingredients:["Bột matcha","Mật ong"]}
+ "Truyền thống":{price:22,recipe:0,emoji:emojiImg("🫖"),type:"normal",ingredients:["Trà đen"]},
+ "Matcha":{price:27,recipe:25,emoji:emojiImg("🍵"),type:"normal",ingredients:["Bột matcha"]},
+ "Trà đào":{price:25,recipe:30,emoji:emojiImg("🍑"),type:"normal",ingredients:["Trà đen","Syrup đào"]},
+ "Trà chanh":{price:24,recipe:30,emoji:emojiImg("🍋"),type:"normal",ingredients:["Trà đen","Chanh tươi"]},
+ "Bạc xỉu":{price:33,recipe:35,emoji:emojiImg("🥛"),type:"normal",ingredients:["Cà phê","Sữa tươi"]},
+ "Soda chanh":{price:29,recipe:35,emoji:emojiImg("🥤"),type:"normal",ingredients:["Soda","Chanh tươi"]},
+ "Ô long":{price:30,recipe:40,emoji:emojiImg("🫖"),type:"normal",ingredients:["Trà ô long"]},
+ "Cà phê sữa":{price:32,recipe:45,emoji:emojiImg("☕"),type:"normal",ingredients:["Cà phê","Sữa đặc"]},
+ "Trà sữa":{price:34,recipe:50,emoji:emojiImg("🧋"),type:"normal",ingredients:["Trà đen","Bột sữa"]},
+ "Yakult chanh":{price:35,recipe:55,emoji:emojiImg("🍋"),type:"normal",ingredients:["Yakult","Chanh tươi"]},
+ "Nước cam":{price:31,recipe:60,emoji:emojiImg("🍊"),type:"normal",ingredients:["Cam tươi"]},
+ "Sinh tố dâu":{price:40,recipe:65,emoji:emojiImg("🍓"),type:"normal",ingredients:["Dâu tươi","Sữa tươi"]},
+ "Socola":{price:38,recipe:70,emoji:emojiImg("🍫"),type:"normal",ingredients:["Bột cacao","Sữa tươi"]},
+ "Matcha latte":{price:37,special:1,emoji:emojiImg("🍵"),type:"special",ingredients:["Bột matcha","Sữa tươi"]},
+ "Sữa tươi trân châu đường đen":{price:42,special:2,emoji:emojiImg("🧋"),type:"special",ingredients:["Sữa tươi","Đường đen"]},
+ "Trà kem cheese":{price:46,special:3,emoji:emojiImg("🧀"),type:"special",ingredients:["Trà đen","Kem cheese"]},
+ "Dâu sữa":{price:48,special:4,emoji:emojiImg("🍓"),type:"special",ingredients:["Dâu tươi","Sữa tươi"]},
+ "Matcha dâu":{price:52,special:5,emoji:emojiImg("🍓"),type:"special",ingredients:["Bột matcha","Dâu tươi","Sữa tươi"]},
+ "Xoài kem cheese":{price:55,special:6,emoji:emojiImg("🥭"),type:"special",ingredients:["Xoài tươi","Kem cheese"]},
+ "Khoai môn sữa":{price:50,special:7,emoji:emojiImg("🍠"),type:"special",ingredients:["Khoai môn","Sữa tươi"]},
+ "Matcha mật ong":{price:53,special:8,emoji:emojiImg("🍯"),type:"special",ingredients:["Bột matcha","Mật ong"]}
 };
 const SNACKS={
- "Xúc xích nướng đá":{price:18,cost:8,recipe:20,emoji:"🌭"},"Lạp xưởng nướng đá":{price:22,cost:10,recipe:25,emoji:"🥓"},"Cá viên chiên":{price:18,cost:8,recipe:22,emoji:"🍢"},"Bò viên chiên":{price:20,cost:9,recipe:25,emoji:"🍢"},
- "Khoai tây lắc":{price:20,cost:9,recipe:28,emoji:"🍟"},"Bánh tráng trộn":{price:22,cost:10,recipe:30,emoji:"🌶️"},"Bánh tráng nhúng nước":{price:20,cost:8,recipe:32,emoji:"🥢"},"Phô mai que":{price:24,cost:11,recipe:35,emoji:"🧀"},
- "Nem chua rán":{price:23,cost:10,recipe:38,emoji:"🥟"},"Đậu hũ chiên sốt":{price:21,cost:9,recipe:40,emoji:"🧈"}
+ "Xúc xích nướng đá":{price:18,cost:8,recipe:20,emoji:emojiImg("🌭")},"Lạp xưởng nướng đá":{price:22,cost:10,recipe:25,emoji:emojiImg("🥓")},"Cá viên chiên":{price:18,cost:8,recipe:22,emoji:emojiImg("🍢")},"Bò viên chiên":{price:20,cost:9,recipe:25,emoji:emojiImg("🍢")},
+ "Khoai tây lắc":{price:20,cost:9,recipe:28,emoji:emojiImg("🍟")},"Bánh tráng trộn":{price:22,cost:10,recipe:30,emoji:emojiImg("🌶️")},"Bánh tráng nhúng nước":{price:20,cost:8,recipe:32,emoji:emojiImg("🥢")},"Phô mai que":{price:24,cost:11,recipe:35,emoji:emojiImg("🧀")},
+ "Nem chua rán":{price:23,cost:10,recipe:38,emoji:emojiImg("🥟")},"Đậu hũ chiên sốt":{price:21,cost:9,recipe:40,emoji:emojiImg("🧈")}
 };
 const TOPS={
- "Trân châu đen":{price:6,cost:2,unlock:1,emoji:"⚫"},"Thạch trái cây":{price:5,cost:2,unlock:1,emoji:"🟢"},"Pudding trứng":{price:8,cost:3,unlock:2,emoji:"🍮"},"Trân châu trắng":{price:8,cost:3,unlock:2,emoji:"⚪"},
- "Thạch dừa":{price:7,cost:3,unlock:2,emoji:"🥥"},"Nha đam":{price:7,cost:3,unlock:3,emoji:"🌿"},"Trân châu hoàng kim":{price:10,cost:4,unlock:3,emoji:"🟡"},"Hạt sen":{price:9,cost:4,unlock:3,emoji:"🌰"},
- "Đậu đỏ":{price:8,cost:3,unlock:4,emoji:"🫘"},"Kem cheese":{price:10,cost:4,unlock:4,emoji:"🧀"},"Oreo vụn":{price:10,cost:4,unlock:4,emoji:"🍪"},"Thạch nho":{price:9,cost:4,unlock:5,emoji:"🍇"},
- "Thạch đào":{price:9,cost:4,unlock:5,emoji:"🍑"},"Bánh flan":{price:11,cost:5,unlock:6,emoji:"🍮"},"Kem vani":{price:12,cost:5,unlock:7,emoji:"🍦"},"Mochi":{price:13,cost:6,unlock:8,emoji:"🍡"}
+ "Trân châu đen":{price:6,cost:2,unlock:1,emoji:emojiImg("⚫")},"Thạch trái cây":{price:5,cost:2,unlock:1,emoji:emojiImg("🟢")},"Pudding trứng":{price:8,cost:3,unlock:2,emoji:emojiImg("🍮")},"Trân châu trắng":{price:8,cost:3,unlock:2,emoji:emojiImg("⚪")},
+ "Thạch dừa":{price:7,cost:3,unlock:2,emoji:emojiImg("🥥")},"Nha đam":{price:7,cost:3,unlock:3,emoji:emojiImg("🌿")},"Trân châu hoàng kim":{price:10,cost:4,unlock:3,emoji:emojiImg("🟡")},"Hạt sen":{price:9,cost:4,unlock:3,emoji:emojiImg("🌰")},
+ "Đậu đỏ":{price:8,cost:3,unlock:4,emoji:emojiImg("🫘")},"Kem cheese":{price:10,cost:4,unlock:4,emoji:emojiImg("🧀")},"Oreo vụn":{price:10,cost:4,unlock:4,emoji:emojiImg("🍪")},"Thạch nho":{price:9,cost:4,unlock:5,emoji:emojiImg("🍇")},
+ "Thạch đào":{price:9,cost:4,unlock:5,emoji:emojiImg("🍑")},"Bánh flan":{price:11,cost:5,unlock:6,emoji:emojiImg("🍮")},"Kem vani":{price:12,cost:5,unlock:7,emoji:emojiImg("🍦")},"Mochi":{price:13,cost:6,unlock:8,emoji:emojiImg("🍡")}
 };
 const CUSTOMERS=[
  {name:"Minh",gender:"male",avatar:"👨🏻"},{name:"Nam",gender:"male",avatar:"👨🏻"},{name:"Huy",gender:"male",avatar:"👨🏼"},{name:"Khoa",gender:"male",avatar:"👨🏻‍🦱"},{name:"Phúc",gender:"male",avatar:"👨🏽"},{name:"Quang",gender:"male",avatar:"👨🏻"},{name:"Tuấn",gender:"male",avatar:"👨🏼"},{name:"Dũng",gender:"male",avatar:"👨🏽"},{name:"Đức",gender:"male",avatar:"👨🏻"},{name:"Hoàng",gender:"male",avatar:"👨🏻‍🦱"},{name:"Long",gender:"male",avatar:"👨🏼"},{name:"Tùng",gender:"male",avatar:"👨🏽"},
@@ -176,7 +176,7 @@ function load(){
  syncSpecialDrinks(false);syncLevelUnlocks(false);save();
 }
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");updateTop()}
-function updateTop(){const n=S.shopName||"Tiệm Trà Xinh";document.querySelector(".top .logo").innerHTML="🧋 Tiệm Trà Xinh";document.getElementById("signShopName").textContent=n.toUpperCase();document.getElementById("signStatus").textContent=S.shopOpen?"OPEN":"CLOSE";document.getElementById("signStatus").className=S.shopOpen?"shopStatus open":"shopStatus closed";document.getElementById("day").textContent="Ngày "+S.day;document.getElementById("cash").textContent=money(S.cash);document.getElementById("rating").textContent=S.rating.toFixed(1);document.getElementById("level").textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);document.getElementById("xpHome").style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent="Tiệm Trà Xinh"}
+function updateTop(){const n=S.shopName||"Tiệm Trà Xinh";document.querySelector(".top .logo").innerHTML='<img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> Tiệm Trà Xinh';document.getElementById("signShopName").textContent=n.toUpperCase();document.getElementById("signStatus").textContent=S.shopOpen?"OPEN":"CLOSE";document.getElementById("signStatus").className=S.shopOpen?"shopStatus open":"shopStatus closed";document.getElementById("day").textContent="Ngày "+S.day;document.getElementById("cash").textContent=money(S.cash);document.getElementById("rating").textContent=S.rating.toFixed(1);document.getElementById("level").textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);document.getElementById("xpHome").style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent="Tiệm Trà Xinh"}
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",1800)}
 function fx(sym="✨"){for(let i=0;i<7;i++){let e=document.createElement("div");e.className="float";e.textContent=sym;e.style.left=(45+Math.random()*10)+"%";e.style.top=(45+Math.random()*10)+"%";e.style.setProperty("--x",(Math.random()*180-90)+"px");e.style.setProperty("--y",(-50-Math.random()*130)+"px");document.body.appendChild(e);setTimeout(()=>e.remove(),900)}}
 function gainXP(n){S.xp+=n;while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;S.cash+=25;syncLevelUnlocks(true);toast("🎉 Lên cấp "+S.level+"! +25k");fx("⭐")}}
@@ -193,6 +193,9 @@ function wipe(){
   const second=confirm("🚨 XÁC NHẬN LẦN CUỐI\n\nThao tác này không thể hoàn tác. Nhấn OK để xóa toàn bộ dữ liệu, hoặc Hủy để giữ nguyên tiến trình.");
   if(second){localStorage.removeItem("TTX_FULL_SAVE");location.reload();}
 }
+function imgIcon(src,alt=""){return `<img class="inlineIcon" src="${src}" alt="${alt}" draggable="false">`}
+const ICONS={"🥤":"assets/drinks/tra_sua_truyen_thong.png","🧋":"assets/drinks/tra_sua_truyen_thong.png","🍵":"assets/drinks/tra_sua_matcha.png","🫖":"assets/drinks/tra_sua_o_long.png","🍑":"assets/drinks/tra_dao.png","🍋":"assets/drinks/tra_chanh.png","🍊":"assets/drinks/tra_vai.png","🍓":"assets/drinks/tra_dau.png","🍫":"assets/drinks/tra_sua_socola.png","🥭":"assets/drinks/tra_xoai.png","🍠":"assets/drinks/tra_sua_khoai_mon.png","🍯":"assets/ingredients/trai_cay.png","🥛":"assets/ingredients/sua_tuoi.png","☕":"assets/drinks/tra_sua_den.png","🥫":"assets/ingredients/sua_dac.png","🧀":"assets/toppings/kem_cheese.png","🍮":"assets/toppings/pudding.png","🥥":"assets/toppings/thach_dua.png","🍡":"assets/toppings/thach_trai_cay.png","🍪":"assets/snacks/banh_trang_tron.png","🍟":"assets/snacks/khoai_tay_lac.png","🌭":"assets/snacks/xuc_xich_nuong_da.png","🥓":"assets/snacks/lap_xuong_nuong_da.png","🍢":"assets/snacks/ca_vien_chien.png","🥟":"assets/snacks/nem_chua_ran.png","🧪":"assets/ingredients/tra_den.png","🏆":"assets/ui_new/achievements.png","⚙️":"assets/ui_new/settings.png","🛒":"assets/ui_new/shop.png","📋":"assets/ui_new/quests.png","💾":"assets/ui_new/save.png","▶️":"assets/ui_new/start.png","✨":"assets/effects_new/sparkle.png","🌿":"assets/shop/plant.png","💖":"assets/effects_new/heart.png","⚫":"assets/ingredients_new/black_pearls.png","⚪":"assets/ingredients_new/white_pearls.png","🟢":"assets/ingredients_new/strawberry.png","🟡":"assets/ingredients_new/pudding.png","🫘":"assets/ingredients_new/red_pearls.png","🌰":"assets/ingredients_new/black_pearls.png","🍦":"assets/ingredients_new/pudding.png","🍇":"assets/ingredients_new/red_pearls.png","🥢":"assets/snacks_new/croissant.png","🧈":"assets/snacks_new/egg_ball.png"};
+function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
 function assetTea(n){const m={"Truyền thống":"tra_sua_truyen_thong","Matcha":"tra_sua_matcha","Trà đào":"tra_dao","Trà chanh":"tra_chanh","Bạc xỉu":"tra_sua_den","Soda chanh":"tra_chanh","Ô long":"tra_sua_o_long","Cà phê sữa":"tra_sua_caramel","Trà sữa":"tra_sua_truyen_thong","Yakult chanh":"tra_chanh","Nước cam":"tra_vai","Sinh tố dâu":"tra_dau","Socola":"tra_sua_socola","Matcha latte":"tra_sua_matcha","Sữa tươi trân châu đường đen":"tra_sua_den","Trà kem cheese":"tra_sua_dau","Dâu sữa":"tra_sua_dau","Matcha dâu":"tra_sua_dau","Xoài kem cheese":"tra_xoai","Khoai môn sữa":"tra_sua_khoai_mon","Matcha mật ong":"tra_sua_matcha"};return m[n]?`assets/drinks/${m[n]}.png`:null}
 function assetTop(n){const m={"Trân châu đen":"tran_chau_den","Thạch trái cây":"thach_trai_cay","Pudding trứng":"pudding","Trân châu trắng":"tran_chau_trang","Thạch dừa":"thach_dua","Nha đam":"thach_dua","Trân châu hoàng kim":"tran_chau_trang","Hạt sen":"tran_chau_den","Đậu đỏ":"tran_chau_den","Kem cheese":"kem_cheese","Oreo vụn":"thach_ca_phe","Thạch nho":"thach_trai_cay","Thạch đào":"thach_trai_cay","Bánh flan":"pudding","Kem vani":"kem_cheese","Mochi":"thach_trai_cay"};return m[n]?`assets/toppings/${m[n]}.png`:null}
 function assetSnack(n){const m={"Xúc xích nướng đá":"xuc_xich_nuong_da","Lạp xưởng nướng đá":"lap_xuong_nuong_da","Cá viên chiên":"ca_vien_chien","Bò viên chiên":"bo_vien_chien","Khoai tây lắc":"khoai_tay_lac","Bánh tráng trộn":"banh_trang_tron","Bánh tráng nhúng nước":"banh_trang_tron","Phô mai que":"pho_mai_que","Nem chua rán":"nem_chua_ran","Đậu hũ chiên sốt":"ca_vien_chien"};return m[n]?`assets/snacks/${m[n]}.png`:null}
