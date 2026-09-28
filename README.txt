@@ -1,5 +1,4 @@
-Tiệm Trà Xinh V10
-- Bảng hiệu hiển thị OPEN khi tiệm đang mở bán.
-- Bảng hiệu hiển thị CLOSE khi tiệm đóng cửa/ngoài ca.
-- Giữ nguyên hệ thống V9 và tiến trình localStorage.
-- Chỉ cần thay index.html trên GitHub Pages.
+Tiệm Trà Xinh V11
+- Tên quán hiển thị riêng trên bảng hiệu.
+- Bảng màu xanh bên phải hiển thị OPEN khi mở cửa và CLOSE khi đóng cửa.
+- Giữ nguyên hệ thống gameplay của V10.

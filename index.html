@@ -15,13 +15,13 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 <style>
 .pourBtn{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;touch-action:none!important;}
 .nameModal{position:fixed;inset:0;background:#2f241dcc;display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}.nameModal.show{display:flex}.nameModal .modalCard{width:min(460px,100%);background:#fffdf9;border:2px solid #ead9ca;border-radius:28px;padding:26px;box-shadow:0 20px 60px #2f241d55;text-align:center}.nameModal h2{margin:0 0 8px}.nameModal p{margin:0 0 16px;color:#90796b}.nameInput{width:100%;font:inherit;font-size:20px;padding:14px 16px;border:2px solid #ead9ca;border-radius:16px;outline:none;text-align:center;background:#fff7ed;color:#3e3028}.nameInput:focus{border-color:#d97850}.modalActions{display:flex;gap:10px;margin-top:14px}.modalActions .btn{flex:1}.shopNameText{font-weight:900} 
-.shopStatus{display:inline-block;margin-left:8px;padding:4px 9px;border-radius:999px;font-size:.75em;letter-spacing:.04em;vertical-align:middle}.shopStatus.open{background:#e8f5e9;color:#3f7d4b;border:2px solid #7db383}.shopStatus.closed{background:#fff0ee;color:#b44f49;border:2px solid #df8d85}.sign{font-size:clamp(9px,1.65vw,18px)}
-@media(max-width:780px){.sign{font-size:clamp(8px,1.9vw,13px);padding:5px 6px}.shopStatus{margin-left:4px;padding:3px 6px}}
+.shopStatus{display:grid;place-items:center;font-size:clamp(18px,4vw,34px);font-weight:1000;letter-spacing:.04em}.shopStatus.open{color:#4f8c65}.shopStatus.closed{color:#c45b55}.sign{font-size:clamp(9px,1.65vw,18px)}
+@media(max-width:780px){.sign{font-size:clamp(8px,1.9vw,13px);padding:5px 6px}.shopStatus{font-size:clamp(17px,6vw,27px)}}
 </style></head>
 <body>
 <div class="app">
 <header class="top"><div class="logo">🧋 Tiệm Trà Xinh</div><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">300k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div></header>
-<div class="scene"><div class="awning"></div><div class="sign">🧋 TIỆM TRÀ XINH</div><div class="window"></div><div class="plant">🌿</div></div>
+<div class="scene"><div class="awning"></div><div class="sign">🧋 <span id="signShopName">TIỆM TRÀ XINH</span></div><div class="window"><b id="signStatus">CLOSE</b></div><div class="plant">🌿</div></div>
 
 <section id="home" class="screen active">
  <div class="card hero"><div style="font-size:70px">🧋</div><h1 id="homeShopName">Tiệm Trà Xinh</h1><p class="muted">Quản lý • Pha chế • Mở rộng • Trở thành chủ tiệm</p>
@@ -157,7 +157,7 @@ function load(){
  syncSpecialDrinks(false);syncLevelUnlocks(false);save();
 }
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");updateTop()}
-function updateTop(){const n=S.shopName||"Tiệm Trà Xinh";document.querySelector(".top .logo").innerHTML="🧋 "+escapeHTML(n);document.querySelector(".scene .sign").innerHTML=`🧋 ${escapeHTML(n.toUpperCase())} <span class="shopStatus ${S.shopOpen?"open":"closed"}">${S.shopOpen?"OPEN":"CLOSE"}</span>`;document.getElementById("day").textContent="Ngày "+S.day;document.getElementById("cash").textContent=money(S.cash);document.getElementById("rating").textContent=S.rating.toFixed(1);document.getElementById("level").textContent=S.level;document.getElementById("xpHome").style.width=(S.xp%100)+"%";const h=document.getElementById("homeShopName");if(h)h.textContent=n}
+function updateTop(){const n=S.shopName||"Tiệm Trà Xinh";document.querySelector(".top .logo").innerHTML="🧋 "+escapeHTML(n);document.getElementById("signShopName").textContent=n.toUpperCase();document.getElementById("signStatus").textContent=S.shopOpen?"OPEN":"CLOSE";document.getElementById("signStatus").className=S.shopOpen?"open":"closed";document.getElementById("day").textContent="Ngày "+S.day;document.getElementById("cash").textContent=money(S.cash);document.getElementById("rating").textContent=S.rating.toFixed(1);document.getElementById("level").textContent=S.level;document.getElementById("xpHome").style.width=(S.xp%100)+"%";const h=document.getElementById("homeShopName");if(h)h.textContent=n}
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",1800)}
 function fx(sym="✨"){for(let i=0;i<7;i++){let e=document.createElement("div");e.className="float";e.textContent=sym;e.style.left=(45+Math.random()*10)+"%";e.style.top=(45+Math.random()*10)+"%";e.style.setProperty("--x",(Math.random()*180-90)+"px");e.style.setProperty("--y",(-50-Math.random()*130)+"px");document.body.appendChild(e);setTimeout(()=>e.remove(),900)}}
 function gainXP(n){S.xp+=n;while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;S.cash+=25;syncLevelUnlocks(true);toast("🎉 Lên cấp "+S.level+"! +25k");fx("⭐")}}
