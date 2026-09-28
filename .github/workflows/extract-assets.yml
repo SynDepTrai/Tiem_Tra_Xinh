@@ -14,23 +14,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Check ZIP
         run: |
-          echo "Danh sach file:"
-          ls -lah
-          echo "Tim file ZIP:"
-          find . -maxdepth 1 -type f -name "*.zip" -print
+          ls -lh tiem_tra_xinh_assets_v2.zip
+          file tiem_tra_xinh_assets_v2.zip
 
       - name: Extract assets
         run: |
           rm -rf assets
           mkdir -p assets
-          python -m zipfile -e tiem_tra_xinh_assets_v2.zip assets
+          unzip -o tiem_tra_xinh_assets_v2.zip -d assets
 
       - name: Remove ZIP
-        run: rm -f tiem_tra_xinh_assets_v2.zip
+        run: |
+          rm -f tiem_tra_xinh_assets_v2.zip
 
       - name: Commit assets
         run: |
@@ -38,5 +37,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets
           git add -u
-          git commit -m "Add Tiệm Trà Xinh game assets" || echo "No changes"
+          git commit -m "Add game assets" || echo "No changes"
           git push
