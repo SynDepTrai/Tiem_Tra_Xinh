@@ -1,16 +1,14 @@
-TIỆM TRÀ XINH — FULL GAME
-Mở index.html bằng Chrome/Edge/Safari.
+TIỆM TRÀ XINH — V8
 
-Có:
-- Vòng đời ngày: chuẩn bị -> bán hàng -> tổng kết -> ngày tiếp theo
-- Nhiều khách và đơn riêng
-- Pha chế: size, trà, rót đúng vạch, topping, đường, đá
-- Kiên nhẫn khách, khách bỏ đi, đánh giá
-- Kinh tế: doanh thu, thuê, điện nước, hao hụt, lợi nhuận
-- Kho và nhập hàng
-- XP + cấp độ + mở khóa trà/topping
-- Nâng cấp tốc độ, chất lượng, sức chứa, trang trí
-- Nhiệm vụ ngày + thưởng
-- Thành tựu và lịch sử
-- Auto-save bằng localStorage
-- Chạy offline, không cần Node/server
+Cập nhật:
+- Xóa chữ OPEN trên bảng hiệu.
+- Khi bấm Chơi mới, người chơi phải đặt tên quán trước khi bắt đầu.
+- Tên quán được lưu bằng localStorage và hiển thị trên logo/bảng hiệu.
+- Tên tối đa 24 ký tự, tối thiểu 2 ký tự.
+- Tiến trình cũ vẫn giữ tên mặc định Tiệm Trà Xinh nếu chưa từng đặt tên.
+
+Cách cập nhật GitHub Pages:
+1. Giải nén ZIP.
+2. Thay index.html trong repo Tiem_Tra_Xinh bằng index.html của V8.
+3. Commit changes.
+4. Mở lại GitHub Pages sau khi deploy.
