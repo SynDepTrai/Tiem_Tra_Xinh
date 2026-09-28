@@ -1,4 +1,4 @@
-Tiệm Trà Xinh V11
-- Tên quán hiển thị riêng trên bảng hiệu.
-- Bảng màu xanh bên phải hiển thị OPEN khi mở cửa và CLOSE khi đóng cửa.
-- Giữ nguyên hệ thống gameplay của V10.
+Tiệm Trà Xinh V14
+- Thêm thanh Kinh nghiệm (XP) ngay trên giao diện chính.
+- Hiển thị XP hiện tại / XP cần để lên cấp và thanh tiến trình.
+- Giữ nguyên save localStorage và toàn bộ tính năng V13.
