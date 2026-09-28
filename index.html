@@ -20,10 +20,17 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 .sign{font:inherit;text-align:left;color:inherit;appearance:none;-webkit-appearance:none}
 </style><style>
 .assetImg{width:64px;height:64px;object-fit:contain;object-position:center;display:block;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:64px;height:64px;float:right;margin-left:8px}.snackChoice .assetImg,.choice .assetImg{width:42px;height:42px;object-fit:contain;object-position:center;vertical-align:middle}.customerImg{width:112px;height:112px;object-fit:contain;object-position:center;display:block;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/shop/storefront.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
-.inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style></head>
+.inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style>
+
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icons/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/icons/favicon-192.png">
+
+</head>
 <body>
 <div class="app">
-<header class="top"><div class="logo"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> Tiệm Trà Xinh</div><div class="topRight"><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">300k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div><div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div></div></header>
+<header class="top"><div class="logo"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> Tiệm Trà Xinh</div><div class="topRight"><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">500k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div><div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div></div></header>
 <div class="scene"><div class="awning"></div><button class="sign" type="button" onclick="openRenameModal()" title="Đổi tên quán"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> <span id="signShopName">TIỆM TRÀ XINH</span></button><div class="window"><b id="signStatus">CLOSE</b></div><div class="plant">🌿</div></div>
 
 <section id="home" class="screen active">
@@ -85,7 +92,7 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
   <div style="font-size:64px">🧋</div>
   <h2 id="nameTitle">Đổi tên quán</h2>
   <p id="nameDesc">Tên quán mặc định là <b>Tiệm Trà Xinh</b>. Đổi tên trên bảng hiệu sẽ mất <b>50k</b>.</p>
-  <input id="shopNameInput" class="nameInput" maxlength="24" autocomplete="off" placeholder="Ví dụ: Tiệm Trà Nhà Hiếu">
+  <input id="shopNameInput" class="nameInput" maxlength="24" autocomplete="off" placeholder="Ví dụ: Tiệm Trà Xinhhh">
   <div class="modalActions"><button class="btn secondary" onclick="closeNameModal()">Hủy</button><button class="btn primary" onclick="confirmShopName()">Đổi tên · 50k</button></div>
  </div>
 </div>
