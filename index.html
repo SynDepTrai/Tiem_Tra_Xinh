@@ -29,9 +29,69 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png?v=21">
 <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/favicon-192.png?v=22">
 <link rel="manifest" href="assets/icons/site.webmanifest?v=22">
+
+<style>
+/* V25 settings + chill music */
+.settingsFab{
+  position:fixed;right:14px;top:14px;z-index:9000;
+  width:48px;height:48px;border-radius:16px;border:2px solid #ead9ca;
+  background:#fff8ee;color:#4b3428;box-shadow:0 8px 22px #2f241d22;
+  font-size:24px;display:grid;place-items:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.settingsFab:active{transform:scale(.96)}
+.settingsModal{
+  position:fixed;inset:0;background:#2f241dcc;display:none;align-items:flex-start;
+  justify-content:center;padding:72px 14px 24px;z-index:10000;overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.settingsModal.show{display:flex}
+.settingsCard{
+  width:min(620px,100%);background:#fffdf9;border:2px solid #ead9ca;
+  border-radius:28px;padding:18px;box-shadow:0 20px 60px #2f241d55;
+}
+.settingsHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.settingsHead h2{margin:0;font-size:25px}
+.settingsClose{width:44px;height:44px;border-radius:14px;border:2px solid #ead9ca;background:#fff7ed;font-size:22px}
+.settingRow{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:15px 4px;border-bottom:1px solid #ead9ca;
+}
+.settingRow:last-child{border-bottom:0}
+.settingMain{min-width:0;flex:1}.settingMain b{display:block;font-size:17px}.settingMain .mini{margin-top:3px}
+.settingToggle{
+  min-width:78px;border:0;border-radius:14px;padding:10px 12px;font:inherit;font-weight:900;
+  background:#ead9ca;color:#5d4638;touch-action:manipulation;
+}
+.settingToggle.on{background:#cfeedd;color:#28734a}
+.musicBox{
+  margin-top:14px;padding:15px;border:2px solid #ead9ca;border-radius:20px;background:#fff7ed;
+}
+.musicTitle{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:1000}
+.musicControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.musicControls .btn{touch-action:manipulation}
+.musicRange{width:100%;accent-color:#c84d6c}
+.musicList{display:grid;gap:8px;margin-top:12px}
+.musicItem{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;
+  background:#fff;border:1px solid #ead9ca;
+}
+.musicItemName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.musicItem.active{border-color:#5eb78a;background:#effbf4}
+.musicItem button{touch-action:manipulation}
+.musicEmpty{padding:12px;text-align:center;color:#90796b}
+.musicFile{display:none}
+@media(max-width:600px){
+ .settingsFab{top:10px;right:10px;width:44px;height:44px;border-radius:14px}
+ .settingsModal{padding:62px 8px 18px}
+ .settingsCard{border-radius:22px;padding:14px}
+ .settingRow{align-items:flex-start}
+ .settingMain b{font-size:16px}
+}
+</style>
 </head>
 <body>
-<div class="app">
+<div class="app"><button class="settingsFab" type="button" onclick="openSettings()" aria-label="Cài đặt" title="Cài đặt">⚙️</button>
 <header class="top"><div class="logo"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> Tiệm Trà Xinh</div><div class="topRight"><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">300k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div><div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div></div></header>
 <div class="scene"><div class="awning"></div><button class="sign" type="button" onclick="openRenameModal()" title="Đổi tên quán"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> <span id="signShopName">TIỆM TRÀ XINH</span></button><div class="window"><b id="signStatus">CLOSE</b></div><div class="plant">🌿</div></div>
 
@@ -89,6 +149,41 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 <div class="footer">Tiệm Trà Xinh — game HTML5 độc lập</div>
 </div>
 <div id="toast" class="toast"></div>
+
+<div id="settingsModal" class="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+ <div class="settingsCard">
+  <div class="settingsHead">
+   <h2 id="settingsTitle">⚙️ Cài đặt</h2>
+   <button class="settingsClose" type="button" onclick="closeSettings()" aria-label="Đóng">✕</button>
+  </div>
+  <div class="settingRow">
+   <div class="settingMain"><b>🔊 Âm thanh hiệu ứng</b><div class="mini">Âm thanh rót, múc và thao tác trong quán.</div></div>
+   <button id="sfxToggle" class="settingToggle on" type="button" onclick="toggleSfxSetting()">Bật</button>
+  </div>
+  <div class="settingRow">
+   <div class="settingMain"><b>🌙 Nhạc chill quán</b><div class="mini">Phát nhạc nền nhẹ nhàng khi bạn chơi. Trên iPhone cần bấm Phát lần đầu.</div></div>
+   <button id="musicToggle" class="settingToggle on" type="button" onclick="toggleMusicSetting()">Bật</button>
+  </div>
+  <div class="musicBox">
+   <div class="musicTitle">🎧 Nhạc chill của bạn</div>
+   <div class="mini" style="margin-top:5px">Thêm MP3, M4A, WAV hoặc OGG. Nhạc được lưu trên thiết bị bằng bộ nhớ trình duyệt.</div>
+   <input id="musicFileInput" class="musicFile" type="file" accept="audio/*" multiple onchange="addMusicFiles(this.files)">
+   <div class="musicControls">
+    <button class="btn primary" type="button" onclick="document.getElementById('musicFileInput').click()">➕ Thêm nhạc</button>
+    <button class="btn secondary" type="button" onclick="musicPrev()">⏮️</button>
+    <button class="btn secondary" type="button" id="musicPlayBtn" onclick="toggleMusic()">▶️ Phát</button>
+    <button class="btn secondary" type="button" onclick="musicNext()">⏭️</button>
+   </div>
+   <div style="margin-top:10px"><div class="mini" id="musicNow">Chưa có bài nhạc</div><input id="musicVolume" class="musicRange" type="range" min="0" max="1" step="0.01" value="0.35" oninput="setMusicVolume(this.value)"></div>
+   <div id="musicList" class="musicList"></div>
+  </div>
+  <div class="settingRow" style="margin-top:8px">
+   <div class="settingMain"><b>🔄 Làm mới trang</b><div class="mini">Dùng khi bạn vừa cập nhật phiên bản mới.</div></div>
+   <button class="btn secondary" type="button" onclick="location.reload()">Tải lại</button>
+  </div>
+  <button class="btn secondary wide" style="margin-top:12px" type="button" onclick="closeSettings()">Đóng cài đặt</button>
+ </div>
+</div>
 <div id="nameModal" class="nameModal" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
  <div class="modalCard">
   <div style="font-size:64px">🧋</div>
@@ -103,6 +198,118 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 function imgIcon(src,alt=""){return `<img class="inlineIcon" src="${src}" alt="${alt}" draggable="false">`}
 const ICONS={"🥤":"assets/drinks/tra_sua_truyen_thong.png","🧋":"assets/drinks/tra_sua_truyen_thong.png","🍵":"assets/drinks/tra_sua_matcha.png","🫖":"assets/drinks/tra_sua_o_long.png","🍑":"assets/drinks/tra_dao.png","🍋":"assets/drinks/tra_chanh.png","🍊":"assets/drinks/tra_vai.png","🍓":"assets/drinks/tra_dau.png","🍫":"assets/drinks/tra_sua_socola.png","🥭":"assets/drinks/tra_xoai.png","🍠":"assets/drinks/tra_sua_khoai_mon.png","🍯":"assets/ingredients/trai_cay.png","🥛":"assets/ingredients/sua_tuoi.png","☕":"assets/drinks/tra_sua_den.png","🥫":"assets/ingredients/sua_dac.png","🧀":"assets/toppings/kem_cheese.png","🍮":"assets/toppings/pudding.png","🥥":"assets/toppings/thach_dua.png","🍡":"assets/toppings/thach_trai_cay.png","🍪":"assets/snacks/banh_trang_tron.png","🍟":"assets/snacks/khoai_tay_lac.png","🌭":"assets/snacks/xuc_xich_nuong_da.png","🥓":"assets/snacks/lap_xuong_nuong_da.png","🍢":"assets/snacks/ca_vien_chien.png","🥟":"assets/snacks/nem_chua_ran.png","🧪":"assets/ingredients/tra_den.png","🏆":"assets/ui_new/achievements.png","⚙️":"assets/ui_new/settings.png","🛒":"assets/ui_new/shop.png","📋":"assets/ui_new/quests.png","💾":"assets/ui_new/save.png","▶️":"assets/ui_new/start.png","✨":"assets/effects_new/sparkle.png","🌿":"assets/shop/plant.png","💖":"assets/effects_new/heart.png","⚫":"assets/ingredients_new/black_pearls.png","⚪":"assets/ingredients_new/white_pearls.png","🟢":"assets/ingredients_new/strawberry.png","🟡":"assets/ingredients_new/pudding.png","🫘":"assets/ingredients_new/red_pearls.png","🌰":"assets/ingredients_new/black_pearls.png","🍦":"assets/ingredients_new/pudding.png","🍇":"assets/ingredients_new/red_pearls.png","🥢":"assets/snacks_new/croissant.png","🧈":"assets/snacks_new/egg_ball.png"};
 function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
+/* ===== V25 SETTINGS + CHILL MUSIC ===== */
+const MUSIC_DB_NAME="TiemTraXinhMusicDB", MUSIC_DB_VERSION=1, MUSIC_STORE="tracks";
+let musicDB=null, musicTracks=[], musicIndex=0;
+let musicAudio=new Audio(); musicAudio.preload="metadata"; musicAudio.loop=false;
+let musicObjectUrl=null;
+
+function getSetting(key, fallback){
+  try{const v=localStorage.getItem("ttx_setting_"+key);return v===null?fallback:JSON.parse(v)}catch(e){return fallback}
+}
+function setSetting(key,val){try{localStorage.setItem("ttx_setting_"+key,JSON.stringify(val))}catch(e){}}
+
+function openMusicDB(){
+ return new Promise((resolve,reject)=>{
+  if(musicDB)return resolve(musicDB);
+  if(!window.indexedDB)return reject(new Error("IndexedDB không hỗ trợ"));
+  const req=indexedDB.open(MUSIC_DB_NAME,MUSIC_DB_VERSION);
+  req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(MUSIC_STORE))db.createObjectStore(MUSIC_STORE,{keyPath:"id",autoIncrement:true})};
+  req.onsuccess=e=>{musicDB=e.target.result;resolve(musicDB)};
+  req.onerror=()=>reject(req.error);
+ });
+}
+async function loadMusicTracks(){
+ try{
+  const db=await openMusicDB();
+  musicTracks=await new Promise((resolve,reject)=>{
+   const q=db.transaction(MUSIC_STORE,"readonly").objectStore(MUSIC_STORE).getAll();
+   q.onsuccess=()=>resolve(q.result||[]);q.onerror=()=>reject(q.error);
+  });
+  musicTracks.sort((a,b)=>a.id-b.id);
+  renderMusicList();
+ }catch(e){renderMusicList();toast("⚠️ Không mở được kho nhạc trên thiết bị")}
+}
+function openSettings(){
+ document.getElementById("settingsModal").classList.add("show");
+ syncSettingsUI();
+ loadMusicTracks();
+}
+function closeSettings(){document.getElementById("settingsModal").classList.remove("show")}
+function syncSettingsUI(){
+ const sfx=getSetting("sfx",true), music=getSetting("music",true);
+ const a=document.getElementById("sfxToggle"),b=document.getElementById("musicToggle");
+ if(a){a.textContent=sfx?"Bật":"Tắt";a.classList.toggle("on",sfx)}
+ if(b){b.textContent=music?"Bật":"Tắt";b.classList.toggle("on",music)}
+ const v=getSetting("musicVolume",0.35), r=document.getElementById("musicVolume");if(r)r.value=v;
+}
+function toggleSfxSetting(){setSetting("sfx",!getSetting("sfx",true));syncSettingsUI();toast(getSetting("sfx",true)?"🔊 Đã bật âm thanh":"🔇 Đã tắt âm thanh")}
+function toggleMusicSetting(){
+ const on=!getSetting("music",true);setSetting("music",on);syncSettingsUI();
+ if(!on){musicAudio.pause();updateMusicButton()} else if(musicTracks.length){toggleMusic(true)}
+}
+function setMusicVolume(v){v=Number(v);setSetting("musicVolume",v);musicAudio.volume=v}
+function renderMusicList(){
+ const box=document.getElementById("musicList"), now=document.getElementById("musicNow");
+ if(!box)return;
+ if(!musicTracks.length){box.innerHTML='<div class="musicEmpty">🎵 Chưa có nhạc. Hãy bấm <b>➕ Thêm nhạc</b> để đưa nhạc chill vào quán.</div>';if(now)now.textContent="Chưa có bài nhạc";return}
+ box.innerHTML=musicTracks.map((m,i)=>`<div class="musicItem ${i===musicIndex?"active":""}">
+   <button class="btn secondary" type="button" onclick="selectMusic(${i})">▶</button>
+   <div class="musicItemName" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</div>
+   <button class="btn danger" type="button" onclick="removeMusic(${m.id})">Xóa</button>
+ </div>`).join("");
+ const cur=musicTracks[musicIndex];if(now)now.textContent=cur?"🎶 "+cur.name:"Chưa có bài nhạc";
+ updateMusicButton();
+}
+function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+async function addMusicFiles(files){
+ if(!files||!files.length)return;
+ try{
+  const db=await openMusicDB(), arr=[...files].filter(f=>f.type.startsWith("audio/"));
+  if(!arr.length)return toast("🎵 Hãy chọn file âm thanh");
+  const tx=db.transaction(MUSIC_STORE,"readwrite"), store=tx.objectStore(MUSIC_STORE);
+  arr.forEach(f=>store.add({name:f.name,type:f.type||"audio/mpeg",blob:f,addedAt:Date.now()}));
+  tx.oncomplete=async()=>{await loadMusicTracks();toast("🎵 Đã thêm "+arr.length+" bài nhạc");};
+  tx.onerror=()=>toast("⚠️ Không lưu được file nhạc");
+ }catch(e){toast("⚠️ Trình duyệt không cho lưu nhạc")}
+ const inp=document.getElementById("musicFileInput");if(inp)inp.value="";
+}
+async function getMusicBlob(index){
+ const m=musicTracks[index];if(!m)return null;
+ try{
+  const db=await openMusicDB();
+  return await new Promise((resolve,reject)=>{
+   const q=db.transaction(MUSIC_STORE,"readonly").objectStore(MUSIC_STORE).get(m.id);
+   q.onsuccess=()=>resolve(q.result?.blob||null);q.onerror=()=>reject(q.error);
+  });
+ }catch(e){return null}
+}
+async function selectMusic(i,autoplay=true){
+ if(!musicTracks.length)return toast("🎵 Chưa có bài nhạc");
+ musicIndex=(i+musicTracks.length)%musicTracks.length;
+ const blob=await getMusicBlob(musicIndex);if(!blob)return toast("⚠️ Không đọc được bài nhạc");
+ if(musicObjectUrl)URL.revokeObjectURL(musicObjectUrl);
+ musicObjectUrl=URL.createObjectURL(blob);musicAudio.src=musicObjectUrl;
+ musicAudio.volume=Number(getSetting("musicVolume",0.35));
+ renderMusicList();
+ if(autoplay&&getSetting("music",true)){try{await musicAudio.play()}catch(e){toast("▶️ Bấm Phát để bắt đầu nhạc trên iPhone")}}
+ updateMusicButton();
+}
+async function toggleMusic(forcePlay=false){
+ if(!getSetting("music",true)&&!forcePlay)return;
+ if(!musicTracks.length)return toast("🎵 Hãy thêm nhạc trước");
+ if(!musicAudio.src){return selectMusic(musicIndex,true)}
+ if(musicAudio.paused){try{await musicAudio.play()}catch(e){toast("▶️ Bấm Phát lại để bắt đầu")}}else musicAudio.pause();
+ updateMusicButton();
+}
+function updateMusicButton(){const b=document.getElementById("musicPlayBtn");if(b)b.textContent=musicAudio.paused?"▶️ Phát":"⏸️ Dừng"}
+async function musicNext(){if(!musicTracks.length)return toast("🎵 Chưa có nhạc");await selectMusic((musicIndex+1)%musicTracks.length,true)}
+async function musicPrev(){if(!musicTracks.length)return toast("🎵 Chưa có nhạc");await selectMusic((musicIndex-1+musicTracks.length)%musicTracks.length,true)}
+musicAudio.addEventListener("ended",()=>{if(getSetting("music",true))musicNext()});
+musicAudio.addEventListener("play",updateMusicButton);musicAudio.addEventListener("pause",updateMusicButton);
+musicAudio.volume=getSetting("musicVolume",0.35);
+window.addEventListener("beforeunload",()=>{if(musicObjectUrl)URL.revokeObjectURL(musicObjectUrl)});
+
 function assetTea(n){const m={"Truyền thống":"tra_sua_truyen_thong","Matcha":"tra_sua_matcha","Trà đào":"tra_dao","Trà chanh":"tra_chanh","Bạc xỉu":"tra_sua_den","Soda chanh":"tra_chanh","Ô long":"tra_sua_o_long","Cà phê sữa":"tra_sua_caramel","Trà sữa":"tra_sua_truyen_thong","Yakult chanh":"tra_chanh","Nước cam":"tra_vai","Sinh tố dâu":"tra_dau","Socola":"tra_sua_socola","Matcha latte":"tra_sua_matcha","Sữa tươi trân châu đường đen":"tra_sua_den","Trà kem cheese":"tra_sua_dau","Dâu sữa":"tra_sua_dau","Matcha dâu":"tra_sua_dau","Xoài kem cheese":"tra_xoai","Khoai môn sữa":"tra_sua_khoai_mon","Matcha mật ong":"tra_sua_matcha"};return m[n]?`assets/drinks/${m[n]}.png`:null}
 function assetTop(n){const m={"Trân châu đen":"tran_chau_den","Thạch trái cây":"thach_trai_cay","Pudding trứng":"pudding","Trân châu trắng":"tran_chau_trang","Thạch dừa":"thach_dua","Nha đam":"thach_dua","Trân châu hoàng kim":"tran_chau_trang","Hạt sen":"tran_chau_den","Đậu đỏ":"tran_chau_den","Kem cheese":"kem_cheese","Oreo vụn":"thach_ca_phe","Thạch nho":"thach_trai_cay","Thạch đào":"thach_trai_cay","Bánh flan":"pudding","Kem vani":"kem_cheese","Mochi":"thach_trai_cay"};return m[n]?`assets/toppings/${m[n]}.png`:null}
 function assetSnack(n){const m={"Xúc xích nướng đá":"xuc_xich_nuong_da","Lạp xưởng nướng đá":"lap_xuong_nuong_da","Cá viên chiên":"ca_vien_chien","Bò viên chiên":"bo_vien_chien","Khoai tây lắc":"khoai_tay_lac","Bánh tráng trộn":"banh_trang_tron","Bánh tráng nhúng nước":"banh_trang_tron","Phô mai que":"pho_mai_que","Nem chua rán":"nem_chua_ran","Đậu hũ chiên sốt":"ca_vien_chien"};return m[n]?`assets/snacks/${m[n]}.png`:null}
@@ -346,6 +553,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElement
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 document.getElementById("nameModal").addEventListener("click",e=>{if(e.target.id==="nameModal")closeNameModal()});
 updateTop();
+
+document.addEventListener("click",e=>{
+ const m=document.getElementById("settingsModal");
+ if(m && e.target===m)closeSettings();
+});
 </script>
 </body>
 </html>
