@@ -744,7 +744,7 @@ const DEFAULT={
  stock:{cups:{S:8,M:8,L:6,XL:3,XXL:1},ingredients:{"Trà đen":10},toppings:{"Trân châu đen":8,"Thạch trái cây":8},snacks:Object.fromEntries(Object.keys(SNACKS).map(n=>[n,0]))},
  upgrades:{speed:0,quality:0,capacity:0,decor:0,special:0},
  unlockedTeas:["Truyền thống"],recipes:["Truyền thống"],menuDrinks:["Truyền thống"],menuSnacks:[],unlockedTops:["Trân châu đen","Thạch trái cây"],unlockedSizes:["S","M","L"],unlockedIngredients:["Trà đen"],unlockedSnacks:[],
- stats:{served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0},today:{served:0,wrong:0,left:0,revenue:0},cardGame:{bet:20,played:0,wins:0},employeeDeals:{},employeeInfo:{},employeePayEnabled:true,unpaidDays:0,equipment:{},loan:{principal:0,total:0,paid:0,dueDay:0},employees:{counter1:false,brewer:false,online:false,counter2:false},online:{platform:false,tablets:0},quests:{served:0,perfect:0,profit:0,claimed:false},history:[],dayReward:false,reviews:[],reviewSeq:0,ratingPenalty:0,quits:{count:0,lost:0,recovered:0},theft:{count:0,lost:0,recovered:0,lastDay:0},police:{checks:0,arrests:0},security:{camera:false}
+ stats:{served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0},today:{served:0,wrong:0,left:0,revenue:0},cardGame:{bet:20,played:0,wins:0},employeeDeals:{},employeeInfo:{},employeePayEnabled:true,unpaidDays:0,equipment:{},loan:{principal:0,total:0,paid:0,dueDay:0},employees:{counter1:false,brewer:false,online:false,counter2:false},employeeRoster:{},online:{platform:false,tablets:0},quests:{served:0,perfect:0,profit:0,claimed:false},history:[],dayReward:false,reviews:[],reviewSeq:0,ratingPenalty:0,quits:{count:0,lost:0,recovered:0},theft:{count:0,lost:0,recovered:0,lastDay:0},police:{checks:0,arrests:0},security:{camera:false}
 };
 let S=structuredClone(DEFAULT),customers=[],current=0,cup={},timer=null,arrivalTimer=null,elapsed=0,shopStartTime=0,lastTickAt=0,pouring=false,pourTimer=null,manageMode="up",claimed=false,dayEnding=false;
 const GAME_DAY_SECONDS=600, GAME_START_MINUTE=7*60, GAME_END_MINUTE=17*60;
@@ -760,7 +760,6 @@ function money(n){
   }
   return sign+n+"k";
 }
-function save(){localStorage.setItem("TTX_FULL_SAVE",JSON.stringify(S))}
 function unlockIngredientsFor(name,showToast=false){let t=TEAS[name];if(!t)return;S.unlockedIngredients=S.unlockedIngredients||[];S.stock.ingredients=S.stock.ingredients||{};for(const ing of t.ingredients){if(!S.unlockedIngredients.includes(ing)){S.unlockedIngredients.push(ing);S.stock.ingredients[ing]=(S.stock.ingredients[ing]||0)+5;if(showToast)toast("🧪 Mở nguyên liệu: "+INGREDIENTS[ing].emoji+" "+ing)}}}
 function syncLevelUnlocks(showToast=true){
  S.unlockedSizes=S.unlockedSizes||["S","M","L"];S.stock.cups=S.stock.cups||{};S.unlockedTops=S.unlockedTops||[];
@@ -794,12 +793,12 @@ function normalizeSnackUnlocks(){
 function load(){
  let x=localStorage.getItem("TTX_FULL_SAVE");if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
  if(typeof S.renameUsed!=="boolean") S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";
- S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.employeeInfo=S.employeeInfo||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
+ S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.employeeInfo=S.employeeInfo||{}; S.employeeRoster=S.employeeRoster||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
  // V41: a brand-new shop starts at 500k and 0 stars. If an old save is still on day 1
  // with no completed day/reviews, migrate it to the new starting state.
  if((S.day||1)===1 && (S.stats?.days||0)===0 && (!Array.isArray(S.reviews)||S.reviews.length===0)){S.cash=500;S.rating=0;}
  recalcRatingFromReviews();
- S.shopOpen=!!S.shopOpen;S.equipment=S.equipment||{};S.loan=Object.assign({principal:0,total:0,paid:0,dueDay:0},S.loan||{});S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});S.online=Object.assign({platform:false,tablets:0},S.online||{});S.stats=S.stats||{};S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.stats.totalProfit=S.stats.totalProfit||S.history?.reduce((a,h)=>a+(h.profit||0),0)||0;S.stats.onlineRevenue=S.stats.onlineRevenue||0;S.shopOpen=!!S.shopOpen;S.upgrades=S.upgrades||{};S.upgrades.special=S.upgrades.special||0;S.stock=S.stock||{};S.stock.cups=S.stock.cups||{};S.stock.ingredients=S.stock.ingredients||{};S.stock.toppings=S.stock.toppings||{};S.stock.snacks=S.stock.snacks||{};S.unlockedSnacks=Array.isArray(S.unlockedSnacks)?S.unlockedSnacks:[]; S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});Object.keys(S.employees).forEach(k=>S.employees[k]=S.employees[k]===true);S.employeePayEnabled=S.employeePayEnabled!==false; S.reviews=Array.isArray(S.reviews)?S.reviews:[];S.cardGame=S.cardGame||{bet:20,played:0,wins:0};S.quits=Object.assign({count:0,lost:0,recovered:0},S.quits||{});S.theft=Object.assign({count:0,lost:0,recovered:0,lastDay:0},S.theft||{});S.police=Object.assign({checks:0,arrests:0},S.police||{});S.security=Object.assign({camera:false},S.security||{});S.reviews.forEach(r=>{r.response=r.response||"";r.customerReply=r.customerReply||"";r.customerMood=r.customerMood||""});S.reviewSeq=Number(S.reviewSeq||0);
+ S.shopOpen=!!S.shopOpen;S.equipment=S.equipment||{};S.loan=Object.assign({principal:0,total:0,paid:0,dueDay:0},S.loan||{});S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});S.online=Object.assign({platform:false,tablets:0},S.online||{});S.stats=S.stats||{};S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.stats.totalProfit=S.stats.totalProfit||S.history?.reduce((a,h)=>a+(h.profit||0),0)||0;S.stats.onlineRevenue=S.stats.onlineRevenue||0;S.shopOpen=!!S.shopOpen;S.upgrades=S.upgrades||{};S.upgrades.special=S.upgrades.special||0;S.stock=S.stock||{};S.stock.cups=S.stock.cups||{};S.stock.ingredients=S.stock.ingredients||{};S.stock.toppings=S.stock.toppings||{};S.stock.snacks=S.stock.snacks||{};S.unlockedSnacks=Array.isArray(S.unlockedSnacks)?S.unlockedSnacks:[]; S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});Object.keys(S.employees).forEach(k=>S.employees[k]=S.employees[k]===true);S.employeeRoster=S.employeeRoster||{};S.employeePayEnabled=S.employeePayEnabled!==false; S.reviews=Array.isArray(S.reviews)?S.reviews:[];S.cardGame=S.cardGame||{bet:20,played:0,wins:0};S.quits=Object.assign({count:0,lost:0,recovered:0},S.quits||{});S.theft=Object.assign({count:0,lost:0,recovered:0,lastDay:0},S.theft||{});S.police=Object.assign({checks:0,arrests:0},S.police||{});S.security=Object.assign({camera:false},S.security||{});S.reviews.forEach(r=>{r.response=r.response||"";r.customerReply=r.customerReply||"";r.customerMood=r.customerMood||""});S.reviewSeq=Number(S.reviewSeq||0);
  // Migrate old V6 generic stock into new system.
  if(S.stock.cupM!=null)S.stock.cups.M=Math.max(S.stock.cups.M||0,S.stock.cupM);if(S.stock.cupL!=null)S.stock.cups.L=Math.max(S.stock.cups.L||0,S.stock.cupL);
  if(S.stock.tea!=null)S.stock.ingredients["Trà đen"]=Math.max(S.stock.ingredients["Trà đen"]||0,S.stock.tea);
@@ -828,9 +827,9 @@ const STORE_DEFS={
  bread:{name:"Tiệm Bánh Mì",icon:"🥖",unlockLevel:11,openCost:50000,kind:"generic",tag:"Bánh mì • đồ ăn sáng",desc:"Bánh mì nóng và các loại nhân."},
  grocery:{name:"Tạp Hóa",icon:"🏪",unlockLevel:15,openCost:50000,kind:"generic",tag:"Đồ uống • bánh • hàng tiêu dùng",desc:"Cửa hàng bán hàng tiêu dùng hằng ngày."}
 };
-const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeePayEnabled","unpaidDays","equipment","loan","employees","online","quests","history","dayReward","reviews","reviewSeq","ratingPenalty","quits","theft","police","security","cardGame"];
+const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","loan","employees","online","quests","history","dayReward","reviews","reviewSeq","ratingPenalty","quits","theft","police","security","cardGame"];
 function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);return x}
-function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};return storeSnapshotFrom(base)}
+function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};return storeSnapshotFrom(base)}
 function storeSnapshotFrom(base){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);return x}
 function initStoreSystem(){
  S.stores=S.stores||{};S.companyLevel=Math.max(1,Number(S.companyLevel||S.level||1));S.activeStoreId=S.activeStoreId||"tea";S.storeSelectionDone=!!S.storeSelectionDone;S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);S.cash=S.globalCash;
@@ -842,7 +841,7 @@ function initStoreSystem(){
  S.stores.tea.opened=true;S.stores[S.activeStoreId].opened=true;save();
 }
 function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
-function save(){syncGlobalCash();localStorage.setItem("TTX_FULL_SAVE",JSON.stringify(S))}
+function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem("TTX_FULL_SAVE",JSON.stringify(S))}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
 function openStore(id){const d=STORE_DEFS[id];if(!d)return;if(S.stores[id]?.opened)return switchStore(id);if(S.companyLevel<d.unlockLevel)return toast(`🔒 ${d.name} mở từ công ty Lv.${d.unlockLevel}`);if(S.cash<d.openCost)return toast(`💰 Cần ${money(d.openCost)} để mở ${d.name}`);S.cash-=d.openCost;S.stores[id].opened=true;S.stores[id].storeBusiness=S.stores[id].storeBusiness||{kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false};syncGlobalCash();save();toast(`🏪 Đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);renderStoreChooser();}
@@ -917,7 +916,12 @@ function applyRatingChange(delta){
   if(delta<0)S.ratingPenalty=Math.min(2,(Number(S.ratingPenalty)||0)+Math.abs(delta));
   recalcRatingFromReviews();
 }
-function stars(n){n=Math.round(n);return "★".repeat(n)+"☆".repeat(5-n)}
+function stars(n){
+ n=Math.max(0,Math.min(5,Number(n)||0));
+ const full=Math.floor(n+1e-9);
+ const half=(n-full)>=0.5;
+ return "★".repeat(full)+(half?"½":"")+"☆".repeat(Math.max(0,5-full-(half?1:0)));
+}
 function openReviews(){renderReviews();show("reviews")}
 function reviewAvatar(o){
  const sameGender=CUSTOMERS.filter(c=>c.gender===o.gender);
@@ -925,10 +929,40 @@ function reviewAvatar(o){
  const file=(genderIndex%8)+1;
  return `assets/customers/${o.gender==='female'?'female':'male'}/khach_${o.gender==='female'?'nu':'nam'}_${file}.png`;
 }
+function getCustomerWaitSeconds(o){
+  if(!o)return 0;
+  if(Number.isFinite(Number(o.waitSeconds)))return Math.max(0,Number(o.waitSeconds));
+  if(o.arrivedAt){
+    const end=o.servedAt||Date.now();
+    return Math.max(0,(end-o.arrivedAt)/1000);
+  }
+  return 0;
+}
+
+/* V70 — đánh giá theo thời gian khách phải chờ.
+   0–20s = 5⭐ · >20–30s = 4.5⭐ · >30–40s = 4⭐
+   >40–50s = 3.5⭐ · >50s nhưng khách vẫn chờ = 3⭐
+   Khách bỏ đi/không được phục vụ = 1⭐. */
+function getWaitRating(o){
+  if(!o || o.leftEarly || o.left || o.served!==true)return 1;
+  const sec=getCustomerWaitSeconds(o);
+  if(sec<=20)return 5;
+  if(sec<=30)return 4.5;
+  if(sec<=40)return 4;
+  if(sec<=50)return 3.5;
+  return 3;
+}
+
+function waitRatingText(o){
+  if(!o || o.leftEarly || o.left || o.served!==true)return "Khách bỏ đi/không được phục vụ · 1⭐";
+  const sec=getCustomerWaitSeconds(o);
+  return `Chờ ${sec.toFixed(1)} giây · ${getWaitRating(o)}⭐`;
+}
+
 function generateDayReviews(){
  S.reviews=S.reviews||[];
- const servedToday=customers.filter(o=>o.done && !o.leftEarly && !o.left && o.served===true);
- if(!servedToday.length)return;
+ const reviewCustomers=customers.filter(o=>o.done && (o.served===true || o.leftEarly || o.left));
+ if(!reviewCustomers.length)return;
  // Do not duplicate reviews for the same day.
  if(S.reviews.some(r=>r.day===S.day))return;
  const positive=[
@@ -978,16 +1012,24 @@ function generateDayReviews(){
   "Khách phía trước phục vụ lâu quá, mình chờ một lúc rồi quyết định đi.",
   "Mình hiểu quán bận, nhưng thời gian chờ hôm nay vượt quá mức mình có thể đợi."
  ];
- for(const o of servedToday){
-   let starsN,textReview;
-   const chance=Math.random();
-   if(o.done && o.patience>65 && chance<.62){starsN=5;textReview=positive[Math.floor(Math.random()*positive.length)]}
-   else if(o.done && o.patience>35 && chance<.82){starsN=4;textReview=mild[Math.floor(Math.random()*mild.length)]}
-   else if(o.done && chance<.93){starsN=3;textReview=negative[Math.floor(Math.random()*negative.length)]}
-   else {starsN=2;textReview=negative[Math.floor(Math.random()*negative.length)]}
-   if(o.patience<=0||o.leftEarly){starsN=Math.min(starsN,2);textReview=leftText[Math.floor(Math.random()*leftText.length)]}
+ for(const o of reviewCustomers){
+   const starsN=getWaitRating(o);
+   let textReview;
+   if(o.leftEarly||o.left||o.served!==true){
+     textReview=leftText[Math.floor(Math.random()*leftText.length)];
+   }else if(starsN===5){
+     textReview=positive[Math.floor(Math.random()*positive.length)];
+   }else if(starsN===4.5||starsN===4){
+     textReview=mild[Math.floor(Math.random()*mild.length)];
+   }else{
+     textReview=negative[Math.floor(Math.random()*negative.length)];
+   }
    S.reviewSeq++;
-   S.reviews.unshift({id:S.reviewSeq,day:S.day,name:o.name,gender:o.gender,stars:starsN,text:textReview,response:"",time:new Date().toISOString()});
+   S.reviews.unshift({
+     id:S.reviewSeq,day:S.day,name:o.name,gender:o.gender,stars:starsN,text:textReview,
+     response:"",time:new Date().toISOString(),waitSeconds:getCustomerWaitSeconds(o),
+     waitRating:starsN,served:o.served===true,leftEarly:!!o.leftEarly
+   });
  }
  // Keep the feed manageable while retaining recent history.
  S.reviews=S.reviews.slice(0,100);
@@ -1272,7 +1314,10 @@ function addNextCustomer(reason=""){
  const pending=customers.filter(o=>!o.done).length;
  if(pending>=maxCustomerQueue())return false;
  const o=makeOrder();
- o.patience=100;o.done=false;
+ o.patience=100;o.done=false;o.served=false;o.leftEarly=false;
+ // Bắt đầu đồng hồ ngay khi khách bước vào hàng chờ.
+ o.arrivedAt=Date.now();
+ o.waitSeconds=0;
  customers.push(o);
  if(current<0||!customers[current]||customers[current].done)current=customers.indexOf(o);
  if(reason)toast(reason);
@@ -1283,7 +1328,9 @@ function finishCurrentCustomerIfNeeded(){
  let changed=false;
  customers.forEach((o,i)=>{
    if(!o.done && o.patience<=0){
-     o.done=true;o.leftEarly=true;o.served=false;S.stats.left++;S.today.left++;applyRatingChange(-0.12);changed=true;
+     o.waitSeconds=getCustomerWaitSeconds(o);
+     o.leftAt=Date.now();
+     o.done=true;o.leftEarly=true;o.served=false;S.stats.left++;S.today.left++;changed=true;
      if(i===current)current=-1;
    }
  });
@@ -1343,7 +1390,7 @@ function tick(){
     timer=null;
     shopStartTime=0;
     lastTickAt=0;
-    customers.forEach(o=>{if(!o.done){o.done=true;o.leftEarly=true;o.served=false;S.stats.left++;S.today.left++;}});
+    customers.forEach(o=>{if(!o.done){o.waitSeconds=getCustomerWaitSeconds(o);o.leftAt=Date.now();o.done=true;o.leftEarly=true;o.served=false;S.stats.left++;S.today.left++;}});
     current=-1;
     S.shopOpen=false;
     toast("🌇 Hết giờ bán! Một ngày từ sáng tới chiều đã kết thúc.");
@@ -1374,15 +1421,19 @@ function choices(id,arr,key){document.getElementById(id).innerHTML=arr.map(v=>{l
 function choose(k,v){cup[k]=(k==="sweet"||k==="ice")?+v:v;renderControls()}
 function chooseSnack(v){normalizeSnackUnlocks();if(Number(S.level||1)<2){cup.snack=null;renderControls();return toast("🔒 Đồ ăn vặt mở từ cấp 2");}if(v!==null && (!(S.menuSnacks||[]).includes(v)||(S.stock.snacks?.[v]||0)<=0)){cup.snack=null;renderControls();return toast("📦 Món ăn vặt chưa có trong kho hoặc chưa bán");}cup.snack=v;renderControls()}
 function resetCup(){cup={size:null,tea:null,pour:0,top:null,sweet:null,ice:null,snack:null};renderControls()}
-const pb=document.getElementById("pourBtn");function startPour(e){if(e){e.preventDefault();e.stopPropagation()}if(pouring)return;pouring=true;try{if(e&&e.pointerId!=null)pb.setPointerCapture(e.pointerId)}catch(_){}clearInterval(pourTimer);pourTimer=setInterval(()=>{cup.pour=Math.min(100,(cup.pour||0)+2.4);document.getElementById("liquid").style.height=cup.pour+"%";if(cup.pour>=100)stopPour()},60)}function stopPour(e){if(e){e.preventDefault();e.stopPropagation()}pouring=false;clearInterval(pourTimer);renderControls()}pb.addEventListener("pointerdown",startPour,{passive:false});["pointerup","pointercancel","lostpointercapture"].forEach(x=>pb.addEventListener(x,stopPour,{passive:false}));pb.addEventListener("touchstart",e=>{e.preventDefault();e.stopPropagation();startPour(e)},{passive:false});pb.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("touchcancel",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("selectstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("dragstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("copy",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("cut",e=>{e.preventDefault();e.stopPropagation();return false});
+const pb=document.getElementById("pourBtn");function startPour(e){if(e){e.preventDefault();e.stopPropagation()}if(pouring)return;pouring=true;try{if(e&&e.pointerId!=null)pb.setPointerCapture(e.pointerId)}catch(_){}clearInterval(pourTimer);pourTimer=setInterval(()=>{cup.pour=Math.min(100,(cup.pour||0)+2.4*prepSpeedMultiplier());document.getElementById("liquid").style.height=cup.pour+"%";if(cup.pour>=100)stopPour()},60)}function stopPour(e){if(e){e.preventDefault();e.stopPropagation()}pouring=false;clearInterval(pourTimer);renderControls()}pb.addEventListener("pointerdown",startPour,{passive:false});["pointerup","pointercancel","lostpointercapture"].forEach(x=>pb.addEventListener(x,stopPour,{passive:false}));pb.addEventListener("touchstart",e=>{e.preventDefault();e.stopPropagation();startPour(e)},{passive:false});pb.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("touchcancel",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("selectstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("dragstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("copy",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("cut",e=>{e.preventDefault();e.stopPropagation();return false});
 function serve(){
- let o=customers[current];if(!o||o.done)return;let correct=cup.size===o.size&&cup.tea===o.tea&&Math.abs((cup.pour||0)-66)<=9&&cup.top===o.top&&cup.sweet===o.sweet&&cup.ice===o.ice&&cup.snack===o.snack;if(!correct){S.stats.wrong++;S.today.wrong++;S.cash=Math.max(0,S.cash-4);applyRatingChange(-0.08);toast("❌ Sai công thức · -4k");document.querySelector("#shop .grid").classList.add("shake");setTimeout(()=>document.querySelector("#shop .grid").classList.remove("shake"),300);resetCup();renderStats();save();return}
+ let o=customers[current];if(!o||o.done)return;
+ // Chốt thời gian khách đã chờ ngay tại thời điểm phục vụ thành công.
+ const servedAt=Date.now();
+ const waitSeconds=o.arrivedAt?Math.max(0,(servedAt-o.arrivedAt)/1000):0;
+ let correct=cup.size===o.size&&cup.tea===o.tea&&Math.abs((cup.pour||0)-66)<=9&&cup.top===o.top&&cup.sweet===o.sweet&&cup.ice===o.ice&&cup.snack===o.snack;if(!correct){S.stats.wrong++;S.today.wrong++;S.cash=Math.max(0,S.cash-4);applyRatingChange(-0.08);toast("❌ Sai công thức · -4k");document.querySelector("#shop .grid").classList.add("shake");setTimeout(()=>document.querySelector("#shop .grid").classList.remove("shake"),300);resetCup();renderStats();save();return}
  let tea=TEAS[o.tea],top=TOPS[o.top],sn=o.snack?SNACKS[o.snack]:null,need=tea.ingredients||[];let sizeStock=S.stock.cups[o.size]||0;if(sizeStock<1)return toast("🥤 Hết ly "+o.size);for(const ing of need)if((S.stock.ingredients[ing]||0)<1)return toast("🧪 Hết nguyên liệu: "+ing);if((S.stock.toppings[o.top]||0)<1)return toast("🍡 Hết topping: "+o.top);if(o.snack&&(S.stock.snacks[o.snack]||0)<1)return toast("🍢 Hết món: "+o.snack);
- S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let sale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;o.served=true;S.quests.served++;S.quests.perfect++;gainXP(12);applyRatingChange(0.06);o.done=true;
+ S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let sale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;o.served=true;ensureEmployeeRoster();const activeStaff=["counter1","brewer","counter2"].filter(k=>S.employees?.[k]);activeStaff.forEach(k=>{if(S.employeeRoster?.[k])S.employeeRoster[k].totalOrders=(S.employeeRoster[k].totalOrders||0)+1});o.servedAt=servedAt;o.waitSeconds=waitSeconds;o.waitRating=getWaitRating(o);S.quests.served++;S.quests.perfect++;gainXP(12);applyRatingChange(0.06);o.done=true;
  const quyt=Math.random()<0.025; if(quyt){ S.cash=Math.max(0,S.cash-sale); S.quits=S.quits||{count:0,lost:0,recovered:0}; S.quits.count++;S.quits.lost+=sale; toast(`🏃 Khách nhận đồ rồi bùng tiền ${money(sale)}!`); setTimeout(()=>policeCatchQuyt(sale),900); } else { toast("💖 Đơn hoàn hảo! +"+sale+"k"); } fx("💖");resetCup();current=customers.findIndex(x=>!x.done);if(customers.filter(x=>!x.done).length<maxCustomerQueue())scheduleNextCustomer(false);renderShop();save()}
 function renderStock(){let snackCount=Object.values(S.stock.snacks||{}).reduce((a,b)=>a+b,0),ingCount=Object.values(S.stock.ingredients||{}).reduce((a,b)=>a+b,0),topCount=Object.values(S.stock.toppings||{}).reduce((a,b)=>a+b,0);document.getElementById("stock").innerHTML=`🥤 Ly S/M/L/XL/XXL: <b>${S.unlockedSizes.map(n=>n+":"+(S.stock.cups[n]||0)).join(" · ")}</b><br>🧪 Nguyên liệu: <b>${ingCount}</b> phần<br>🍡 Topping: <b>${topCount}</b> phần<br>🍢 Đồ ăn vặt: <b>${snackCount}</b> phần`}
 function renderStats(){const t=S.today||{served:0,wrong:0,left:0,revenue:0};document.getElementById("served").textContent=t.served;document.getElementById("wrong").textContent=t.wrong;document.getElementById("left").textContent=t.left;document.getElementById("todayEarn").textContent=money(t.revenue)}
-function closeShopEarly(){if(confirm("Đóng cửa sớm? Các khách còn lại sẽ rời đi.")){S.shopOpen=false;shopStartTime=0;lastTickAt=0;clearTimeout(arrivalTimer);arrivalTimer=null;updateTop();customers.forEach(o=>{if(!o.done){o.done=true;o.leftEarly=true;S.stats.left++;S.today.left++}});endDay()}}
+function closeShopEarly(){if(confirm("Đóng cửa sớm? Các khách còn lại sẽ rời đi.")){S.shopOpen=false;shopStartTime=0;lastTickAt=0;clearTimeout(arrivalTimer);arrivalTimer=null;updateTop();customers.forEach(o=>{if(!o.done){o.waitSeconds=getCustomerWaitSeconds(o);o.leftAt=Date.now();o.done=true;o.leftEarly=true;o.served=false;S.stats.left++;S.today.left++;}});endDay()}}
 function endDay(){
  if(dayEnding)return;
  dayEnding=true;
@@ -1438,7 +1489,7 @@ function policeCatchQuyt(amount){
 }
 
 function nextDay(){snapshotActiveStore();companyBusinessIncome();S.shopOpen=false;shopStartTime=0;lastTickAt=0;dayEnding=false;claimed=false;clearInterval(timer);timer=null;clearInterval(pourTimer);pourTimer=null;pouring=false;clearTimeout(arrivalTimer);arrivalTimer=null;customers=[];current=-1;S.today={served:0,wrong:0,left:0,revenue:0};S.day++;S.quests={served:0,perfect:0,profit:0,claimed:false};for(const n of S.unlockedSizes)S.stock.cups[n]=Math.min(SIZES[n].stockMax,S.stock.cups[n]+2);for(const n of S.unlockedIngredients)S.stock.ingredients[n]=Math.min(20,(S.stock.ingredients[n]||0)+2);for(const n of S.unlockedTops)S.stock.toppings[n]=Math.min(15,(S.stock.toppings[n]||0)+1);for(const n of (S.unlockedSnacks||[]))S.stock.snacks[n]=Math.min(12,(S.stock.snacks[n]||0)+1);syncSpecialDrinks(true);syncLevelUnlocks(true);resolveNextDayCrime();save();startPrep()}
-function syncSpecialDrinks(showToast=true){S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh";S.shopOpen=!!S.shopOpen;S.equipment=S.equipment||{};S.loan=Object.assign({principal:0,total:0,paid:0,dueDay:0},S.loan||{});S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});S.online=Object.assign({platform:false,tablets:0},S.online||{});S.stats=S.stats||{};S.stats.totalProfit=S.stats.totalProfit||S.history?.reduce((a,h)=>a+(h.profit||0),0)||0;S.stats.onlineRevenue=S.stats.onlineRevenue||0;S.shopOpen=!!S.shopOpen;S.upgrades=S.upgrades||{};S.upgrades.special=S.upgrades.special||0;S.recipes=S.recipes||["Truyền thống"];S.unlockedTeas=S.recipes.slice();for(const [n,t] of Object.entries(TEAS)){if(t.type==="special"&&S.upgrades.special>=t.special&&!S.recipes.includes(n)){S.recipes.push(n);S.unlockedTeas.push(n);unlockIngredientsFor(n,showToast);if(showToast)toast("⭐ Mở khóa nước đặc biệt: "+n)}}for(const [n,t] of Object.entries(TOPS))if(S.level>=t.unlock&&!S.unlockedTops.includes(n)){S.unlockedTops.push(n);S.stock.toppings[n]=(S.stock.toppings[n]||0)+5;if(showToast)toast("🍡 Mở topping: "+n)}}
+function syncSpecialDrinks(showToast=true){ensureEmployeeRoster();S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh";S.shopOpen=!!S.shopOpen;S.equipment=S.equipment||{};S.loan=Object.assign({principal:0,total:0,paid:0,dueDay:0},S.loan||{});S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});S.online=Object.assign({platform:false,tablets:0},S.online||{});S.stats=S.stats||{};S.stats.totalProfit=S.stats.totalProfit||S.history?.reduce((a,h)=>a+(h.profit||0),0)||0;S.stats.onlineRevenue=S.stats.onlineRevenue||0;S.shopOpen=!!S.shopOpen;S.upgrades=S.upgrades||{};S.upgrades.special=S.upgrades.special||0;S.recipes=S.recipes||["Truyền thống"];S.unlockedTeas=S.recipes.slice();for(const [n,t] of Object.entries(TEAS)){if(t.type==="special"&&S.upgrades.special>=t.special&&!S.recipes.includes(n)){S.recipes.push(n);S.unlockedTeas.push(n);unlockIngredientsFor(n,showToast);if(showToast)toast("⭐ Mở khóa nước đặc biệt: "+n)}}for(const [n,t] of Object.entries(TOPS))if(S.level>=t.unlock&&!S.unlockedTops.includes(n)){S.unlockedTops.push(n);S.stock.toppings[n]=(S.stock.toppings[n]||0)+5;if(showToast)toast("🍡 Mở topping: "+n)}}
 
 function buySnackRecipe(name){let t=SNACKS[name];if(!t)return;if(S.level<2)return toast("🔒 Đồ ăn vặt mở từ cấp 2");S.snackSystemUnlocked=true;if((S.unlockedSnacks||[]).includes(name))return toast("✅ Món này đã mở khóa");if(S.cash<t.recipe)return toast("💰 Không đủ tiền mở khóa công thức");S.cash-=t.recipe;S.unlockedSnacks.push(name);S.stock.snacks[name]=S.stock.snacks[name]||0;save();toast("🍢 Mở khóa công thức: "+t.emoji+" "+name+" · hãy nhập kho trước khi bán");renderManage();renderPrep();updateTop()}
 function manageTab(mode){
@@ -1456,6 +1507,73 @@ const EMPLOYEE_ROLES={
  counter2:{label:"Nhân viên phụ quầy 2",base:21,min:16,max:25}
 };
 
+/* V71 — quản lý nhân viên theo từng người + vai trò + kỹ năng. */
+const EMPLOYEE_ROLE_SPEED={counter1:0.08,brewer:0.15,online:0,counter2:0.06};
+function employeeRoleIcon(key){return key==="counter1"?"👩‍🍳":key==="brewer"?"🧑‍🍳":key==="online"?"🚚":"🧑‍🎤"}
+function employeeRoleName(key){return EMPLOYEE_ROLES[key]?.label||key}
+function ensureEmployeeRoster(){
+ S.employeeRoster=S.employeeRoster||{};S.employeeInfo=S.employeeInfo||{};S.employeeDeals=S.employeeDeals||{};S.employees=S.employees||{};
+ for(const key of Object.keys(EMPLOYEE_ROLES)){
+   if(!S.employees[key])continue;
+   const old=S.employeeRoster[key]||{};
+   const info=S.employeeInfo[key]||assignEmployeeIdentity(key);
+   const wage=Number(old.wage||S.employeeDeals[key]||employeeWage(key));
+   S.employeeRoster[key]={
+     id:old.id||`EMP-${key}-${Math.random().toString(36).slice(2,8).toUpperCase()}`,
+     name:old.name||info.name,gender:old.gender||info.gender,role:key,
+     level:Math.max(1,Math.min(5,Number(old.level)||1)),
+     skill:Math.max(1,Math.min(5,Number(old.skill)||1)),
+     wage,
+     hiredDay:Number(old.hiredDay||S.day||1),
+     totalOrders:Number(old.totalOrders||0),
+     speedBonus:Number.isFinite(Number(old.speedBonus))?Number(old.speedBonus):0
+   };
+   S.employeeInfo[key]={name:S.employeeRoster[key].name,gender:S.employeeRoster[key].gender};
+   S.employeeDeals[key]=wage;
+ }
+ return S.employeeRoster;
+}
+function employeeSpeedBonus(key){
+ ensureEmployeeRoster();const e=S.employeeRoster?.[key];if(!e||!S.employees?.[key])return 0;
+ const roleBase=Number(EMPLOYEE_ROLE_SPEED[key]||0);
+ const skillBonus=Math.max(0,Number(e.skill||1)-1)*0.025;
+ const levelBonus=Math.max(0,Number(e.level||1)-1)*0.015;
+ return Math.min(0.25,roleBase+skillBonus+levelBonus);
+}
+function totalEmployeePrepBonus(){
+ ensureEmployeeRoster();
+ // Online staff does not speed the in-store counter. Other roles stack, capped at 45%.
+ const total=["counter1","brewer","counter2"].reduce((sum,key)=>sum+employeeSpeedBonus(key),0);
+ return Math.min(0.45,total);
+}
+function prepSpeedMultiplier(){return 1+totalEmployeePrepBonus();}
+function employeeTrainCost(key){ensureEmployeeRoster();const e=S.employeeRoster?.[key];return e?Math.round((70+e.level*45)*10)/10:0}
+function trainEmployee(key){
+ ensureEmployeeRoster();const e=S.employeeRoster?.[key];if(!e)return toast("👨‍🍳 Chưa có nhân viên này");
+ if(e.level>=5)return toast("🏆 Nhân viên đã đạt cấp 5");
+ const cost=employeeTrainCost(key);if(S.cash<cost)return toast(`💰 Cần ${money(cost)} để đào tạo ${e.name}`);
+ S.cash-=cost;e.level++;e.skill=Math.min(5,e.skill+1);e.speedBonus=employeeSpeedBonus(key);save();renderManage();updateTop();toast(`📚 ${e.name} lên Lv.${e.level} · tốc độ pha chế +${Math.round(employeeSpeedBonus(key)*100)}%`);
+}
+function fireEmployee(key){
+ ensureEmployeeRoster();const e=S.employeeRoster?.[key];if(!e)return toast("👨‍🍳 Không tìm thấy nhân viên");
+ if(!confirm(`Cho ${e.name} nghỉ việc khỏi vai trò ${employeeRoleName(key)}?`))return;
+ delete S.employeeRoster[key];delete S.employeeInfo[key];delete S.employeeDeals[key];S.employees[key]=false;save();renderManage();updateTop();toast(`👋 ${e.name} đã nghỉ việc`);
+}
+function hireEmployee(key,cost,name,condition=true){
+ S.employees=S.employees||{};S.employeeDeals=S.employeeDeals||{};S.employeeRoster=S.employeeRoster||{};
+ if(!condition)return toast("🔒 Chưa đủ điều kiện");
+ if(key==="counter1"&&S.employees.counter2)return toast("👥 Đang có nhân viên phụ quầy 2");
+ if(key==="counter2"&&S.employees.counter1)return toast("👥 Đang có nhân viên phụ quầy");
+ if(S.employees[key])return toast("✅ Nhân viên đã được thuê");
+ if(S.cash<cost)return toast("💰 Không đủ tiền");
+ const info=assignEmployeeIdentity(key);const wage=employeeWage(key);
+ S.cash-=cost;S.employees[key]=true;S.employeePayEnabled=true;
+ ensureEmployeeRoster();
+ const e=S.employeeRoster[key];e.wage=wage;e.hiredDay=S.day;
+ save();renderManage();updateTop();
+ toast((info.gender==="female"?"👩":"👨")+" Đã thuê "+info.name+" · "+name+" · deal "+wage+"k/giờ");
+}
+
 function getEmployeeDeal(key){
  S.employeeDeals=S.employeeDeals||{};
  const role=EMPLOYEE_ROLES[key];if(!role)return 0;
@@ -1471,7 +1589,7 @@ function negotiateEmployee(key){
  const current=employeeWage(key);
  const delta=(Math.random()<.5?-1:1)*(5+Math.floor(Math.random()*16));
  const next=Math.max(role.min,Math.min(role.max,current+delta));
- S.employeeDeals[key]=next;save();renderManage();
+ S.employeeDeals[key]=next;ensureEmployeeRoster();if(S.employeeRoster?.[key])S.employeeRoster[key].wage=next;save();renderManage();
  toast(delta<0?`🤝 Deal giảm còn ${next}k/giờ`:`💬 Nhân viên đề nghị ${next}k/giờ`);
 }
 function toggleEmployeePay(){
@@ -1489,22 +1607,9 @@ function applyUnpaidPenalty(){
  applyRatingChange(-penalty);
  return penalty;
 }
-function hireEmployee(key,cost,name,condition=true){
- S.employees=S.employees||{};S.employeeDeals=S.employeeDeals||{};
- if(!condition)return toast("🔒 Chưa đủ điều kiện");
- if(key==="counter1"&&S.employees.counter2)return toast("👥 Đang có nhân viên phụ quầy 2");
- if(key==="counter2"&&S.employees.counter1)return toast("👥 Đang có nhân viên phụ quầy");
- if(S.employees[key])return toast("✅ Nhân viên đã được thuê");
- const wage=employeeWage(key);
- if(S.cash<cost)return toast("💰 Không đủ tiền");
- const info=assignEmployeeIdentity(key);
- S.cash-=cost;S.employees[key]=true;S.employeePayEnabled=true;
- save();renderManage();updateTop();
- toast((info.gender==="female"?"👩":"👨")+" Đã thuê "+info.name+" · "+name+" · deal "+wage+"k/giờ");
-}
 function buyOnlinePlatform(){S.online=S.online||{platform:false,tablets:0};if(S.online.platform)return toast("✅ Đã mở nền tảng");const ok=(S.stats.totalProfit||0)>=15000&&S.stats.days>=60&&S.rating>=4;if(!ok)return toast("🔒 Chưa đủ điều kiện mở đơn online");if(S.cash<3000)return toast("💰 Cần 3.000k để gia nhập Soppi");S.cash-=3000;S.online.platform=true;save();renderManage();updateTop();toast("🚚 Đã mở nền tảng Soppi")}
 function buyTablet(){S.online=S.online||{platform:false,tablets:0};if(!S.online.platform)return toast("🔒 Hãy mở nền tảng online trước");if((S.online.tablets||0)>=5)return toast("📱 Tối đa 5 tablet");if(S.cash<7000)return toast("💰 Cần 7.000k mua tablet");S.cash-=7000;S.online.tablets=(S.online.tablets||0)+1;save();renderManage();updateTop();toast("📱 Đã mua tablet nhận đơn") }
-function employeeDailyCost(){const e=S.employees||{};const active=["counter1","brewer","online","counter2"].filter(k=>e[k]===true);if(!active.length)return 0;if(S.employeePayEnabled===false)return 0;const hoursPerDay=5;return active.reduce((sum,k)=>sum+employeeWage(k),0)*hoursPerDay}
+function employeeDailyCost(){ensureEmployeeRoster();const active=["counter1","brewer","online","counter2"].filter(k=>S.employees?.[k]===true);if(!active.length)return 0;if(S.employeePayEnabled===false)return 0;const hoursPerDay=5;return active.reduce((sum,k)=>sum+Number(S.employeeRoster?.[k]?.wage||employeeWage(k)),0)*hoursPerDay}
 function hiredEmployeeCount(){return Object.values(S.employees||{}).filter(v=>v===true).length}
 function onlineDailyRevenue(){if(!S.online?.platform||!S.online?.tablets)return 0;let orders=Math.min(S.online.tablets,2+Math.floor(S.day/10));let gross=orders*45;let fee=Math.round(gross*.2);S.stats.onlineRevenue=(S.stats.onlineRevenue||0)+Math.max(0,gross-fee);return Math.max(0,gross-fee)}
 
@@ -1526,7 +1631,8 @@ function toggleMenuItem(type,name){
 function renderManage(){
  let b=document.getElementById("manageBody");
  if(manageMode==="staff"){
-  const e=S.employees||{};
+  ensureEmployeeRoster();
+  const e=S.employees||{};const roster=S.employeeRoster||{};
   const employeePayOn=S.employeePayEnabled!==false;
   const staffPayPanel=`<div class="snackBox" style="margin-bottom:14px"><b>📈 Lượng khách · tối đa hàng chờ hiện tại: ${maxCustomerQueue()}</b><div class="mini">Số sao càng cao, thời gian chờ khách tiếp theo càng ngắn. Từ cấp 2, khách mới có thể vào khi khách trước đang phục vụ và xếp hàng chờ; cấp càng cao thì nhịp khách càng nhanh.</div></div><div class="snackBox" style="margin-bottom:14px">
     <b>💼 Hợp đồng & tiền lương</b>
@@ -1535,11 +1641,13 @@ function renderManage(){
     ${employeePayOn?"":"<div class='staffPayWarning'>⚠️ Không trả lương sẽ tạo phốt, giảm sao và làm khách đến quán thưa dần.</div>"}
     <button class="btn ${employeePayOn?"danger":"good"}" type="button" onclick="toggleEmployeePay()">${employeePayOn?"⛔ Tạm không trả lương":"💵 Trả lương nhân viên"}</button>
   </div>`;
-  b.innerHTML=staffPayPanel+`<div class="sectionTitle"><div><h3>👨‍🍳 Nhân viên</h3><div class="mini">Lương được tính vào cuối mỗi ngày.</div></div><span class="tag">💸 ${employeeDailyCost()}k/ngày</span></div>
-  <div class="upgrade"><div><b>👩‍🍳 Nhân viên phụ quầy</b><div class="mini">${e.counter1&&S.employeeInfo?.counter1?((S.employeeInfo.counter1.gender==="female"?"👩":"👨")+" "+S.employeeInfo.counter1.name):"Chưa thuê"}</div><div class="mini">Chọn ly, bỏ topping và dán nắp. Nhân viên rót trà, cho đường và đá.<br>Deal ${employeeWage("counter1")}k/giờ</div></div><button class="btn ${e.counter1?"secondary":"gold"}" onclick="hireEmployee('counter1',90,'Nhân viên phụ quầy')">${e.counter1?"✅ Đã thuê":"90k · Thuê"}</button><button class="btn secondary" type="button" onclick="negotiateEmployee(\'counter1\')">🤝 Deal</button></div>
-  <div class="upgrade"><div><b>🧑‍🍳 Nhân viên pha chế</b><div class="mini">${e.brewer&&S.employeeInfo?.brewer?((S.employeeInfo.brewer.gender==="female"?"👩":"👨")+" "+S.employeeInfo.brewer.name):"Chưa thuê"}</div><div class="mini">Khi có từ 2 khách, tự xử lý đơn chờ lâu nhất và pha hết các ly. Hiếm khi làm sai (0,5%).<br>Deal ${employeeWage("brewer")}k/giờ · Mở từ ngày 30</div></div><button class="btn ${e.brewer?"secondary":"gold"}" onclick="hireEmployee('brewer',200,'Nhân viên pha chế',S.day>=30)">${e.brewer?"✅ Đã thuê":S.day>=30?"200k · Thuê":"Mở từ ngày 30"}</button><button class="btn secondary" type="button" onclick="negotiateEmployee(\'brewer\')">🤝 Deal</button></div>
-  <div class="upgrade"><div><b>🚚 Nhân viên đơn online</b><div class="mini">${e.online&&S.employeeInfo?.online?((S.employeeInfo.online.gender==="female"?"👩":"👨")+" "+S.employeeInfo.online.name):"Chưa thuê"}</div><div class="mini">Chỉ làm đơn online, nhận trọn đơn và pha hết các ly. Mỗi ly khoảng 1 giây.<br>Deal ${employeeWage("online")}k/giờ · Cần mở đơn online</div></div><button class="btn ${e.online?"secondary":"gold"}" onclick="hireEmployee('online',250,'Nhân viên đơn online',!!S.online?.platform)">${e.online?"✅ Đã thuê":S.online?.platform?"250k · Thuê":"Cần mở đơn online"}</button><button class="btn secondary" type="button" onclick="negotiateEmployee(\'online\')">🤝 Deal</button></div>
-  <div class="upgrade"><div><b>🧑‍🎤 Nhân viên phụ quầy 2</b><div class="mini">${e.counter2&&S.employeeInfo?.counter2?((S.employeeInfo.counter2.gender==="female"?"👩":"👨")+" "+S.employeeInfo.counter2.name):"Chưa thuê"}</div><div class="mini">Làm như nhân viên phụ quầy, thêm mức topping. Không thuê cùng lúc với nhân viên phụ quầy.<br>Deal ${employeeWage("counter2")}k/giờ</div></div><button class="btn ${e.counter2?"secondary":"gold"}" onclick="hireEmployee('counter2',150,'Nhân viên phụ quầy 2',!e.counter1)">${e.counter2?"✅ Đã thuê":e.counter1?"Không thể thuê cùng NV phụ quầy":"150k · Thuê"}</button><button class="btn secondary" type="button" onclick="negotiateEmployee(\'counter2\')">🤝 Deal</button></div>`;
+  const staffCards=["counter1","brewer","online","counter2"].map(key=>{
+    const r=roster[key],role=EMPLOYEE_ROLES[key];
+    if(!r)return `<div class="upgrade"><div><b>${employeeRoleIcon(key)} ${role.label}</b><div class="mini">Chưa thuê · vai trò riêng</div></div><span class="tag">Chưa có</span></div>`;
+    const speed=Math.round(employeeSpeedBonus(key)*100);const train=employeeTrainCost(key);
+    return `<div class="upgrade" style="align-items:flex-start"><div style="flex:1"><div class="row between"><b>${employeeRoleIcon(key)} ${r.name}</b><span class="tag">${role.label}</span></div><div class="mini">ID: ${r.id} · Lv.${r.level}/5 · Kỹ năng ${r.skill}/5 · ${r.wage}k/giờ</div><div class="mini">⚡ Tốc độ pha chế: <b>+${speed}%</b> · Đã xử lý: ${r.totalOrders||0} đơn</div><div class="progress" style="margin-top:7px"><i style="width:${Math.min(100,(speed/25)*100)}%"></i></div></div><div class="row"><button class="btn gold" onclick="trainEmployee('${key}')">📚 ${money(train)}</button><button class="btn secondary" onclick="negotiateEmployee('${key}')">🤝 Deal</button><button class="btn danger" onclick="fireEmployee('${key}')">👋 Nghỉ</button></div></div>`;
+  }).join("");
+  b.innerHTML=staffPayPanel+`<div class="sectionTitle"><div><h3>👨‍🍳 Quản lý nhân viên</h3><div class="mini">Mỗi người có hồ sơ, vai trò, cấp độ và kỹ năng riêng. Nhân viên trong quầy giúp rút ngắn thời gian rót/làm đồ uống.</div></div><span class="tag">⚡ Tổng +${Math.round(totalEmployeePrepBonus()*100)}%</span></div>${staffCards}<div class="snackBox" style="margin-top:12px"><b>⚡ Cơ chế tốc độ</b><div class="mini">Phụ quầy +8% · Pha chế +15% · Phụ quầy 2 +6%. Mỗi cấp thêm +1,5% và mỗi điểm kỹ năng thêm +2,5%. Tổng cộng tối đa +45%. Nhân viên online không ảnh hưởng quầy tại chỗ.</div><button class="btn secondary" style="margin-top:8px" onclick="window.open('employee-manager.html','_blank')">📋 Mở file quản lý nhân viên</button></div>`;
   return;
  }
  if(manageMode==="online"){
@@ -1596,6 +1704,8 @@ const openShopBtn=document.getElementById("openShopBtn");
 if(openShopBtn){openShopBtn.addEventListener("pointerup",e=>{e.preventDefault();e.stopPropagation();if(!S.shopOpen)openShop();},{passive:false});openShopBtn.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();if(!S.shopOpen)openShop();},{passive:false});}
 const __hadSave=!!localStorage.getItem("TTX_FULL_SAVE");load();initStoreSystem();updateTop();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
+// Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem('TTX_FULL_SAVE');if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
 document.getElementById("nameModal").addEventListener("click",e=>{if(e.target.id==="nameModal")closeNameModal()});
 updateTop();
 

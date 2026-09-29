@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tiệm Trà Xinh — Quản lý nhân viên</title>
+<style>
+:root{--bg:#f6eadb;--paper:#fffdf8;--ink:#4b3428;--muted:#8d7465;--brand:#b9673b;--gold:#d89b36;--line:#e7d3be;--green:#4c8b63;--red:#b94d49}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#f4e3cf,#fffaf2);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:18px}.wrap{max-width:1050px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#5a3423;color:#fff8ef;border-radius:20px;padding:16px 18px;box-shadow:0 12px 30px #5a342322}.top h1{margin:0;font-size:22px}.top .mini{color:#ead8c8}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:10px 13px;font:inherit;font-weight:900;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}.gold{background:#fff0c9;border:1px solid #e9c976;color:#76541c}.danger{background:#fff0ef;border:1px solid #e7b4b0;color:#9d3f3a}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 7px 20px #68452a12}.section{margin-top:14px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.mini{font-size:12px;color:var(--muted);line-height:1.45}.tag{font-size:11px;padding:5px 8px;border-radius:99px;background:#f4e8da;font-weight:900}.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.statBox{background:#fff7ed;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.statBox b{display:block;font-size:19px}.employee{position:relative}.avatar{font-size:46px}.role{color:var(--brand);font-weight:1000}.speed{color:var(--green);font-weight:1000}.progress{height:9px;background:#eadfd4;border-radius:99px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;background:var(--green);border-radius:99px}.actions2{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.empty{text-align:center;padding:35px;color:var(--muted);border:2px dashed var(--line);border-radius:16px}.note{background:#fff5e5;border:1px solid #ead2aa;border-radius:14px;padding:12px}.modal{position:fixed;inset:0;background:#2f241dcc;display:none;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.modalCard{width:min(430px,100%);background:var(--paper);border-radius:20px;padding:18px}.input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;margin:7px 0 12px}@media(max-width:700px){body{padding:8px}.grid{grid-template-columns:1fr}.stat{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>👨‍🍳 Quản lý nhân viên</h1><div class="mini" id="shopLabel">Đang đọc dữ liệu Tiệm Trà Xinh…</div></div>
+    <div class="actions"><button class="btn secondary" onclick="location.href='index.html'">← Về game</button><button class="btn primary" onclick="loadData()">🔄 Làm mới</button></div>
+  </div>
+  <div id="summary" class="stat"></div>
+  <div class="card section note">
+    <b>⚡ Cơ chế rút ngắn thời gian làm đồ uống</b>
+    <div class="mini" style="margin-top:5px">Phụ quầy +8% · Pha chế +15% · Phụ quầy 2 +6%. Mỗi cấp nhân viên thêm +1,5%, mỗi điểm kỹ năng thêm +2,5%. Nhân viên online chỉ xử lý đơn online. Tổng bonus tại quầy tối đa +45%.</div>
+  </div>
+  <div id="employees" class="grid"></div>
+</div>
+<div id="modal" class="modal"><div class="modalCard"><h3 id="modalTitle">Đổi tên</h3><input id="nameInput" class="input" maxlength="30"><div class="actions"><button class="btn secondary" onclick="closeModal()">Hủy</button><button class="btn primary" onclick="confirmName()">Lưu</button></div></div></div>
+<script>
+const ROLES={
+ counter1:{label:'Nhân viên phụ quầy',icon:'👩‍🍳',base:.08,desc:'Hỗ trợ chọn ly, topping, đường, đá và dán nắp; tăng tốc thao tác pha chế.'},
+ brewer:{label:'Nhân viên pha chế',icon:'🧑‍🍳',base:.15,desc:'Chuyên pha chế; tạo bonus tốc độ lớn nhất cho quầy tại chỗ.'},
+ online:{label:'Nhân viên đơn online',icon:'🚚',base:0,desc:'Chỉ xử lý đơn online, không cộng tốc độ cho quầy tại chỗ.'},
+ counter2:{label:'Nhân viên phụ quầy 2',icon:'🧑‍🎤',base:.06,desc:'Hỗ trợ quầy thứ hai và tăng thêm tốc độ thao tác.'}
+};
+let data=null, activeRole=null;
+const money=n=>{n=Math.round(Number(n)||0);if(n>=1000){let tr=Math.floor(n/1000),k=n%1000;return tr+'Tr'+(k?k+'k':'')}return n+'k'};
+function loadData(){
+ try{const raw=localStorage.getItem('TTX_FULL_SAVE');if(!raw){renderEmpty('Chưa tìm thấy dữ liệu lưu của game. Hãy mở index.html và tạo/tiếp tục game trước.');return}data=JSON.parse(raw);migrate();render()}catch(e){renderEmpty('Dữ liệu lưu bị lỗi: '+e.message)}
+}
+function migrate(){
+ data.employeeRoster=data.employeeRoster||{};data.employeeInfo=data.employeeInfo||{};data.employeeDeals=data.employeeDeals||{};data.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},data.employees||{});
+ for(const role of Object.keys(ROLES)){
+  if(!data.employees[role])continue;
+  const old=data.employeeRoster[role]||{};const info=data.employeeInfo[role]||{};
+  data.employeeRoster[role]={id:old.id||('EMP-'+role+'-'+Math.random().toString(36).slice(2,8).toUpperCase()),name:old.name||info.name||'Nhân viên',gender:old.gender||info.gender||'male',role,level:Math.max(1,Math.min(5,Number(old.level)||1)),skill:Math.max(1,Math.min(5,Number(old.skill)||1)),wage:Number(old.wage||data.employeeDeals[role]||20),hiredDay:Number(old.hiredDay||data.day||1),totalOrders:Number(old.totalOrders||0)};
+ }
+}
+function bonus(e){if(!e)return 0;return Math.min(.25,ROLES[e.role].base+Math.max(0,e.skill-1)*.025+Math.max(0,e.level-1)*.015)}
+function totalBonus(){return Math.min(.45,Object.values(data.employeeRoster||{}).reduce((a,e)=>a+bonus(e),0))}
+function save(){data.__employeeManagerUpdated=Date.now();localStorage.setItem('TTX_FULL_SAVE',JSON.stringify(data))}
+function render(){
+ document.getElementById('shopLabel').textContent=(data.shopName||'Tiệm Trà Xinh')+' · Ngày '+(data.day||1);
+ const list=Object.values(data.employeeRoster||{});
+ document.getElementById('summary').innerHTML=`<div class="statBox"><b>${list.length}</b>Nhân viên</div><div class="statBox"><b>+${Math.round(totalBonus()*100)}%</b>Tốc độ quầy</div><div class="statBox"><b>${money(list.reduce((a,e)=>a+Number(e.wage||0),0)*5)}</b>Lương/ngày</div><div class="statBox"><b>${list.reduce((a,e)=>a+Number(e.totalOrders||0),0)}</b>Đơn đã xử lý</div>`;
+ const box=document.getElementById('employees');
+ const cards=Object.keys(ROLES).map(role=>{const e=data.employeeRoster?.[role];return e?card(e):`<div class="card empty"><div style="font-size:40px">${ROLES[role].icon}</div><b>${ROLES[role].label}</b><div class="mini" style="margin:7px 0">${ROLES[role].desc}</div><span class="tag">Chưa thuê</span></div>`}).join('');box.innerHTML=cards;
+}
+function card(e){const r=ROLES[e.role],sp=Math.round(bonus(e)*100),train=Math.round(70+e.level*45);return `<div class="card employee"><div class="row between"><div class="avatar">${e.gender==='female'?'👩':'👨'}</div><span class="tag">${e.id}</span></div><h2 style="margin:5px 0">${esc(e.name)}</h2><div class="role">${r.icon} ${r.label}</div><div class="mini" style="margin-top:5px">${r.desc}</div><div class="stat" style="grid-template-columns:repeat(3,1fr)"><div class="statBox"><b>Lv.${e.level}</b>Cấp</div><div class="statBox"><b>${e.skill}/5</b>Kỹ năng</div><div class="statBox"><b>${e.wage}k</b>/giờ</div></div><div style="margin-top:10px"><div class="row between"><span class="mini">⚡ Bonus tốc độ</span><b class="speed">+${sp}%</b></div><div class="progress"><i style="width:${Math.min(100,sp/25*100)}%"></i></div></div><div class="mini" style="margin-top:8px">📦 Đã xử lý ${e.totalOrders||0} đơn · 🗓 Thuê từ ngày ${e.hiredDay||1}</div><div class="actions2"><button class="btn gold" onclick="train('${e.role}')">📚 Đào tạo · ${money(train)}</button><button class="btn secondary" onclick="rename('${e.role}')">✏️ Đổi tên</button><button class="btn secondary" onclick="raiseWage('${e.role}')">💵 +1k/giờ</button><button class="btn danger" onclick="fire('${e.role}')">👋 Cho nghỉ</button></div></div>`}
+function train(role){const e=data.employeeRoster?.[role];if(!e)return;if(e.level>=5)return alert('Nhân viên đã đạt cấp 5.');const cost=Math.round(70+e.level*45);if(Number(data.cash||0)<cost)return alert('Không đủ tiền.');data.cash-=cost;e.level++;e.skill=Math.min(5,e.skill+1);save();render()}
+function raiseWage(role){const e=data.employeeRoster?.[role];if(!e)return;if(Number(data.cash||0)<0)return; e.wage=Math.min(100,Number(e.wage||0)+1);data.employeeDeals[role]=e.wage;save();render()}
+function rename(role){activeRole=role;document.getElementById('modalTitle').textContent='✏️ Đổi tên nhân viên';document.getElementById('nameInput').value=data.employeeRoster[role].name;document.getElementById('modal').classList.add('show');setTimeout(()=>document.getElementById('nameInput').focus(),50)}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function confirmName(){const e=data.employeeRoster?.[activeRole];if(!e)return;const n=document.getElementById('nameInput').value.trim().replace(/\s+/g,' ');if(n.length<2)return alert('Tên phải có ít nhất 2 ký tự.');e.name=n;data.employeeInfo[activeRole]={name:n,gender:e.gender};save();closeModal();render()}
+function fire(role){const e=data.employeeRoster?.[role];if(!e)return;if(!confirm('Cho '+e.name+' nghỉ việc?'))return;delete data.employeeRoster[role];delete data.employeeInfo[role];delete data.employeeDeals[role];data.employees[role]=false;save();render()}
+function renderEmpty(msg){document.getElementById('employees').innerHTML='<div class="card empty" style="grid-column:1/-1">'+esc(msg)+'</div>'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+loadData();
+</script>
+</body></html>
