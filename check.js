@@ -1,598 +1,4 @@
-<!doctype html>
-<html lang="vi">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#d97951">
-<title>Tiệm Trà Xinh V39 — Chill Cafe</title>
-<style>
-:root{--bg:#fff7ed;--paper:#fffdf9;--ink:#3e3028;--muted:#90796b;--brand:#d97850;--brand2:#f4b36d;--green:#70a56f;--red:#c95e59;--gold:#e4a52f;--line:#ead9ca;--shadow:0 12px 35px #6e493016}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% 0,#fff1dc,transparent 30%),linear-gradient(#fff8ef,#fffdf9);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
-button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;touch-action:manipulation;pointer-events:auto;-webkit-tap-highlight-color:transparent}html,body,#app,button,.pourBtn{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}button:focus{outline:none}.app{max-width:1120px;margin:auto;padding:10px 14px 35px}.top{position:sticky;top:8px;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fffdfbf2;backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;padding:10px 13px;box-shadow:var(--shadow)}.logo{font-size:20px;font-weight:1000;white-space:nowrap}.topRight{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:min(420px,55%)}.xpTop{width:min(360px,100%);background:#fff7ed;border:1px solid var(--line);border-radius:10px;padding:4px 7px}.xpTopLabel{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);font-weight:800}.xpTopLabel b{color:var(--ink)}.xpTrack{height:6px;background:#eadfd6;border-radius:99px;overflow:hidden;margin-top:3px}.xpTrack i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--gold));border-radius:99px;transition:width .25s}.stats{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.pill{border:1px solid var(--line);background:#fff7ed;border-radius:99px;padding:6px 9px;font-size:12px;font-weight:800}
-.scene{height:150px;margin:12px 0;border:1px solid var(--line);border-radius:25px;position:relative;overflow:hidden;background:linear-gradient(#ffe5bd 0 35%,#f3c894 35% 44%,#e5bb87 44%);box-shadow:inset 0 -27px #b9855d}.awning{height:36px;background:repeating-linear-gradient(90deg,var(--brand) 0 42px,#fff0dc 42px 84px)}.sign{cursor:pointer;position:absolute;top:48px;left:5%;transform:none;width:58%;min-width:0;background:#fff;border:3px solid #a86d4b;border-radius:14px;padding:6px 10px;font-weight:1000;box-shadow:0 5px #a86d4b;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip;font-size:clamp(10px,1.8vw,20px)}.window{position:absolute;right:9%;bottom:15px;width:180px;height:65px;border:5px solid #9a684a;border-radius:10px;background:#e4f4f2;display:grid;place-items:center}.window b{padding:7px 16px;border-radius:10px;min-width:82px;text-align:center}.window b.open{background:#e7f6ec;color:#3f8a5a;border:2px solid #79b98e}.window b.closed{background:#fff0ee;color:#c84f4a;border:2px solid #e48b85}.plant{position:absolute;left:5%;bottom:7px;font-size:48px}
-.screen{display:none}.screen.active{display:block}.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:14px}.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:15px;box-shadow:var(--shadow)}.hero{text-align:center;padding:28px}.hero h1{font-size:43px;margin:3px 0}.muted{color:var(--muted)}.btn{border-radius:13px;padding:11px 15px;font-weight:900}.primary{background:var(--brand);color:white;box-shadow:0 7px 17px #d9785030}.secondary{background:#fff;border:1px solid var(--line)}.danger{background:#fff0ee;color:var(--red);border:1px solid #efcbc6}.gold{background:#fff1c9;color:#7b5b18;border:1px solid #efd18b}.wide{width:100%}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.center{text-align:center}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.sectionTitle h2,.sectionTitle h3{margin:0}.orders{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.order{border:1px solid var(--line);background:#fffaf5;border-radius:16px;padding:10px;transition:.2s}.order.selected{outline:3px solid #efb476}.order.done{opacity:.55}.avatar{font-size:38px}.bar{height:7px;background:#eee0d5;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);transition:.25s}.bar i.low{background:var(--red)}.tags{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}.tag{font-size:11px;padding:4px 6px;background:#f4e9df;border-radius:99px}.customerStage{min-height:125px;background:#fff6e9;border:1px dashed #e2c7ae;border-radius:16px;position:relative;display:grid;place-items:center;margin-bottom:10px}.customer{font-size:74px;filter:drop-shadow(0 7px 2px #754b2a22)}.bubble{position:absolute;top:8px;right:5%;max-width:70%;background:white;border:1px solid var(--line);border-radius:13px;padding:7px 10px;font-size:12px;font-weight:800}.bubble:after{content:"";position:absolute;left:22px;bottom:-7px;border-width:7px 7px 0 0;border-style:solid;border-color:#fff transparent transparent}.choices{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.choice{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 11px}.choice.on{background:#ffe1c7;border-color:#df9c65;font-weight:900}.pourBox{height:200px;border:2px dashed #d9b89b;border-radius:18px;background:linear-gradient(#fffaf4,#f6e1cb);position:relative;display:grid;place-items:end center;overflow:hidden}.cup{width:110px;height:145px;border:5px solid #ad7858;border-top:0;border-radius:0 0 25px 25px;position:relative;overflow:hidden;background:#ffffffaa}.liquid{position:absolute;bottom:0;left:0;right:0;height:0;background:#b97949}.target{position:absolute;left:0;right:0;bottom:66%;border-top:3px dashed var(--brand);z-index:2}.pourBtn{position:absolute;bottom:12px;z-index:4;border-radius:99px;padding:9px 18px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}.meter{text-align:center;font-size:12px;color:var(--muted);padding:6px}.inventory{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.ingredientGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:8px}.ingredientCard{border:1px solid var(--line);border-radius:12px;padding:8px;background:#fffaf6}.unlockBadge{font-size:10px;padding:3px 6px;border-radius:99px;background:#edf7ea;color:#4d7b4e}.item{display:flex;justify-content:space-between;align-items:center;gap:7px;border:1px solid var(--line);border-radius:13px;padding:9px}.mini{font-size:11px;color:var(--muted)}.snackBox{margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:10px;background:#fffaf6}.snackChoices{display:flex;gap:6px;flex-wrap:wrap}.snackChoice{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 10px}.snackChoice.on{background:#ffe1c7;border-color:#df9c65;font-weight:900}.snackTag{background:#fff0dc;color:#7b5537}.snackGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.snackItem{border:1px solid var(--line);border-radius:12px;padding:8px;background:#fffaf6}.progress{height:9px;background:#eee0d5;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--brand);transition:.2s}.menuGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.menuItem{border:1px solid var(--line);border-radius:14px;padding:10px;background:#fffaf6}.locked{filter:grayscale(1);opacity:.55}.tabs{display:flex;gap:7px;margin-bottom:10px}.tab{flex:1;padding:10px;border-radius:12px;background:#f4e9df;font-weight:900}.tab.on{background:#e9b47d}.prepNotice{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff6e9;border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:12px}.upgrade{border:1px solid var(--line);border-radius:15px;padding:11px;display:flex;justify-content:space-between;gap:10px;align-items:center;margin:7px 0}.quest{display:flex;gap:9px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;margin:7px 0}.quest.done{background:#edf7ea}.bigMoney{font-size:45px;font-weight:1000}.statGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.statBox{background:#fff6e9;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.statBox b{display:block;font-size:20px}.toast{position:fixed;z-index:99;left:50%;bottom:24px;transform:translateX(-50%);background:#3e3028;color:#fff;border-radius:12px;padding:10px 15px;display:none}.float{position:fixed;z-index:90;pointer-events:none;font-size:25px;animation:float .9s ease-out forwards}@keyframes float{to{transform:translate(var(--x),var(--y)) scale(1.3);opacity:0}}.shake{animation:shake .28s}@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}.footer{text-align:center;color:#a18d7d;font-size:12px;padding:20px}.menuEditor{display:grid;grid-template-columns:1fr 1fr;gap:10px}.menuEditItem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:15px;padding:10px;background:#fffaf6}.menuEditItem.on{border-color:#d99b69;background:#fff1df;box-shadow:0 0 0 2px #f2c99e55}.menuEditItem.off{opacity:.55}.menuEditItem .assetImg{width:54px;height:54px;flex:0 0 54px}.menuEditInfo{min-width:0;flex:1}.menuEditInfo b{display:block;overflow:hidden;text-overflow:ellipsis}.menuToggle{min-width:72px}.menuSummary{background:#fff6e9;border:1px solid var(--line);border-radius:15px;padding:11px;margin-bottom:12px}.menuEmpty{padding:14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}@media(max-width:780px){.menuEditor{grid-template-columns:1fr}.menuEditItem{min-height:76px}.menuToggle{min-width:82px}}
-@media(max-width:780px){.app{padding:7px}.topRight{min-width:0;flex:1}.xpTop{width:100%}.xpTopLabel{font-size:9px}.grid{grid-template-columns:1fr}.orders{grid-template-columns:1fr}.scene{height:125px}.window{width:125px}.sign{cursor:pointer;left:4%;width:59%;font-size:clamp(9px,2.2vw,14px);padding:6px 6px}.hero h1{font-size:33px}.statGrid{grid-template-columns:repeat(2,1fr)}.menuGrid{grid-template-columns:1fr 1fr}.top{position:relative}.customerStage{min-height:110px}.bubble{max-width:78%}}
-<style>
-.pourBtn{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;touch-action:none!important;pointer-events:auto!important;}
-.nameModal{position:fixed;inset:0;background:#2f241dcc;display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}.nameModal.show{display:flex}.nameModal .modalCard{width:min(460px,100%);background:#fffdf9;border:2px solid #ead9ca;border-radius:28px;padding:26px;box-shadow:0 20px 60px #2f241d55;text-align:center}.nameModal h2{margin:0 0 8px}.nameModal p{margin:0 0 16px;color:#90796b}.nameInput{width:100%;font:inherit;font-size:20px;padding:14px 16px;border:2px solid #ead9ca;border-radius:16px;outline:none;text-align:center;background:#fff7ed;color:#3e3028}.nameInput:focus{border-color:#d97850}.modalActions{display:flex;gap:10px;margin-top:14px}.modalActions .btn{flex:1}.shopNameText{font-weight:900} 
-.shopStatus{display:grid;place-items:center;font-size:clamp(18px,4vw,34px);font-weight:1000;letter-spacing:.04em}.shopStatus.open{color:#4f8c65}.shopStatus.closed{color:#c45b55}.sign{cursor:pointer;font-size:clamp(9px,1.65vw,18px)}
-@media(max-width:780px){.sign{cursor:pointer;font-size:clamp(8px,1.9vw,13px);padding:5px 6px}.shopStatus{font-size:clamp(17px,6vw,27px)}}
-.sign{font:inherit;text-align:left;color:inherit;appearance:none;-webkit-appearance:none}
 
-/* ===== V36 FULL SETTINGS ===== */
-.settingsSectionTitle{font-size:18px;font-weight:1000;margin:18px 2px 8px;color:#4b3428}
-.settingsInfoCard{padding:15px 16px;border:2px solid #ead9ca;border-radius:20px;background:#fff7ed;margin-bottom:10px}
-.settingsInfoCard b{font-size:18px}.settingsInfoCard .mini{margin-top:5px}
-.settingsAction{width:100%;display:flex;align-items:center;gap:14px;text-align:left;padding:15px 16px;border:2px solid #ead9ca;border-radius:18px;background:#fffaf3;color:#4b3428;margin:8px 0;font:inherit;cursor:pointer}
-.settingsAction:active{transform:scale(.99)}
-.settingsAction .settingIcon{font-size:30px;width:40px;text-align:center;flex:0 0 40px}
-.settingsAction .settingText{min-width:0;flex:1}.settingsAction .settingText b{display:block;font-size:17px}.settingsAction .settingText span{display:block;font-size:13px;color:#8d7465;margin-top:3px}
-.settingsAction .settingValue{font-weight:900;color:#8d5b4a;white-space:nowrap}
-.settingsAction.good{background:#e6f8ef;border-color:#61b98b}
-.settingsAction.warn{background:#fff4e8}
-.settingsSelect{width:100%;padding:12px 14px;border:2px solid #ead9ca;border-radius:14px;background:#fff;color:#4b3428;font:inherit;font-weight:800}
-.settingsDivider{height:1px;background:#ead9ca;margin:14px 0}
-.backupCode{width:100%;min-height:110px;resize:vertical;padding:12px;border:2px solid #ead9ca;border-radius:14px;background:#fff;font:13px monospace;color:#4b3428;box-sizing:border-box}
-.settingsDanger{border-color:#e7a1a1!important;background:#fff1f1!important;color:#9d3434!important}
-.settingsLinkInput{width:100%;padding:12px;border:2px solid #ead9ca;border-radius:14px;box-sizing:border-box;font:inherit}
-@media(max-width:600px){
- .settingsAction{padding:14px 12px}.settingsAction .settingValue{font-size:14px}
- .settingsSectionTitle{font-size:17px}.settingsCard{max-height:calc(100vh - 78px);overflow:auto}
-}
-
-body.nightTheme{background:#161b22;color:#f6eee5}
-body.nightTheme .card,body.nightTheme .settingsCard,body.nightTheme .settingsInfoCard,body.nightTheme .settingsAction,body.nightTheme .musicBox{background:#242a33;color:#f6eee5;border-color:#4a5565}
-body.nightTheme .muted,body.nightTheme .mini,body.nightTheme .settingMain .mini,body.nightTheme .settingsAction .settingText span{color:#cbbcaf}
-body.nightTheme .settingsFab,body.nightTheme .settingsClose{background:#242a33;color:#fff;border-color:#4a5565}
-body.nightTheme .settingsSelect,body.nightTheme .backupCode,body.nightTheme .settingsLinkInput{background:#1b2028;color:#fff;border-color:#4a5565}
-
-/* V30 image safety: never stretch/crop catalog assets */
-.assetImg,.customerImg,.inlineIcon,.menuItem img,.snackChoice img,.choice img{object-fit:contain!important;object-position:center!important;max-width:100%;}
-.scene{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;}
-.sign img,.top .logo img{object-fit:contain!important;}
-</style><style>
-.assetImg{width:64px;height:64px;object-fit:contain;object-position:center;display:block;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:64px;height:64px;float:right;margin-left:8px}.snackChoice .assetImg,.choice .assetImg{width:42px;height:42px;object-fit:contain;object-position:center;vertical-align:middle}.customerImg{width:112px;height:112px;object-fit:contain;object-position:center;display:block;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/shop/background_main.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
-.inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style><!-- Tiệm Trà Xinh V19 favicon -->
-<link rel="icon" type="image/png" sizes="512x512" href="assets/icons/favicon-512.png?v=21">
-<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/favicon-192.png?v=22">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96.png?v=21">
-<link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48.png?v=21">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=21">
-<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png?v=21">
-<link rel="apple-touch-icon" sizes="192x192" href="assets/icons/favicon-192.png?v=22">
-<link rel="manifest" href="assets/icons/site.webmanifest?v=22">
-
-<style>
-/* V25 settings + chill music */
-.settingsFab{
-  position:fixed;right:14px;top:14px;z-index:9000;
-  width:48px;height:48px;border-radius:16px;border:2px solid #ead9ca;
-  background:#fff8ee;color:#4b3428;box-shadow:0 8px 22px #2f241d22;
-  font-size:24px;display:grid;place-items:center;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
-}
-.settingsFab:active{transform:scale(.96)}
-.settingsModal{
-  position:fixed;inset:0;background:#2f241dcc;display:none;align-items:flex-start;
-  justify-content:center;padding:72px 14px 24px;z-index:10000;overflow:auto;
-  -webkit-overflow-scrolling:touch;
-}
-.settingsModal.show{display:flex}
-.settingsCard{
-  width:min(620px,100%);background:#fffdf9;border:2px solid #ead9ca;
-  border-radius:28px;padding:18px;box-shadow:0 20px 60px #2f241d55;
-}
-.settingsHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.settingsHead h2{margin:0;font-size:25px}
-.settingsClose{width:44px;height:44px;border-radius:14px;border:2px solid #ead9ca;background:#fff7ed;font-size:22px}
-.settingRow{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:15px 4px;border-bottom:1px solid #ead9ca;
-}
-.settingRow:last-child{border-bottom:0}
-.settingMain{min-width:0;flex:1}.settingMain b{display:block;font-size:17px}.settingMain .mini{margin-top:3px}
-.settingToggle{
-  min-width:78px;border:0;border-radius:14px;padding:10px 12px;font:inherit;font-weight:900;
-  background:#ead9ca;color:#5d4638;touch-action:manipulation;
-}
-.settingToggle.on{background:#cfeedd;color:#28734a}
-.musicBox{
-  margin-top:14px;padding:15px;border:2px solid #ead9ca;border-radius:20px;background:#fff7ed;
-}
-.musicTitle{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:1000}
-.musicControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
-.musicControls .btn{touch-action:manipulation}
-.musicRange{width:100%;accent-color:#c84d6c}
-.musicList{display:grid;gap:8px;margin-top:12px}
-.musicItem{
-  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;
-  background:#fff;border:1px solid #ead9ca;
-}
-.musicItemName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.musicItem.active{border-color:#5eb78a;background:#effbf4}
-.musicItem button{touch-action:manipulation}
-.musicEmpty{padding:12px;text-align:center;color:#90796b}
-.musicFile{display:none}
-@media(max-width:600px){
- .settingsFab{top:10px;right:10px;width:44px;height:44px;border-radius:14px}
- .settingsModal{padding:62px 8px 18px}
- .settingsCard{border-radius:22px;padding:14px}
- .settingRow{align-items:flex-start}
- .settingMain b{font-size:16px}
-}
-
-
-.ratingHero{margin:12px 0 16px;padding:18px;border:2px solid #ead9ca;border-radius:22px;background:#fff7ed;text-align:center}
-.ratingBig{display:flex;align-items:baseline;justify-content:center;gap:6px;color:#3e3028}.ratingBig b{font-size:44px}.ratingStars{font-size:30px;letter-spacing:3px;color:#e4a52f;margin:2px 0 4px}
-.reviewList{display:grid;gap:12px}.reviewCard{border:2px solid #ead9ca;border-radius:20px;background:#fffdf9;padding:14px}.reviewHead{display:flex;align-items:center;gap:10px}.reviewAvatar{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid #ead9ca;background:#fff7ed}.reviewMeta{min-width:0;flex:1}.reviewName{font-weight:1000;font-size:17px}.reviewDate{font-size:12px;color:#90796b}.reviewStars{color:#e4a52f;font-size:19px;white-space:nowrap}.reviewText{margin:10px 0;font-size:16px;line-height:1.45}.reviewText.negative{color:#7b4d3e}.shopReply{margin-top:10px;padding:11px 13px;border-radius:15px;background:#eff8f1;border-left:4px solid #65ad7f}.shopReply b{display:block;margin-bottom:3px}.replyBtn{margin-top:8px}
-.emptyState{padding:24px;text-align:center;color:#90796b;border:2px dashed #ead9ca;border-radius:18px;margin-bottom:14px}
-@media(max-width:600px){.reviewCard{padding:12px}.reviewStars{font-size:17px}.ratingBig b{font-size:38px}}
-</style>
-<style>
-/* V30 — cohesive hand-drawn asset alignment */
-img.gameAsset,img.drinkImg,img.snackImg,.menuItem img,.inventoryItem img,.customerAvatar,.reviewAvatar,.staffAvatar{
-  object-fit:contain!important; object-position:center!important; display:block; flex:0 0 auto;
-  max-width:100%; max-height:100%;
-}
-.menuItem{min-height:96px!important;overflow:hidden!important;}
-.menuItem img{width:68px!important;height:68px!important;position:absolute;right:12px;top:50%;transform:translateY(-50%);}
-.drink-card img,.snack-card img{width:92px!important;height:92px!important;object-fit:contain!important;}
-.customerAvatar,.reviewAvatar{width:52px!important;height:52px!important;border-radius:50%;}
-img[src*="assets/shop/"]{object-fit:contain!important;}
-/* Prevent generated art from stretching in cards */
-.card img,.item img,.upgrade img,.ingredient img,.topping img,.snack img{object-fit:contain!important;}
-@media(max-width:700px){
- .menuItem{padding-right:92px!important;min-height:88px!important;}
- .menuItem img{width:62px!important;height:62px!important;right:10px!important;}
- .drink-card img,.snack-card img{width:78px!important;height:78px!important;}
-}
-</style>
-<meta name="version" content="V30"><meta name="viewport-fit" content="cover">
-
-<style id="v31-image-safety">
-.assetImg,.customerImg,.inlineIcon,.menuItem img,.snackChoice img,.choice img,.drink-card img,.snack-card img,.customerAvatar,.reviewAvatar,.staffAvatar,.gameAsset,.drinkImg,.snackImg{object-fit:contain!important;object-position:center!important;display:block;max-width:100%;}
-.menuItem img{width:64px;height:64px;float:right;}
-.choice img,.snackChoice img{width:42px;height:42px;}
-.scene{background-repeat:no-repeat;background-color:#f4dfc4;}
-@media(max-width:780px){.scene{background-size:auto 100%;background-position:center top;}.sign{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.window{right:4%;}}
-</style>
-
-<style id="v32-image-layout-fix">
-/* ===== V32: FIX ẢNH + GIAO DIỆN MOBILE ===== */
-img {
-  box-sizing:border-box !important;
-  max-width:100% !important;
-  height:auto;
-  object-fit:contain !important;
-  object-position:center center !important;
-  display:block;
-}
-
-/* Header / bảng hiệu: icon nhỏ, không bị phóng đại */
-.sign {
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:7px !important;
-  min-height:52px !important;
-  height:auto !important;
-  overflow:hidden !important;
-  line-height:1.15 !important;
-  white-space:nowrap !important;
-}
-.sign .inlineIcon,
-.sign img {
-  width:30px !important;
-  height:30px !important;
-  min-width:30px !important;
-  max-width:30px !important;
-  flex:0 0 30px !important;
-  object-fit:contain !important;
-  object-position:center !important;
-  margin:0 !important;
-}
-.sign #signShopName {
-  min-width:0 !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-  white-space:nowrap !important;
-  flex:1 1 auto !important;
-  text-align:left !important;
-}
-
-/* Trạng thái OPEN/CLOSE không đè sang bảng hiệu */
-.window {
-  overflow:hidden !important;
-  z-index:3 !important;
-}
-.window b {
-  max-width:100% !important;
-  box-sizing:border-box !important;
-  white-space:nowrap !important;
-}
-
-/* Khu quản lý ngày: nút không bị ảnh/element phía sau chồng lên */
-.prepNotice {
-  position:relative !important;
-  overflow:hidden !important;
-  isolation:isolate !important;
-  align-items:stretch !important;
-}
-.prepNotice > div:first-child {
-  min-width:0 !important;
-  flex:1 1 auto !important;
-}
-.prepNotice > .btn {
-  position:relative !important;
-  z-index:2 !important;
-  flex:0 1 235px !important;
-  width:auto !important;
-  min-width:180px !important;
-  max-width:42% !important;
-  min-height:72px !important;
-  overflow:hidden !important;
-  white-space:normal !important;
-  line-height:1.15 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  text-align:center !important;
-}
-
-/* Không cho ảnh của card/menu tràn ra ngoài card */
-.card, .item, .menuItem, .upgrade, .ingredientCard, .snackItem,
-.menuEditItem, .review, .settingsInfoCard {
-  overflow:hidden !important;
-}
-.menuItem img, .snackChoice img, .choice img,
-.assetImg, .menuEditItem img, .ingredientCard img,
-.snackItem img {
-  width:54px !important;
-  height:54px !important;
-  max-width:54px !important;
-  max-height:54px !important;
-  object-fit:contain !important;
-  object-position:center !important;
-  flex:0 0 54px !important;
-}
-
-/* Không cho ảnh trang trí/background làm vỡ layout */
-.scene {
-  overflow:hidden !important;
-  background-size:cover !important;
-  background-position:center center !important;
-}
-.scene .inlineIcon { flex:none !important; }
-
-/* Mobile */
-@media (max-width:780px) {
-  .app { padding:7px 8px 30px !important; }
-  .scene {
-    height:132px !important;
-    border-radius:20px !important;
-  }
-  .sign {
-    left:4% !important;
-    top:45px !important;
-    width:58% !important;
-    min-height:52px !important;
-    padding:6px 8px !important;
-    font-size:clamp(11px,3.4vw,16px) !important;
-  }
-  .sign .inlineIcon, .sign img {
-    width:28px !important;
-    height:28px !important;
-    min-width:28px !important;
-    max-width:28px !important;
-    flex-basis:28px !important;
-  }
-  .window {
-    right:4% !important;
-    bottom:14px !important;
-    width:34% !important;
-    min-width:110px !important;
-    height:62px !important;
-    border-width:4px !important;
-  }
-  .window b {
-    width:100% !important;
-    padding:7px 4px !important;
-    font-size:clamp(18px,6vw,29px) !important;
-  }
-  .prepNotice {
-    flex-direction:column !important;
-    align-items:stretch !important;
-  }
-  .prepNotice > .btn {
-    width:100% !important;
-    max-width:none !important;
-    min-width:0 !important;
-    min-height:62px !important;
-  }
-  .menuItem img, .snackChoice img, .choice img,
-  .assetImg, .menuEditItem img, .ingredientCard img,
-  .snackItem img {
-    width:48px !important;
-    height:48px !important;
-    max-width:48px !important;
-    max-height:48px !important;
-    flex-basis:48px !important;
-  }
-}
-
-/* iPhone portrait: prevent horizontal overflow */
-@media (max-width:430px) {
-  html, body { overflow-x:hidden !important; }
-  .top { gap:6px !important; padding:8px !important; }
-  .logo { font-size:18px !important; }
-  .topRight { min-width:0 !important; }
-  .stats { flex-wrap:wrap !important; justify-content:flex-end !important; }
-  .sign { width:60% !important; }
-  .window { width:32% !important; min-width:108px !important; }
-}
-</style>
-
-
-<style id="v33-review-dialogue">
-.customerFollowup{
-  margin-top:10px;padding:11px 13px;border-radius:15px;
-  background:#fff5e9;border-left:4px solid #d99a58;
-  line-height:1.45;
-}
-.customerFollowup b{display:block;margin-bottom:4px;color:#604638}
-</style>
-
-<style id="v34-cardgame">
-.cardGameEntry{margin:14px 0}
-.gambleWarning{padding:15px;border:2px solid #e2a86b;border-radius:18px;background:#fff5e6;color:#5b4032;line-height:1.5}
-.gambleWarning p{margin:7px 0 0}
-.gameMoney{display:flex;justify-content:space-between;align-items:center;margin:14px 0;padding:14px 16px;border-radius:18px;background:#eef6ef;border:2px solid #d8e7d9}
-.gameMoney b{font-size:24px;color:#b34c67}
-.samlokPanel{padding:16px;border:2px solid #ead9ca;border-radius:20px;background:#fffdf9}
-.betRow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.betRow .btn{flex:1 1 70px}
-.selectedBet{text-align:center;margin:10px 0;color:#725849}
-.samlokHand{min-height:105px;padding:18px;border-radius:18px;background:#f4eee4;text-align:center;font-size:25px;letter-spacing:4px;display:flex;align-items:center;justify-content:center}
-.gameResult{min-height:52px;margin:12px 0;padding:12px;border-radius:14px;background:#fff5e9;text-align:center;font-weight:800;line-height:1.4}
-@media(max-width:600px){
-  .betRow{display:grid;grid-template-columns:1fr 1fr}
-  .betRow .btn{width:100%}
-  .samlokHand{font-size:20px}
-}
-</style>
-
-<style id="v35-five-minute-day">
-#clock{font-variant-numeric:tabular-nums;font-weight:900}
-.shopDayProgress{height:9px;border-radius:999px;background:#ead9ca;overflow:hidden;margin:5px 0 10px}
-.shopDayProgress i{display:block;height:100%;width:0%;background:#d88b5c;transition:width .8s linear}
-</style>
-<style id="v39-employee-demand">
-.wageTag{display:inline-block;padding:3px 8px;border-radius:999px;background:#fff0d9;color:#8a5b2d;font-weight:900}
-.staffPayWarning{margin:8px 0;padding:10px 12px;border-radius:12px;background:#fff0f0;border:1px solid #efb0b0;color:#8f3131}
-</style>
-</head>
-<body>
-<div class="app"><button class="settingsFab" type="button" onclick="openSettings()" aria-label="Cài đặt" title="Cài đặt">⚙️</button>
-<header class="top"><div class="logo"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> Tiệm Trà Xinh</div><div class="topRight"><div class="stats"><span class="pill" id="day">Ngày 1</span><span class="pill">💰 <b id="cash">300k</b></span><span class="pill">⭐ <b id="rating">0.0</b></span><span class="pill">🏆 Lv.<b id="level">1</b></span></div><div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div></div></header>
-<div class="scene"><div class="awning"></div><button class="sign" type="button" onclick="openRenameModal()" title="Đổi tên quán"><img class="inlineIcon" src="assets/drinks/tra_sua_truyen_thong.png" alt="Tiệm Trà"> <span id="signShopName">TIỆM TRÀ XINH</span></button><div class="window"><b id="signStatus">CLOSE</b></div><div class="plant">🌿</div></div>
-
-<section id="home" class="screen active">
- <div class="card hero"><div style="font-size:70px">🧋</div><h1 id="homeShopName">Tiệm Trà Xinh</h1><p class="muted">Quản lý • Pha chế • Mở rộng • Trở thành chủ tiệm</p>
- <div class="row center" style="justify-content:center"><button class="btn primary" onclick="newGame()">Chơi mới</button><button class="btn secondary" onclick="continueGame()">Tiếp tục</button></div>
- <p class="mini">Tiến trình được lưu tự động trên thiết bị này.</p></div>
- <div class="grid" style="margin-top:14px"><div class="card"><div class="sectionTitle"><h3>🎯 Mục tiêu</h3></div><p>Phục vụ chính xác, kiếm lời, mở khóa menu và nâng cấp tiệm.</p><div class="progress"><i id="xpHome" style="width:0%"></i></div><p class="mini">Kinh nghiệm tích lũy để lên cấp.</p></div>
- <div class="card"><h3>📖 Luật chơi</h3><p>Đầu ngày nhập hàng → mở cửa → nhận đơn → pha đúng → tổng kết → nâng cấp.</p><button class="btn danger" onclick="wipe()">Xóa toàn bộ dữ liệu</button></div></div>
-</section>
-
-<section id="prep" class="screen">
- <div class="card">
-  <div class="sectionTitle"><h2>🌤️ Chuẩn bị ngày <span id="prepDay">1</span></h2><span class="tag">☀️ 09:00</span></div>
-  <div class="prepNotice">
-   <div><b>🛠️ Quản lý tiệm</b><div class="mini">Công thức, nguyên liệu, cỡ ly, topping, đồ ăn vặt và các nâng cấp đều được quản lý trong tab <b>Nâng cấp</b>.</div></div>
-   <button class="btn gold" onclick="show('manage');manageTab('up')">🛠️ Nâng cấp & nhập hàng</button>
-  </div>
-  <div class="grid">
-   <div><h3>📦 Tình trạng kho</h3><div id="inventory" class="inventory"></div><div id="ingredientInventory"></div><div id="snackInventory"></div></div>
-   <div><h3>📋 Menu hôm nay</h3><div id="menu" class="menuGrid"></div><div style="height:10px"></div><button class="btn primary wide" onclick="openShop()">Mở cửa tiệm →</button></div>
-  </div>
- </div>
- <div class="grid" style="margin-top:14px"><div class="card"><h3>🧾 Mục tiêu ngày</h3><div id="dailyQuest"></div></div><div class="card"><h3>💡 Kinh nghiệm</h3><p class="muted">Mọi thao tác mua hàng và mở khóa đều gom vào <b>Nâng cấp</b> để màn hình chuẩn bị gọn hơn.</p><p class="muted">Khách có thể rời đi nếu chờ quá lâu.</p></div></div>
- <div class="card" style="margin-top:14px"><div class="sectionTitle"><div><h3>⭐ Đánh giá khách hàng</h3><div class="mini">Xem lời khen, lời chê và phản hồi của quán.</div></div><span class="tag" id="prepReviewCount">0</span></div><button class="btn gold wide" onclick="openReviews()">⭐ Xem đánh giá & phản hồi</button></div>
-</section>
-
-
-<section id="cardgame" class="screen">
-  <div class="card">
-    <div class="sectionTitle">
-      <div>
-        <h2>🃏 Sâm Lốc — Chơi vui trong game</h2>
-        <div class="mini">Tiền cược chỉ là tiền ảo của trò chơi, không đổi ra tiền thật.</div>
-      </div>
-      <span class="tag">Giải trí</span>
-    </div>
-
-    <div class="gambleWarning">
-      ⚠️ <b>Cảnh báo trước khi chơi</b>
-      <p>Đây là trò chơi mô phỏng bằng <b>tiền ảo</b>. Không nạp, rút hoặc quy đổi tiền thật. 
-      Trong game, việc chơi ăn tiền có thể bị cơ chế <b>công an kiểm tra</b>; nếu bị bắt, tiền ảo sẽ bị tịch thu và tiến trình sẽ bị đưa về trạng thái bắt đầu lại với <b>1.000k</b>.</p>
-    </div>
-
-    <div class="gameMoney">
-      <span>💰 Tiền hiện có</span><b id="cardGameCash">0k</b>
-    </div>
-
-    <div class="samlokPanel">
-      <div class="mini">Mức cược</div>
-      <div class="betRow">
-        <button class="btn secondary" onclick="setCardBet(20)">20k</button>
-        <button class="btn secondary" onclick="setCardBet(50)">50k</button>
-        <button class="btn secondary" onclick="setCardBet(100)">100k</button>
-        <button class="btn secondary" onclick="setCardBet(200)">200k</button>
-      </div>
-      <div class="selectedBet">Cược: <b id="cardBet">20k</b></div>
-
-      <div class="samlokHand" id="samlokHand">🂠 Chưa chia bài</div>
-      <div class="gameResult" id="cardGameResult">Chọn mức cược rồi bắt đầu.</div>
-
-      <div class="betRow">
-        <button class="btn gold wide" onclick="playSamLoc()">🃏 Đánh Sâm Lốc</button>
-      </div>
-      <div class="mini">Kết quả được mô phỏng ngẫu nhiên; đây là tính năng giải trí trong game.</div>
-    </div>
-  </div>
-</section>
-<div class="cardGameEntry"><button class="btn secondary wide" onclick="openCardGame()">🃏 Sâm Lốc — Chơi vui bằng tiền ảo</button></div><section id="reviews" class="screen">
- <div class="card">
-  <div class="sectionTitle">
-   <div><h2>⭐ Đánh giá khách hàng</h2><div class="mini">Khách có thể khen, góp ý hoặc chê tùy trải nghiệm thực tế.</div></div>
-   <span class="tag" id="reviewSummary">0 đánh giá</span>
-  </div>
-  <div class="ratingHero">
-   <div class="ratingBig"><b id="reviewAvg">0.0</b><span>⭐ / 5</span></div>
-   <div class="ratingStars" id="reviewStars">☆☆☆☆☆</div>
-   <div class="mini">Điểm đánh giá ảnh hưởng đến lượng khách và điều kiện mở bán online.</div>
-  </div>
-  <div id="reviewList" class="reviewList"></div>
-  <div id="reviewEmpty" class="emptyState">Chưa có đánh giá. Hãy mở cửa và phục vụ khách để nhận phản hồi.</div>
-  <button class="btn secondary wide" onclick="show('prep')">← Về chuẩn bị</button>
- </div>
-</section>
-
-<section id="shop" class="screen">
- <div class="card"><div class="sectionTitle"><h2>🕐 Quầy pha chế</h2><span class="tag" id="clock">09:00</span><div class="shopDayProgress"><i id="shopDayProgress"></i></div></div><div id="customerStage" class="customerStage"></div><div id="orders" class="orders"></div></div>
- <div class="grid" style="margin-top:14px"><div class="card"><h3>🧋 Pha đơn hàng</h3><div id="selected"></div>
-  <div><b>1. Chọn cỡ ly</b><div id="sizes" class="choices"></div></div>
-  <div style="margin-top:10px"><b>2. Chọn nước</b><div id="teas" class="choices"></div></div>
-  <div style="margin-top:10px"><b>3. Rót nước</b><div class="pourBox"><div class="cup"><div id="liquid" class="liquid"></div><div class="target"></div></div><button id="pourBtn" class="primary pourBtn">GIỮ ĐỂ RÓT</button></div><div id="meter" class="meter">Mục tiêu: 66%</div></div>
-  <div style="margin-top:8px"><b>4. Topping</b><div id="toppings" class="choices"></div></div>
-  <div style="margin-top:8px"><b>5. Đường</b><div id="sweet" class="choices"></div></div>
-  <div style="margin-top:8px"><b>6. Đá</b><div id="ice" class="choices"></div></div>
-  <div class="snackBox"><b>🍢 7. Đồ ăn vặt</b><div id="snacks" class="snackChoices"></div><div id="snackHint" class="mini" style="margin-top:5px"></div></div>
-  <div class="row" style="margin-top:12px"><button class="btn primary" onclick="serve()">🧢 Dán nắp & giao</button><button class="btn secondary" onclick="resetCup()">Đổ ly</button></div>
- </div>
- <div class="card"><h3>📦 Kho</h3><div id="stock"></div><hr><h3>📊 Ca làm</h3><div class="statGrid"><div class="statBox"><b id="served">0</b>Đúng</div><div class="statBox"><b id="wrong">0</b>Sai</div><div class="statBox"><b id="left">0</b>Bỏ đi</div><div class="statBox"><b id="todayEarn">0k</b>Thu</div></div><hr><button class="btn danger wide" onclick="closeShopEarly()">Đóng cửa sớm</button></div></div>
-</section>
-
-<section id="summary" class="screen"><div class="card hero"><h2>🌙 Tổng kết ngày <span id="sumDay">1</span></h2><div class="bigMoney" id="profit">+0k</div><p id="sumLine" class="muted"></p><div id="summaryStats" class="statGrid"></div><div style="height:12px"></div><button class="btn gold" onclick="claimDaily()">🎁 Nhận thưởng ngày</button> <button class="btn primary" onclick="nextDay()">Ngày tiếp theo →</button></div>
- <div class="grid" style="margin-top:14px"><div class="card"><h3>📈 Sổ sách</h3><div id="ledger"></div></div><div class="card"><h3>🏆 Thành tựu</h3><div id="achievements"></div></div></div>
-</section>
-
-<section id="manage" class="screen">
- <div class="card">
-  <div class="tabs" style="overflow-x:auto"><button id="tabUp" class="tab on" onclick="manageTab('up')">🛠️ Nâng cấp</button><button id="tabMenu" class="tab" onclick="manageTab('menu')">📋 Sửa menu</button><button id="tabStaff" class="tab" onclick="manageTab('staff')">👨‍🍳 Nhân viên</button><button id="tabOnline" class="tab" onclick="manageTab('online')">🚚 Online</button><button id="tabQuest" class="tab" onclick="manageTab('quest')">🎯 Nhiệm vụ</button></div>
-  <div id="manageBody"></div>
-  <button class="btn secondary" onclick="show('prep')">← Về chuẩn bị</button>
- </div>
-</section>
-
-<section id="gameover" class="screen"><div class="card hero"><div style="font-size:70px">🏆</div><h1>Tiệm đã thành công!</h1><p id="endText"></p><button class="btn primary" onclick="newGame()">Chơi lại từ đầu</button></div></section>
-<div class="footer">Tiệm Trà Xinh — game HTML5 độc lập</div>
-</div>
-<div id="toast" class="toast"></div>
-
-<div id="settingsModal" class="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
- <div class="settingsCard">
-  <div class="settingsHead">
-   <h2 id="settingsTitle">⚙️ Cài đặt</h2>
-   <button class="settingsClose" type="button" onclick="closeSettings()" aria-label="Đóng">✕</button>
-  </div>
-
-  <div class="settingsInfoCard">
-   <b>⚙️ Cài đặt Tiệm Trà Xinh</b>
-   <div class="mini">Tùy chỉnh trải nghiệm chơi, âm thanh, nhạc nền, giao diện và dữ liệu trò chơi.</div>
-  </div>
-
-  <div class="settingsSectionTitle">📖 Trợ giúp & thông tin</div>
-  <button class="settingsAction" type="button" onclick="showGuide()">
-   <span class="settingIcon">📖</span><span class="settingText"><b>Hướng dẫn</b><span>Hướng dẫn cách chơi từ đầu đến mở rộng quán</span></span><span class="settingValue">Xem</span>
-  </button>
-  <button class="settingsAction" type="button" onclick="showWhatsNew()">
-   <span class="settingIcon">🎁</span><span class="settingText"><b>Có gì mới</b><span>Thông tin cập nhật phiên bản hiện tại</span></span><span class="settingValue">V36</span>
-  </button>
-  <button class="settingsAction good" type="button" onclick="location.reload(true)">
-   <span class="settingIcon">🔄</span><span class="settingText"><b>Cập nhật bản mới</b><span>Tải lại web để nhận phiên bản mới nhất</span></span><span class="settingValue">Tải lại</span>
-  </button>
-  <button class="settingsAction" type="button" onclick="openZaloSettings()">
-   <span class="settingIcon">💬</span><span class="settingText"><b>Nhóm Zalo Trà Thủ</b><span>Thêm liên kết nhóm Zalo của bạn</span></span><span class="settingValue">Thiết lập</span>
-  </button>
-  <button class="settingsAction" type="button" onclick="toggleGuideMode()">
-   <span class="settingIcon">📖</span><span class="settingText"><b>Chỉ dẫn từng bước</b><span>Hiển thị gợi ý khi bắt đầu các phần chơi</span></span><span class="settingValue" id="guideModeValue">Tự động</span>
-  </button>
-
-  <div class="settingsSectionTitle">🎮 Trải nghiệm</div>
-  <div class="settingRow">
-   <div class="settingMain"><b>⏱️ Thời gian bán mỗi ngày</b><div class="mini">Chọn tốc độ thời gian hiển thị trong ngày.</div></div>
-   <select id="dayTimeSetting" class="settingsSelect" style="max-width:150px" onchange="setDayTime(this.value)">
-    <option value="5">5 phút</option>
-   </select>
-  </div>
-  <div class="settingRow">
-   <div class="settingMain"><b>🎨 Màu giao diện</b><div class="mini">Đổi giữa giao diện kem sữa và đêm chill.</div></div>
-   <select id="themeSetting" class="settingsSelect" style="max-width:150px" onchange="setTheme(this.value)">
-    <option value="cream">Kem sữa</option><option value="night">Đêm chill</option>
-   </select>
-  </div>
-  <div class="settingRow">
-   <div class="settingMain"><b>🌙 Nhạc Lo-Fi Quán Cafe</b><div class="mini">Nhạc nền nhẹ nhàng khi quản lý quán.</div></div>
-   <button id="musicToggle" class="settingToggle on" type="button" onclick="toggleMusicSetting()">Bật</button>
-  </div>
-  <div class="musicBox">
-   <div class="musicTitle">🎧 Nhạc chill của bạn</div>
-   <div class="mini" style="margin-top:5px">Thêm MP3, M4A, WAV hoặc OGG. File được lưu riêng trên thiết bị bằng IndexedDB.</div>
-   <input id="musicFileInput" class="musicFile" type="file" accept="audio/*" multiple onchange="addMusicFiles(this.files)">
-   <div class="musicControls">
-    <button class="btn primary" type="button" onclick="document.getElementById('musicFileInput').click()">➕ Thêm nhạc</button>
-    <button class="btn secondary" type="button" onclick="musicPrev()">⏮️</button>
-    <button class="btn secondary" type="button" id="musicPlayBtn" onclick="toggleMusic()">▶️ Phát</button>
-    <button class="btn secondary" type="button" onclick="musicNext()">⏭️</button>
-   </div>
-   <div style="margin-top:10px"><div class="mini" id="musicNow">Chưa có bài nhạc</div><input id="musicVolume" class="musicRange" type="range" min="0" max="1" step="0.01" value="0.35" oninput="setMusicVolume(this.value)"></div>
-   <div id="musicList" class="musicList"></div>
-  </div>
-  <div class="settingRow">
-   <div class="settingMain"><b>🔊 Âm thanh (rót, múc...)</b><div class="mini">Bật/tắt âm thanh hiệu ứng trong game.</div></div>
-   <button id="sfxToggle" class="settingToggle on" type="button" onclick="toggleSfxSetting()">Bật</button>
-  </div>
-
-  <div class="settingsSectionTitle">💾 Dữ liệu trò chơi</div>
-  <button class="settingsAction" type="button" onclick="save();toast('💾 Đã lưu tiến trình')">
-   <span class="settingIcon">💾</span><span class="settingText"><b>Sao lưu tiến trình</b><span>Lưu ngay tiến trình hiện tại trên thiết bị</span></span><span class="settingValue">Lưu</span>
-  </button>
-  <button class="settingsAction" type="button" onclick="restoreAutoSave()">
-   <span class="settingIcon">📅</span><span class="settingText"><b>Khôi phục bản tự lưu</b><span>Game tự lưu sau các thao tác quan trọng</span></span><span class="settingValue">Khôi phục</span>
-  </button>
-  <button class="settingsAction" type="button" onclick="exportBackup()">
-   <span class="settingIcon">📦</span><span class="settingText"><b>Xuất bản sao lưu</b><span>Tải file JSON để cất giữ hoặc chuyển máy</span></span><span class="settingValue">Xuất</span>
-  </button>
-  <button class="settingsAction" type="button" onclick="document.getElementById('backupFile').click()">
-   <span class="settingIcon">📥</span><span class="settingText"><b>Khôi phục từ file</b><span>Nhập lại bản sao lưu JSON đã xuất</span></span><span class="settingValue">Nhập</span>
-  </button>
-  <input id="backupFile" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(this.files[0])">
-  <button class="settingsAction" type="button" onclick="restoreCodeDialog()">
-   <span class="settingIcon">🔑</span><span class="settingText"><b>Khôi phục từ mã</b><span>Dán mã sao lưu để phục hồi tiến trình</span></span><span class="settingValue">Nhập mã</span>
-  </button>
-
-  <div class="settingsSectionTitle">⚠️ Quản lý dữ liệu</div>
-  <button class="settingsAction settingsDanger" type="button" onclick="confirmDeleteAll()">
-   <span class="settingIcon">🗑️</span><span class="settingText"><b>Xóa toàn bộ dữ liệu</b><span>Xóa tiến trình, tiền, nâng cấp và lịch sử trên thiết bị</span></span><span class="settingValue">Xóa</span>
-  </button>
-
-  <div class="settingsDivider"></div>
-  <div class="mini" style="text-align:center">Tiệm Trà Xinh V39 · HTML5 · Dữ liệu trò chơi lưu trên thiết bị</div>
-  <button class="btn secondary wide" style="margin-top:12px" type="button" onclick="closeSettings()">Đóng cài đặt</button>
- </div>
-</div>
-<div id="nameModal" class="nameModal" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
- <div class="modalCard">
-  <div style="font-size:64px">🧋</div>
-  <h2 id="nameTitle">Đổi tên quán</h2>
-  <p id="nameDesc">Tên quán mặc định là <b>Tiệm Trà Xinh</b>. Đổi tên trên bảng hiệu sẽ mất <b>50k</b>.</p>
-  <input id="shopNameInput" class="nameInput" maxlength="24" autocomplete="off" placeholder="Ví dụ: Tiệm Trà Nhà Hiếu">
-  <div class="modalActions"><button class="btn secondary" onclick="closeNameModal()">Hủy</button><button class="btn primary" onclick="confirmShopName()">Đổi tên · 50k</button></div>
- </div>
-</div>
-
-<script>
 function imgIcon(src,alt=""){return `<img class="inlineIcon" src="${src}" alt="${alt}" draggable="false">`}
 const ICONS={"🥤":"assets/drinks/tra_sua_truyen_thong.png","🧋":"assets/drinks/tra_sua_truyen_thong.png","🍵":"assets/drinks/tra_sua_matcha.png","🫖":"assets/drinks/tra_sua_o_long.png","🍑":"assets/drinks/tra_dao.png","🍋":"assets/drinks/tra_chanh.png","🍊":"assets/drinks/tra_vai.png","🍓":"assets/drinks/tra_dau.png","🍫":"assets/drinks/tra_sua_socola.png","🥭":"assets/drinks/tra_xoai.png","🍠":"assets/drinks/tra_sua_khoai_mon.png","🍯":"assets/ingredients/trai_cay.png","🥛":"assets/ingredients/sua_tuoi.png","☕":"assets/drinks/tra_sua_den.png","🥫":"assets/ingredients/sua_dac.png","🧀":"assets/toppings/kem_cheese.png","🍮":"assets/toppings/pudding.png","🥥":"assets/toppings/thach_dua.png","🍡":"assets/toppings/thach_trai_cay.png","🍪":"assets/snacks/banh_trang_tron.png","🍟":"assets/snacks/khoai_tay_lac.png","🌭":"assets/snacks/xuc_xich_nuong_da.png","🥓":"assets/snacks/lap_xuong_nuong_da.png","🍢":"assets/snacks/ca_vien_chien.png","🥟":"assets/snacks/nem_chua_ran.png","🧪":"assets/ingredients/tra_den.png","🏆":"assets/ui_new/achievements.png","⚙️":"assets/ui_new/settings.png","🛒":"assets/ui_new/shop.png","📋":"assets/ui_new/quests.png","💾":"assets/ui_new/save.png","▶️":"assets/ui_new/start.png","✨":"assets/effects_new/sparkle.png","🌿":"assets/decor/decor_catalog.png","💖":"assets/effects_new/heart.png","⚫":"assets/ingredients_new/black_pearls.png","⚪":"assets/ingredients_new/white_pearls.png","🟢":"assets/ingredients_new/strawberry.png","🟡":"assets/ingredients_new/pudding.png","🫘":"assets/ingredients_new/red_pearls.png","🌰":"assets/ingredients_new/black_pearls.png","🍦":"assets/ingredients_new/pudding.png","🍇":"assets/ingredients_new/red_pearls.png","🥢":"assets/snacks_new/croissant.png","🧈":"assets/snacks_new/egg_ball.png"};
 function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
@@ -866,7 +272,7 @@ const CUSTOMERS=[
 const DEFAULT={
  shopName:"Tiệm Trà Xinh",renameUsed:false,
  shopOpen:false,
- day:1,cash:500,rating:0,xp:0,level:1,
+ day:1,cash:500,rating:3.2,xp:0,level:1,
  stock:{cups:{S:8,M:8,L:6,XL:3,XXL:1},ingredients:{"Trà đen":10},toppings:{"Trân châu đen":8,"Thạch trái cây":8},snacks:Object.fromEntries(Object.keys(SNACKS).map(n=>[n,0]))},
  upgrades:{speed:0,quality:0,capacity:0,decor:0,special:0},
  unlockedTeas:["Truyền thống"],recipes:["Truyền thống"],menuDrinks:["Truyền thống"],menuSnacks:[],unlockedTops:["Trân châu đen","Thạch trái cây"],unlockedSizes:["S","M","L"],unlockedIngredients:["Trà đen"],unlockedSnacks:[],
@@ -916,9 +322,7 @@ function wipe(){
 }
 function startPrep(){renderPrep();show("prep")}
 
-function clampRating(n){return Math.max(0,Math.min(5,Number(n)||0))}
-function hasCustomerRatings(){return Array.isArray(S.reviews)&&S.reviews.length>0}
-function applyRatingChange(delta){if(!hasCustomerRatings())return;S.rating=clampRating((Number(S.rating)||0)+delta)}
+function clampRating(n){return Math.max(1,Math.min(5,Number(n)||1))}
 function stars(n){n=Math.round(n);return "★".repeat(n)+"☆".repeat(5-n)}
 function openReviews(){renderReviews();show("reviews")}
 function reviewAvatar(o){
@@ -1040,11 +444,11 @@ function replyToReview(id){
 
   if(mood==="rude"){
     r.customerMood="khó chịu";
-    applyRatingChange(-0.15);
+    S.rating=clampRating((Number(S.rating)||3.2)-0.15);
     toast("😕 Khách không vui với cách quán phản hồi · -0.15⭐");
   }else if(mood==="polite"){
     r.customerMood="vui";
-    applyRatingChange(0.05);
+    S.rating=clampRating((Number(S.rating)||3.2)+0.05);
     toast("😊 Khách hài lòng vì quán phản hồi lịch sự · +0.05⭐");
   }else{
     r.customerMood="bình thường";
@@ -1161,7 +565,7 @@ function finishCurrentCustomerIfNeeded(){
     o.leftEarly=true;
     S.stats.left++;
     S.today.left++;
-    applyRatingChange(-0.12);
+    S.rating=Math.max(1,S.rating-.12);
     toast("😤 Khách chuẩn bị về! Khách tiếp theo đang tới...");
     fx("💨");
     scheduleNextCustomer(false);
@@ -1227,9 +631,9 @@ function chooseSnack(v){cup.snack=v;renderControls()}
 function resetCup(){cup={size:null,tea:null,pour:0,top:null,sweet:null,ice:null,snack:null};renderControls()}
 const pb=document.getElementById("pourBtn");function startPour(e){if(e){e.preventDefault();e.stopPropagation()}if(pouring)return;pouring=true;try{if(e&&e.pointerId!=null)pb.setPointerCapture(e.pointerId)}catch(_){}clearInterval(pourTimer);pourTimer=setInterval(()=>{cup.pour=Math.min(100,(cup.pour||0)+2.4);document.getElementById("liquid").style.height=cup.pour+"%";if(cup.pour>=100)stopPour()},60)}function stopPour(e){if(e){e.preventDefault();e.stopPropagation()}pouring=false;clearInterval(pourTimer);renderControls()}pb.addEventListener("pointerdown",startPour,{passive:false});["pointerup","pointercancel","lostpointercapture"].forEach(x=>pb.addEventListener(x,stopPour,{passive:false}));pb.addEventListener("touchstart",e=>{e.preventDefault();e.stopPropagation();startPour(e)},{passive:false});pb.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("touchcancel",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("selectstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("dragstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("copy",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("cut",e=>{e.preventDefault();e.stopPropagation();return false});
 function serve(){
- let o=customers[current];if(!o||o.done)return;let correct=cup.size===o.size&&cup.tea===o.tea&&Math.abs((cup.pour||0)-66)<=9&&cup.top===o.top&&cup.sweet===o.sweet&&cup.ice===o.ice&&cup.snack===o.snack;if(!correct){S.stats.wrong++;S.today.wrong++;S.cash=Math.max(0,S.cash-4);applyRatingChange(-0.08);toast("❌ Sai công thức · -4k");document.querySelector("#shop .grid").classList.add("shake");setTimeout(()=>document.querySelector("#shop .grid").classList.remove("shake"),300);resetCup();renderStats();save();return}
+ let o=customers[current];if(!o||o.done)return;let correct=cup.size===o.size&&cup.tea===o.tea&&Math.abs((cup.pour||0)-66)<=9&&cup.top===o.top&&cup.sweet===o.sweet&&cup.ice===o.ice&&cup.snack===o.snack;if(!correct){S.stats.wrong++;S.today.wrong++;S.cash=Math.max(0,S.cash-4);S.rating=Math.max(1,S.rating-.08);toast("❌ Sai công thức · -4k");document.querySelector("#shop .grid").classList.add("shake");setTimeout(()=>document.querySelector("#shop .grid").classList.remove("shake"),300);resetCup();renderStats();save();return}
  let tea=TEAS[o.tea],top=TOPS[o.top],sn=o.snack?SNACKS[o.snack]:null,need=tea.ingredients||[];let sizeStock=S.stock.cups[o.size]||0;if(sizeStock<1)return toast("🥤 Hết ly "+o.size);for(const ing of need)if((S.stock.ingredients[ing]||0)<1)return toast("🧪 Hết nguyên liệu: "+ing);if((S.stock.toppings[o.top]||0)<1)return toast("🍡 Hết topping: "+o.top);if(o.snack&&(S.stock.snacks[o.snack]||0)<1)return toast("🍢 Hết món: "+o.snack);
- S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let sale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;S.quests.served++;S.quests.perfect++;gainXP(12);applyRatingChange(0.06);o.done=true;toast("💖 Đơn hoàn hảo! +"+sale+"k");fx("💖");resetCup();current=-1;renderShop();scheduleNextCustomer(false);save()}
+ S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let sale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;S.quests.served++;S.quests.perfect++;gainXP(12);S.rating=Math.min(5,S.rating+.06);o.done=true;toast("💖 Đơn hoàn hảo! +"+sale+"k");fx("💖");resetCup();current=-1;renderShop();scheduleNextCustomer(false);save()}
 function renderStock(){let snackCount=Object.values(S.stock.snacks||{}).reduce((a,b)=>a+b,0),ingCount=Object.values(S.stock.ingredients||{}).reduce((a,b)=>a+b,0),topCount=Object.values(S.stock.toppings||{}).reduce((a,b)=>a+b,0);document.getElementById("stock").innerHTML=`🥤 Ly S/M/L/XL/XXL: <b>${S.unlockedSizes.map(n=>n+":"+(S.stock.cups[n]||0)).join(" · ")}</b><br>🧪 Nguyên liệu: <b>${ingCount}</b> phần<br>🍡 Topping: <b>${topCount}</b> phần<br>🍢 Đồ ăn vặt: <b>${snackCount}</b> phần`}
 function renderStats(){const t=S.today||{served:0,wrong:0,left:0,revenue:0};document.getElementById("served").textContent=t.served;document.getElementById("wrong").textContent=t.wrong;document.getElementById("left").textContent=t.left;document.getElementById("todayEarn").textContent=money(t.revenue)}
 function closeShopEarly(){if(confirm("Đóng cửa sớm? Các khách còn lại sẽ rời đi.")){S.shopOpen=false;clearTimeout(arrivalTimer);updateTop();customers.forEach(o=>{if(!o.done){o.done=true;o.leftEarly=true;S.stats.left++;S.today.left++}});endDay()}}
@@ -1282,7 +686,7 @@ function applyUnpaidPenalty(){
  if(S.employeePayEnabled!==false || !Object.values(S.employees||{}).some(Boolean))return 0;
  S.unpaidDays=(S.unpaidDays||0)+1;
  const penalty=Math.min(.5,.04*S.unpaidDays);
- applyRatingChange(-penalty);
+ S.rating=Math.max(1,S.rating-penalty);
  return penalty;
 }
 function hireEmployee(key,cost,name,condition=true){
@@ -1378,7 +782,7 @@ function renderManage(){
  `<div class="snackBox" style="margin-top:14px"><b>💡 Tất cả mua sắm & mở khóa ở đây</b><div class="mini">Mua công thức → mở nguyên liệu. Nâng Nghiên cứu → mở nước đặc biệt. Lên cấp → nhận cỡ ly và topping. Mở công thức đồ ăn vặt → mới nhập hàng được. Màn hình chuẩn bị chỉ để kiểm tra kho và mở cửa.</div></div>`;
 }
 function buyRecipe(name){const t=TEAS[name];if(!t||t.type!=="normal"||S.recipes.includes(name))return;const cost=t.recipe||0;if(S.cash<cost)return toast("💰 Không đủ tiền mua công thức");S.cash-=cost;S.recipes.push(name);S.unlockedTeas=S.recipes.slice();unlockIngredientsFor(name,true);save();renderPrep();renderManage();updateTop();toast("📖 Đã mua công thức: "+name)}
-function upgrade(k,c){if(S.cash<c)return toast("Không đủ tiền");S.cash-=c;S.upgrades[k]=(S.upgrades[k]||0)+1;if(k==="decor")applyRatingChange(0.15);if(k==="special")syncSpecialDrinks(true);save();toast(k==="special"?"⭐ Nghiên cứu thành công":"🏪 Nâng cấp thành công");renderManage();renderPrep();updateTop()}
+function upgrade(k,c){if(S.cash<c)return toast("Không đủ tiền");S.cash-=c;S.upgrades[k]=(S.upgrades[k]||0)+1;if(k==="decor")S.rating=Math.min(5,S.rating+.15);if(k==="special")syncSpecialDrinks(true);save();toast(k==="special"?"⭐ Nghiên cứu thành công":"🏪 Nâng cấp thành công");renderManage();renderPrep();updateTop()}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("shop").classList.contains("active"))closeShopEarly()});load();updateTop();
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 document.getElementById("nameModal").addEventListener("click",e=>{if(e.target.id==="nameModal")closeNameModal()});
@@ -1466,6 +870,3 @@ function updateShopDayProgress(){
   if(p)p.style.width=Math.min(100,(elapsed/300)*100)+"%";
 }
 
-</script>
-</body>
-</html>
