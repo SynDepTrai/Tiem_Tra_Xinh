@@ -222,7 +222,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
     <div class="gambleWarning">
       ⚠️ <b>Cảnh báo trước khi chơi</b>
       <p>Đây là trò chơi mô phỏng bằng <b>tiền ảo</b>. Không nạp, rút hoặc quy đổi tiền thật. 
-      Trong game, việc chơi ăn tiền có thể bị cơ chế <b>công an kiểm tra</b>; nếu bị bắt, tiền ảo sẽ bị tịch thu và tiến trình sẽ bị đưa về trạng thái bắt đầu lại với <b>1.000k</b>.</p>
+      Trong game, việc chơi ăn tiền có thể bị cơ chế <b>công an kiểm tra</b>; nếu bị bắt, tiền ảo sẽ bị tịch thu và tiến trình sẽ bị đưa về trạng thái bắt đầu lại với <b>1tr</b>.</p>
     </div>
 
     <div class="gameMoney">
@@ -753,12 +753,12 @@ function money(n){
   n=Number(n)||0;
   const sign=n<0?"-":"";
   n=Math.round(Math.abs(n));
+  // Đơn vị nội bộ của game là k (1 đơn vị = 1.000đ).
+  // Hiển thị: 0–999k dùng k; từ 1tr trở lên đổi sang tr.
+  if(n<1000) return sign+n+"k";
   const tr=Math.floor(n/1000);
   const k=n%1000;
-  if(tr>0){
-    return sign+tr+"Tr"+(k>0?k+"k":"");
-  }
-  return sign+n+"k";
+  return sign+tr+"tr"+(k>0?k+"k":"");
 }
 function unlockIngredientsFor(name,showToast=false){let t=TEAS[name];if(!t)return;S.unlockedIngredients=S.unlockedIngredients||[];S.stock.ingredients=S.stock.ingredients||{};for(const ing of t.ingredients){if(!S.unlockedIngredients.includes(ing)){S.unlockedIngredients.push(ing);S.stock.ingredients[ing]=(S.stock.ingredients[ing]||0)+5;if(showToast)toast("🧪 Mở nguyên liệu: "+INGREDIENTS[ing].emoji+" "+ing)}}}
 function syncLevelUnlocks(showToast=true){
@@ -924,7 +924,51 @@ function switchStore(id){if(!S.stores?.[id]?.opened)return toast("🔒 Quán nà
 function openStoreChooser(){initStoreSystem();renderStoreChooser();document.getElementById("storeModal").classList.add("show")}
 function closeStoreChooser(){if(!S.storeSelectionDone)return toast("🏪 Hãy chọn quán để bắt đầu kinh doanh");document.getElementById("storeModal").classList.remove("show")}
 function selectInitialStore(id){if(S.storeSelectionDone)return switchStore(id);const d=STORE_DEFS[id];if(!d)return;if(id!=="tea")return toast(`🔒 ${d.name} sẽ mở khi bạn đạt Lv.${d.unlockLevel} và có ${money(d.openCost)}`);S.activeStoreId=id;S.storeSelectionDone=true;S.stores=S.stores||{};S.stores.tea=S.stores.tea||storeSnapshot();S.stores.tea.opened=true;save();renderPrep();updateTop();closeStoreChooser();toast("🧋 Bắt đầu kinh doanh tại Tiệm Trà Xinh!")}
-function renderStoreChooser(){const box=document.getElementById("storeChoices");if(!box)return;const ids=Object.keys(STORE_DEFS);const pending=!S.storeSelectionDone;box.innerHTML=ids.map(id=>{const d=STORE_DEFS[id],opened=id==="tea"||!!S.stores?.[id]?.opened,active=S.activeStoreId===id,canOpen=storeCanOpen(id);let action="";if(pending&&id==="tea")action=`<button class="btn primary" onclick="selectInitialStore('tea')">▶️ Bắt đầu kinh doanh</button>`;else if(active)action=`<button class="btn secondary" disabled>📍 Đang làm</button>`;else if(opened)action=`<button class="btn primary" onclick="switchStore('${id}')">Bắt đầu làm</button>`;else if(S.companyLevel<d.unlockLevel)action=`<button class="btn secondary" disabled>🔒 Lv.${d.unlockLevel}</button>`;else action=`<button class="btn gold" onclick="openStore('${id}')">🔓 Mở · ${money(d.openCost)}</button>`;return `<div class="card" style="text-align:left"><div style="font-size:42px">${d.icon}</div><h3>${d.name}</h3><div class="mini">${d.tag}</div><p class="mini">${d.desc}</p><div class="row between"><span class="tag">${opened?"Đã mở":"Chưa mở"}</span>${action}</div></div>`}).join("")}
+function storeUnlockSummary(d,id){
+ const level=Math.max(1,Number(S.companyLevel||S.level||1));
+ const opened=id==="tea"||!!S.stores?.[id]?.opened;
+ const levelOk=id==="tea"||level>=d.unlockLevel;
+ const cashOk=id==="tea"||Number(S.cash||0)>=d.openCost;
+ const status=opened?"🟢 Đã mở":levelOk?(cashOk?"🟡 Có thể mở":"🟠 Đủ cấp · thiếu vốn"):"🔒 Chưa đủ cấp";
+ const income=id==="tea"?"Quán chính · gameplay pha chế đầy đủ":`Doanh thu cơ bản khoảng ${money(dailyBaseForStore(d))}/ngày khi quán hoạt động`;
+ return {opened,levelOk,cashOk,status,income};
+}
+function dailyBaseForStore(d){return Number(d.dailyBase||120)}
+function renderStoreChooser(){
+ const box=document.getElementById("storeChoices");if(!box)return;
+ initStoreSystem();
+ const ids=Object.keys(STORE_DEFS);const pending=!S.storeSelectionDone;const level=Math.max(1,Number(S.companyLevel||S.level||1));
+ const next=ids.find(id=>id!=="tea"&&!(S.stores?.[id]?.opened)&&STORE_DEFS[id].unlockLevel>level);
+ const nextDef=next?STORE_DEFS[next]:null;
+ const nextText=nextDef?`<div class="card" style="grid-column:1/-1;background:#fff7e8;border:2px solid #f0c56b;text-align:left"><div class="row between"><div><b>🧭 Cửa hàng tiếp theo</b><div style="font-size:20px;font-weight:800;margin-top:4px">${nextDef.icon} ${nextDef.name}</div></div><span class="tag">🔒 Công ty Lv.${nextDef.unlockLevel}</span></div><div class="mini" style="margin-top:6px">Bạn đang ở Công ty Lv.${level}. Còn <b>${Math.max(0,nextDef.unlockLevel-level)} cấp</b> nữa để đủ điều kiện mở. Vốn mở cửa: <b>${money(nextDef.openCost)}</b>.</div></div>`:"";
+ box.innerHTML=nextText+ids.map((id,index)=>{
+   const d=STORE_DEFS[id],info=storeUnlockSummary(d,id),active=S.activeStoreId===id;
+   let action="";
+   if(pending&&id==="tea")action=`<button class="btn primary" onclick="selectInitialStore('tea')">▶️ Bắt đầu kinh doanh</button>`;
+   else if(active)action=`<button class="btn secondary" disabled>📍 Đang làm</button>`;
+   else if(info.opened)action=`<button class="btn primary" onclick="switchStore('${id}')">Bắt đầu làm</button>`;
+   else if(!info.levelOk)action=`<button class="btn secondary" disabled>🔒 Mở ở Lv.${d.unlockLevel}</button>`;
+   else action=`<button class="btn gold" onclick="openStore('${id}')">🔓 Mở · ${money(d.openCost)}</button>`;
+   const levelLine=id==="tea"?"Mở ngay từ Lv.1":`Mở khóa tại <b>Công ty Lv.${d.unlockLevel}</b>`;
+   const costLine=id==="tea"?"Chi phí mở: miễn phí":`Chi phí mở: <b>${money(d.openCost)}</b>`;
+   const passiveLine=id==="tea"?"Thu nhập: theo doanh thu pha chế":`Quán phụ: ${d.dailyBase||120}k/ngày cơ bản + 55k/ngày mỗi nhân viên`;
+   const position=index+1;
+   return `<div class="card" style="text-align:left;position:relative;overflow:hidden">
+     <div class="row between"><div style="font-size:42px">${d.icon}</div><span class="tag">#${position} · ${info.status}</span></div>
+     <h3 style="margin-bottom:4px">${d.name}</h3>
+     <div class="mini" style="font-weight:700">${d.tag}</div>
+     <p class="mini" style="margin:7px 0">${d.desc}</p>
+     <div style="display:grid;gap:5px;margin:8px 0 12px">
+       <div class="mini">🎯 ${levelLine}</div>
+       <div class="mini">💰 ${costLine}</div>
+       <div class="mini">📈 ${passiveLine}</div>
+     </div>
+     <div class="row between" style="gap:8px"><span class="tag">${info.opened?"✅ Đang kinh doanh":info.levelOk?(info.cashOk?"🔓 Sẵn sàng mở":"💰 Chờ đủ vốn"):"🔒 Chờ cấp độ"}</span>${action}</div>
+   </div>`;
+ }).join("");
+ const title=document.getElementById("storeModalTitle");if(title)title.textContent="🏪 Chuỗi cửa hàng";
+ const desc=document.getElementById("storeModalDesc");if(desc)desc.innerHTML=`Công ty Lv.<b>${level}</b> · Vốn hiện có <b>${money(S.cash)}</b>. Xem toàn bộ lộ trình mở quán, cấp độ, vốn và trạng thái từng cửa hàng.`;
+}
 function companyBusinessIncome(){
  let total=0;const rows=[];
  for(const [id,d] of Object.entries(STORE_DEFS)){
@@ -958,7 +1002,7 @@ function auditStoreBooks(){
    details.push(`${d.name}: lệch ${money(gap)}`);
  }
  const limit=20000;
- if(discrepancy>limit){S.cash=1000;S.globalCash=1000;toast(`🚓 Sổ sách lệch ${money(discrepancy)} > 20Tr · tịch thu tài sản · còn 1Tr`);save();return false;}
+ if(discrepancy>limit){S.cash=1000;S.globalCash=1000;toast(`🚓 Sổ sách lệch ${money(discrepancy)} > 20tr · tịch thu tài sản · còn 1tr`);save();return false;}
  toast(`🚓 Kiểm tra giấy tờ hợp lệ · tổng chênh lệch ${money(discrepancy)}`);
  save();return true;
 }
@@ -1537,7 +1581,7 @@ function resolveNextDayCrime(){
     S.cash+=recovered;S.theft.recovered+=recovered;S.police.arrests++;
     setTimeout(()=>toast(`🚓 Camera phát hiện trộm! Công an bắt được · hoàn lại ${money(recovered)} (75%)`),350);
   }else{
-    setTimeout(()=>toast(`🚨 Trộm đột nhập! Mất ${money(stolen)} · số dư còn 1Tr`),350);
+    setTimeout(()=>toast(`🚨 Trộm đột nhập! Mất ${money(stolen)} · số dư còn 1tr`),350);
   }
   save();
 }
@@ -1755,7 +1799,7 @@ function renderManage(){
  const normal=Object.entries(TEAS).filter(([n,t])=>t.type==="normal"), special=Object.entries(TEAS).filter(([n,t])=>t.type==="special");
  const unlockedSizes=S.unlockedSizes||[], unlockedTops=S.unlockedTops||[], unlockedIngs=S.unlockedIngredients||[], unlockedSnacks=S.unlockedSnacks||[];
  b.innerHTML=`<div class="sectionTitle"><h3>🏪 Nâng cấp tiệm</h3><span class="tag">💰 ${money(S.cash)}</span></div>`+
- `<div class="card" style="background:#fffaf6"><h3>💳 Két sắp cạn tiền</h3><div class="mini">Vay tối đa 1.000k. Lãi 25% · trả trong 10 ngày. Chỉ có thể có 1 khoản vay cùng lúc.</div><div class="row" style="margin-top:10px">${[200,500,1000].map(a=>`<button class="btn primary" ${S.loan?.principal?"disabled":""} onclick="takeLoan(${a})">Vay ${money(a)}</button>`).join("")}</div>${S.loan?.principal?`<p class="mini">Khoản vay: ${money(S.loan.principal)} · Tổng phải trả: ${money(S.loan.total)} · Đã trả: ${money(S.loan.paid)} · Hạn ngày ${S.loan.dueDay}</p>`:""}</div>`+
+ `<div class="card" style="background:#fffaf6"><h3>💳 Két sắp cạn tiền</h3><div class="mini">Vay tối đa 1tr. Lãi 25% · trả trong 10 ngày. Chỉ có thể có 1 khoản vay cùng lúc.</div><div class="row" style="margin-top:10px">${[200,500,1000].map(a=>`<button class="btn primary" ${S.loan?.principal?"disabled":""} onclick="takeLoan(${a})">Vay ${money(a)}</button>`).join("")}</div>${S.loan?.principal?`<p class="mini">Khoản vay: ${money(S.loan.principal)} · Tổng phải trả: ${money(S.loan.total)} · Đã trả: ${money(S.loan.paid)} · Hạn ngày ${S.loan.dueDay}</p>`:""}</div>`+
  `<h3 style="margin-top:16px">🛠️ Trang bị <span class="mini">(+8k/ngày điện nước mỗi món)</span></h3>`+
  [["lid","🏷️ Máy dán nắp tự động","Dán nắp và giao ly bằng một chạm, khách tip thêm 30%",4500],["led","💡 Biển hiệu đèn LED","Tăng lượng khách ghé quán 20%",2500],["seating","🛋️ Bàn ghế cho khách ngồi","Khách chịu chờ lâu hơn 25%",1800],["social","📣 Quảng cáo mạng xã hội","Tăng lượng khách ghé quán 25%",3500],["stall","🧱 Mở rộng quầy","Phục vụ cùng lúc ít nhất 4 khách",3000],["ac","❄️ Máy lạnh","Khách ít chê khi phải chờ lâu",2600],["nightGuard","🛡️ Bảo vệ ca tối","Tăng cơ hội xử lý khách quỵt tiền lên 52%",6000],["camera","📹 Camera an ninh","Phát hiện 75% vụ trộm · công an bắt và hoàn lại 75% số tiền bị lấy",4500],["branding","❔ Bộ nhận diện thương hiệu","Tự thiết kế tem thương hiệu in lên ly: màu nền, logo, tên quán, khẩu hiệu",5000]].map(x=>`<div class="upgrade"><div><b>${x[1]}</b><div class="mini">${x[2]}</div>${x[0]==="branding"&&S.equipment?.branding?`<div class="mini" style="margin-top:5px">🎨 Tem: ${escapeHTML(S.branding?.logo||"🧋")} · ${escapeHTML(S.branding?.slogan||"Ngon từng ngụm")}</div>`:""}</div><div class="row">${x[0]==="branding"&&S.equipment?.branding?`<button class="btn secondary" onclick="editBranding()">🎨 Thiết kế</button>`:""}<button class="btn ${S.equipment?.[x[0]]?"secondary":"gold"}" ${S.equipment?.[x[0]]?"disabled":""} onclick="buyEquipment('${x[0]}',${x[3]},'${x[1].replace(/'/g,"\'")}')">${S.equipment?.[x[0]]?"✅ Đã mua":money(x[3])+" · Mua"}</button></div></div>`).join("")+
  `<h3 style="margin-top:18px">⚙️ Nâng cấp cơ bản</h3>`;
@@ -1817,7 +1861,7 @@ try{applyStoredSettings()}catch(e){}
 /* V39 — Sâm Lốc fictional in-game money mini-game */
 S.cardGame=S.cardGame||{bet:20,played:0,wins:0};
 function openCardGame(){
-  const warn="⚠️ CẢNH BÁO\n\nSâm Lốc ở đây chỉ dùng TIỀN ẢO trong game, không có giá trị tiền thật.\n\nTrong mô phỏng, nếu bị công an kiểm tra khi đang chơi ăn tiền, tiền ảo có thể bị tịch thu và tiến trình bị đưa về trạng thái bắt đầu với 1.000k.\n\nBạn có muốn vào khu Sâm Lốc không?";
+  const warn="⚠️ CẢNH BÁO\n\nSâm Lốc ở đây chỉ dùng TIỀN ẢO trong game, không có giá trị tiền thật.\n\nTrong mô phỏng, nếu bị công an kiểm tra khi đang chơi ăn tiền, tiền ảo có thể bị tịch thu và tiến trình bị đưa về trạng thái bắt đầu với 1tr.\n\nBạn có muốn vào khu Sâm Lốc không?";
   if(!confirm(warn))return;
   renderCardGame(); show("cardgame");
 }
