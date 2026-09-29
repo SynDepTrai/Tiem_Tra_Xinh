@@ -19,7 +19,7 @@ button,input{font:inherit}button{cursor:pointer;border:0;-webkit-user-select:non
 @media(max-width:780px){.sign{cursor:pointer;font-size:clamp(8px,1.9vw,13px);padding:5px 6px}.shopStatus{font-size:clamp(17px,6vw,27px)}}
 .sign{font:inherit;text-align:left;color:inherit;appearance:none;-webkit-appearance:none}
 
-/* ===== V54 DESKTOP + MOBILE SETTINGS MODAL FIX ===== */
+/* ===== V55 DESKTOP + MOBILE SETTINGS MODAL FIX ===== */
 .settingsModal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:rgba(30,22,16,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .settingsModal.show{display:flex!important}
 .settingsCard{width:min(920px,100%);max-height:min(88vh,900px);overflow:auto;box-sizing:border-box;background:#fffaf3;border:1px solid #d8c7b6;border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.35);padding:0;color:#4b3428;overscroll-behavior:contain}
@@ -256,7 +256,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
    <span class="settingIcon">📖</span><span class="settingText"><b>Hướng dẫn</b><span>Hướng dẫn cách chơi từ đầu đến mở rộng quán</span></span><span class="settingValue">Xem</span>
   </button>
   <button class="settingsAction" type="button" onclick="showWhatsNew()">
-   <span class="settingIcon">🎁</span><span class="settingText"><b>Có gì mới</b><span>Thông tin cập nhật phiên bản hiện tại</span></span><span class="settingValue">V54</span>
+   <span class="settingIcon">🎁</span><span class="settingText"><b>Có gì mới</b><span>Thông tin cập nhật phiên bản hiện tại</span></span><span class="settingValue">V55</span>
   </button>
   <button class="settingsAction good" type="button" onclick="location.reload(true)">
    <span class="settingIcon">🔄</span><span class="settingText"><b>Cập nhật bản mới</b><span>Tải lại web để nhận phiên bản mới nhất</span></span><span class="settingValue">Tải lại</span>
@@ -640,7 +640,17 @@ const DEFAULT={
 };
 let S=structuredClone(DEFAULT),customers=[],current=0,cup={},timer=null,arrivalTimer=null,elapsed=0,shopStartTime=0,lastTickAt=0,pouring=false,pourTimer=null,manageMode="up",claimed=false,dayEnding=false;
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function money(n){return Math.round(n)+"k"}
+function money(n){
+  n=Number(n)||0;
+  const sign=n<0?"-":"";
+  n=Math.round(Math.abs(n));
+  const tr=Math.floor(n/1000);
+  const k=n%1000;
+  if(tr>0){
+    return sign+tr+"Tr"+(k>0?k+"k":"");
+  }
+  return sign+n+"k";
+}
 function save(){localStorage.setItem("TTX_FULL_SAVE",JSON.stringify(S))}
 function unlockIngredientsFor(name,showToast=false){let t=TEAS[name];if(!t)return;S.unlockedIngredients=S.unlockedIngredients||[];S.stock.ingredients=S.stock.ingredients||{};for(const ing of t.ingredients){if(!S.unlockedIngredients.includes(ing)){S.unlockedIngredients.push(ing);S.stock.ingredients[ing]=(S.stock.ingredients[ing]||0)+5;if(showToast)toast("🧪 Mở nguyên liệu: "+INGREDIENTS[ing].emoji+" "+ing)}}}
 function syncLevelUnlocks(showToast=true){
