@@ -744,7 +744,7 @@ const DEFAULT={
  stock:{cups:{S:8,M:8,L:6,XL:3,XXL:1},ingredients:{"Trà đen":10},toppings:{"Trân châu đen":8,"Thạch trái cây":8},snacks:Object.fromEntries(Object.keys(SNACKS).map(n=>[n,0]))},
  upgrades:{speed:0,quality:0,capacity:0,decor:0,special:0},
  unlockedTeas:["Truyền thống"],recipes:["Truyền thống"],menuDrinks:["Truyền thống"],menuSnacks:[],unlockedTops:["Trân châu đen","Thạch trái cây"],unlockedSizes:["S","M","L"],unlockedIngredients:["Trà đen"],unlockedSnacks:[],
- stats:{served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0},today:{served:0,wrong:0,left:0,revenue:0},cardGame:{bet:20,played:0,wins:0},employeeDeals:{},employeeInfo:{},employeePayEnabled:true,unpaidDays:0,equipment:{},branding:{bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"},loan:{principal:0,total:0,paid:0,dueDay:0},employees:{counter1:false,brewer:false,online:false,counter2:false},employeeRoster:{},online:{platform:false,tablets:0},quests:{served:0,perfect:0,profit:0,claimed:false},history:[],dayReward:false,reviews:[],reviewSeq:0,ratingPenalty:0,ratingBonus:0,quits:{count:0,lost:0,recovered:0},theft:{count:0,lost:0,recovered:0,lastDay:0},police:{checks:0,arrests:0},security:{camera:false}
+ stats:{served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0},today:{served:0,wrong:0,left:0,revenue:0},cardGame:{bet:20,played:0,wins:0},employeeDeals:{},employeeInfo:{},employeePayEnabled:true,unpaidDays:0,equipment:{},branding:{bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"},loan:{principal:0,total:0,paid:0,dueDay:0},employees:{counter1:false,brewer:false,online:false,counter2:false},employeeRoster:{},online:{platform:false,tablets:0},quests:{served:0,perfect:0,profit:0,claimed:false},levelMissions:{claimed:{}},history:[],dayReward:false,reviews:[],reviewSeq:0,ratingPenalty:0,ratingBonus:0,quits:{count:0,lost:0,recovered:0},theft:{count:0,lost:0,recovered:0,lastDay:0},police:{checks:0,arrests:0},security:{camera:false}
 };
 let S=structuredClone(DEFAULT),customers=[],current=0,cup={},timer=null,arrivalTimer=null,elapsed=0,shopStartTime=0,lastTickAt=0,pouring=false,pourTimer=null,manageMode="up",claimed=false,dayEnding=false;
 const GAME_DAY_SECONDS=600, GAME_START_MINUTE=7*60, GAME_END_MINUTE=17*60;
@@ -793,7 +793,7 @@ function normalizeSnackUnlocks(){
 function load(){
  let x=localStorage.getItem("TTX_FULL_SAVE");if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
  if(typeof S.renameUsed!=="boolean") S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";
- S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.ratingBonus=Math.max(0,Number(S.ratingBonus)||0); S.employeeInfo=S.employeeInfo||{}; S.employeeRoster=S.employeeRoster||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
+ S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.ratingBonus=Math.max(0,Number(S.ratingBonus)||0); ensureLevelMissionState(); S.employeeInfo=S.employeeInfo||{}; S.employeeRoster=S.employeeRoster||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
  // V41: a brand-new shop starts at 500k and 0 stars. If an old save is still on day 1
  // with no completed day/reviews, migrate it to the new starting state.
  if((S.day||1)===1 && (S.stats?.days||0)===0 && (!Array.isArray(S.reviews)||S.reviews.length===0)){S.cash=500;S.rating=0;}
@@ -813,7 +813,80 @@ function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.re
 function updateTop(){const storeDef=STORE_DEFS[S.activeStoreId||"tea"]||STORE_DEFS.tea;const n=S.shopName||storeDef.name;const nameEl=document.getElementById("signShopName");if(nameEl)nameEl.textContent=n.toUpperCase();const st=document.getElementById("signStatus");if(st){st.textContent=S.shopOpen?"OPEN":"CLOSE";st.className="statusPill "+(S.shopOpen?"open":"closed")}const d=document.getElementById("day");if(d)d.textContent="Ngày "+S.day;const c=document.getElementById("cash");if(c)c.textContent=money(S.cash);const r=document.getElementById("rating");if(r)r.textContent=hasCustomerRatings()?S.rating.toFixed(1):"0.0";const lv=document.getElementById("level");if(lv)lv.textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);const xh=document.getElementById("xpHome");if(xh)xh.style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent=n;const hc=document.getElementById("headerClock");if(hc)hc.textContent=S.shopOpen?(document.getElementById("clock")?.textContent||"07:00"):"07:00";}
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",1800)}
 function fx(sym="✨"){for(let i=0;i<7;i++){let e=document.createElement("div");e.className="float";e.textContent=sym;e.style.left=(45+Math.random()*10)+"%";e.style.top=(45+Math.random()*10)+"%";e.style.setProperty("--x",(Math.random()*180-90)+"px");e.style.setProperty("--y",(-50-Math.random()*130)+"px");document.body.appendChild(e);setTimeout(()=>e.remove(),900)}}
-function gainXP(n){S.xp+=n;while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;S.companyLevel=Math.max(Number(S.companyLevel||1),S.level);S.cash+=25;syncLevelUnlocks(true);toast("🎉 "+STORE_DEFS[S.activeStoreId].name+" lên cấp "+S.level+"! +25k");if([5,8,11,15].includes(S.companyLevel))setTimeout(()=>{openStoreChooser();toast("🏪 Bạn đã đủ cấp để mở rộng thêm cửa hàng!")},250);fx("⭐")}}
+function gainXP(n){S.xp+=n;while(S.xp>=S.level*100){S.xp-=S.level*100;S.level++;S.companyLevel=Math.max(Number(S.companyLevel||1),S.level);S.cash+=25;syncLevelUnlocks(true);toast("🎉 "+STORE_DEFS[S.activeStoreId].name+" lên cấp "+S.level+"! +25k");if([5,8,11,15].includes(S.companyLevel))setTimeout(()=>{openStoreChooser();toast("🏪 Bạn đã đủ cấp để mở rộng thêm cửa hàng!")},250);fx("⭐")}checkLevelMissions(false);}
+/* V72 — Nhiệm vụ theo từng cấp độ. Tiến độ lấy trực tiếp từ hệ thống gameplay. */
+const LEVEL_MISSIONS={
+ 1:{icon:"🥤",title:"Khởi nghiệp",desc:"Phục vụ 3 khách",type:"served",target:3,reward:30},
+ 2:{icon:"📖",title:"Mở rộng menu",desc:"Có ít nhất 2 công thức nước",type:"recipes",target:2,reward:40},
+ 3:{icon:"⭐",title:"Lấy lòng khách",desc:"Đạt 3.0⭐ đánh giá",type:"rating",target:3,reward:50},
+ 4:{icon:"👨‍🍳",title:"Có người đồng hành",desc:"Thuê 1 nhân viên",type:"employees",target:1,reward:60},
+ 5:{icon:"🛠️",title:"Nâng cấp quán",desc:"Mua 2 trang bị/nâng cấp cơ bản",type:"upgrades",target:2,reward:70},
+ 6:{icon:"🧋",title:"Phục vụ chuyên nghiệp",desc:"Phục vụ tổng cộng 25 khách",type:"served",target:25,reward:80},
+ 7:{icon:"🌸",title:"Tạo dấu ấn",desc:"Đạt 3 cấp nâng cấp cơ bản",type:"upgrades",target:3,reward:90},
+ 8:{icon:"💰",title:"Quán có lãi",desc:"Tích lũy 2.000k lợi nhuận",type:"profit",target:2000,reward:110},
+ 9:{icon:"🎨",title:"Thương hiệu riêng",desc:"Mua Bộ nhận diện thương hiệu",type:"branding",target:1,reward:130},
+ 10:{icon:"🥤",title:"Quán đông khách",desc:"Phục vụ tổng cộng 60 khách",type:"served",target:60,reward:150},
+ 11:{icon:"⭐",title:"Công thức đặc biệt",desc:"Nghiên cứu đặc biệt đạt Lv.1",type:"special",target:1,reward:170},
+ 12:{icon:"👥",title:"Đội ngũ vững mạnh",desc:"Có 2 nhân viên đang làm việc",type:"employees",target:2,reward:190},
+ 13:{icon:"🏪",title:"Ông chủ thực thụ",desc:"Mở cửa hàng ít nhất 2 ngày",type:"days",target:2,reward:220},
+ 14:{icon:"🌟",title:"Thương hiệu được yêu thích",desc:"Đạt 4.5⭐ đánh giá",type:"rating",target:4.5,reward:260},
+ 15:{icon:"🚚",title:"Sẵn sàng phát triển",desc:"Có nền tảng online và ít nhất 1 tablet",type:"online",target:1,reward:300}
+};
+function ensureLevelMissionState(){
+ S.levelMissions=S.levelMissions||{};
+ S.levelMissions.claimed=S.levelMissions.claimed||{};
+}
+function levelMissionProgress(m){
+ ensureLevelMissionState();
+ switch(m.type){
+   case "served": return Number(S.stats?.served||0);
+   case "recipes": return Number(S.recipes?.length||0);
+   case "rating": return Number(S.rating||0);
+   case "employees": return Object.values(S.employees||{}).filter(Boolean).length;
+   case "upgrades": return Object.values(S.upgrades||{}).reduce((a,v)=>a+(Number(v)||0),0);
+   case "profit": return Number(S.stats?.totalProfit||0);
+   case "branding": return S.equipment?.branding?1:0;
+   case "special": return Number(S.upgrades?.special||0);
+   case "days": return Number(S.stats?.days||0);
+   case "online": return S.online?.platform&&Number(S.online?.tablets||0)>=1?1:0;
+   default: return 0;
+ }
+}
+function levelMissionComplete(level){
+ const m=LEVEL_MISSIONS[level];
+ return !!m && levelMissionProgress(m)>=m.target;
+}
+function checkLevelMissions(showToast=true){
+ ensureLevelMissionState();
+ let changed=false;
+ const maxUnlocked=Math.min(15,Math.max(1,Number(S.level)||1));
+ for(let level=1;level<=maxUnlocked;level++){
+   const m=LEVEL_MISSIONS[level];
+   if(!m || S.levelMissions.claimed[level] || !levelMissionComplete(level))continue;
+   S.levelMissions.claimed[level]=Date.now();
+   S.cash+=m.reward;
+   changed=true;
+   if(showToast)toast(`🎯 Nhiệm vụ Lv.${level} hoàn thành! +${m.reward}k`);
+ }
+ if(changed){save();return true}
+ return false;
+}
+function renderLevelMissions(){
+ ensureLevelMissionState();
+ const current=Math.min(15,Math.max(1,Number(S.level)||1));
+ return `<div class="snackBox" style="margin-bottom:12px"><b>🎯 Nhiệm vụ cấp độ</b><div class="mini">Mỗi cấp có một mục tiêu riêng. Hoàn thành nhiệm vụ của các cấp đã mở để nhận thưởng một lần.</div></div>`+
+   Object.entries(LEVEL_MISSIONS).map(([lv,m])=>{
+     lv=Number(lv);
+     const unlocked=lv<=current;
+     const progress=levelMissionProgress(m);
+     const done=!!S.levelMissions.claimed[lv];
+     const pct=Math.min(100,Math.max(0,(progress/m.target)*100));
+     const progressText=m.type==="rating"?`${Math.min(5,progress).toFixed(1)}/${m.target.toFixed(1)}⭐`:m.type==="profit"?`${money(Math.min(progress,m.target))}/${money(m.target)}`:`${Math.min(progress,m.target)}/${m.target}`;
+     const state=done?"✅ Hoàn thành":unlocked?`🔄 ${progressText}`:"🔒 Chưa mở";
+     return `<div class="quest ${done?"done":""}" style="margin-bottom:8px;opacity:${unlocked?1:.62}"><div style="display:flex;gap:10px;align-items:flex-start;width:100%"><span style="font-size:24px">${m.icon}</span><div style="flex:1"><b>Lv.${lv} · ${m.title}</b><div class="mini">${m.desc}</div>${unlocked&&!done?`<div class="progress" style="margin-top:6px"><i style="width:${pct}%"></i></div>`:""}<div class="mini" style="margin-top:4px">${state} · 🎁 +${m.reward}k</div></div></div></div>`;
+   }).join("");
+}
+
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 function openNameModal(){const m=document.getElementById("nameModal"),i=document.getElementById("shopNameInput"),first=!S.renameUsed;document.getElementById("nameTitle").textContent=first?"🎁 Đổi tên quán lần đầu":"✏️ Đổi tên quán";document.getElementById("nameDesc").innerHTML=first?"🎉 Lần đầu đổi tên quán được <b>MIỄN PHÍ</b>.":"Đổi tên lần này sẽ mất <b>50k</b>.";i.placeholder="Ví dụ: Tiệm Trà Nhà Hiếu";i.value=S.shopName||"Tiệm Trà Xinh";const b=m.querySelector(".modalActions .primary");b.textContent=first?"Đổi tên · MIỄN PHÍ":"Đổi tên · 50k";m.classList.add("show");setTimeout(()=>{i.focus();i.select()},80)}
 function closeNameModal(){document.getElementById("nameModal").classList.remove("show")}
@@ -827,7 +900,7 @@ const STORE_DEFS={
  bread:{name:"Tiệm Bánh Mì",icon:"🥖",unlockLevel:11,openCost:50000,kind:"generic",tag:"Bánh mì • đồ ăn sáng",desc:"Bánh mì nóng và các loại nhân."},
  grocery:{name:"Tạp Hóa",icon:"🏪",unlockLevel:15,openCost:50000,kind:"generic",tag:"Đồ uống • bánh • hàng tiêu dùng",desc:"Cửa hàng bán hàng tiêu dùng hằng ngày."}
 };
-const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","branding","loan","employees","online","quests","history","dayReward","reviews","reviewSeq","ratingPenalty","ratingBonus","quits","theft","police","security","cardGame"];
+const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","branding","loan","employees","online","quests","levelMissions","history","dayReward","reviews","reviewSeq","ratingPenalty","ratingBonus","quits","theft","police","security","cardGame"];
 function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);return x}
 function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};return storeSnapshotFrom(base)}
 function storeSnapshotFrom(base){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);return x}
@@ -1219,7 +1292,7 @@ function renderPrep(){
  const menu=Object.entries(TEAS).filter(([n])=>S.menuDrinks.includes(n));
  const menuSnacks=Number(S.level||1)>=2?(S.menuSnacks||[]).filter(n=>SNACKS[n]&&(S.stock.snacks?.[n]||0)>0):[];
  document.getElementById("menu").innerHTML=menu.map(([n,t])=>`<div class="menuItem">${assetTag(assetTea(n),n)}<b>${n}</b><div class="mini">${t.price}k / ly · ${t.type==="special"?"⭐ Đặc biệt":"📖 Đã mở"}</div><div class="mini">🧪 ${t.ingredients.join(" + ")}</div></div>`).join("")+menuSnacks.map(n=>{let t=SNACKS[n];return `<div class="menuItem">${assetTag(assetSnack(n),n)}<b>${n}</b><div class="mini">${t.price}k / phần · 🍢 Đồ ăn vặt</div></div>`}).join("")+`<div class="menuItem"><b>📋 Menu đang bán</b><div class="mini">${menu.length} nước · ${menuSnacks.length} món ăn vặt</div><button class="btn gold" style="margin-top:7px" onclick="show('manage');manageTab('menu')">✏️ Sửa menu</button></div>`;
- document.getElementById("dailyQuest").innerHTML=`<div class="quest"><span>🎯</span><div><b>Phục vụ ${5+S.day} khách</b><div class="progress"><i style="width:${Math.min(100,S.quests.served/(5+S.day)*100)}%"></i></div></div></div><div class="quest"><span>✨</span><div><b>${S.quests.perfect} ly hoàn hảo</b></div></div>`;
+ checkLevelMissions(false);const lm=LEVEL_MISSIONS[Math.min(15,Math.max(1,Number(S.level)||1))];const lp=lm?levelMissionProgress(lm):0;document.getElementById("dailyQuest").innerHTML=`<div class="quest"><span>🎯</span><div><b>Phục vụ ${5+S.day} khách</b><div class="progress"><i style="width:${Math.min(100,S.quests.served/(5+S.day)*100)}%"></i></div></div></div><div class="quest"><span>✨</span><div><b>${S.quests.perfect} ly hoàn hảo</b></div></div>${lm?`<div class="quest ${S.levelMissions?.claimed?.[S.level]?"done":""}"><span>${lm.icon}</span><div><b>Nhiệm vụ Lv.${S.level}: ${lm.title}</b><div class="mini">${lm.desc} · ${S.levelMissions?.claimed?.[S.level]?"✅ Hoàn thành":`${lm.type==="rating"?lp.toFixed(1):Math.floor(lp)}/${lm.target}`}</div></div></div>`:""}`;
  const rc=document.getElementById("prepReviewCount");if(rc){const n=(S.reviews||[]).length;const avg=n?(S.reviews.reduce((a,r)=>a+r.stars,0)/n):0;rc.textContent=n?`${avg.toFixed(1)} ⭐ · ${n}`:"Chưa có"}
 }
 function buyCup(k){let cost=(8+Math.max(0,SIZES[k].price));if(S.cash<cost)return toast("💰 Không đủ tiền mua ly");S.cash-=cost;S.stock.cups[k]=(S.stock.cups[k]||0)+4;save();renderPrep();renderManage();updateTop()}
@@ -1435,7 +1508,7 @@ function serve(){
  let correct=cup.size===o.size&&cup.tea===o.tea&&Math.abs((cup.pour||0)-66)<=9&&cup.top===o.top&&cup.sweet===o.sweet&&cup.ice===o.ice&&cup.snack===o.snack;if(!correct){S.stats.wrong++;S.today.wrong++;S.cash=Math.max(0,S.cash-4);applyRatingChange(-0.08);toast("❌ Sai công thức · -4k");document.querySelector("#shop .grid").classList.add("shake");setTimeout(()=>document.querySelector("#shop .grid").classList.remove("shake"),300);resetCup();renderStats();save();return}
  let tea=TEAS[o.tea],top=TOPS[o.top],sn=o.snack?SNACKS[o.snack]:null,need=tea.ingredients||[];let sizeStock=S.stock.cups[o.size]||0;if(sizeStock<1)return toast("🥤 Hết ly "+o.size);for(const ing of need)if((S.stock.ingredients[ing]||0)<1)return toast("🧪 Hết nguyên liệu: "+ing);if((S.stock.toppings[o.top]||0)<1)return toast("🍡 Hết topping: "+o.top);if(o.snack&&(S.stock.snacks[o.snack]||0)<1)return toast("🍢 Hết món: "+o.snack);
  S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let baseSale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);let lidTip=S.equipment?.lid?Math.round(baseSale*0.30):0;let sale=baseSale+lidTip;S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;o.served=true;ensureEmployeeRoster();const activeStaff=["counter1","brewer","counter2"].filter(k=>S.employees?.[k]);activeStaff.forEach(k=>{if(S.employeeRoster?.[k])S.employeeRoster[k].totalOrders=(S.employeeRoster[k].totalOrders||0)+1});o.servedAt=servedAt;o.waitSeconds=waitSeconds;o.qualityLevel=Math.max(0,Number(S.upgrades?.quality)||0);o.waitRating=getWaitRating(o);S.quests.served++;S.quests.perfect++;gainXP(12);applyRatingChange(0.06);o.done=true;
- const quyt=Math.random()<0.025; if(quyt){ S.cash=Math.max(0,S.cash-sale); S.quits=S.quits||{count:0,lost:0,recovered:0}; S.quits.count++;S.quits.lost+=sale; toast(`🏃 Khách nhận đồ rồi bùng tiền ${money(sale)}!`); setTimeout(()=>policeCatchQuyt(sale),900); } else { toast("💖 Đơn hoàn hảo! +"+sale+"k"+(lidTip?` · 🏷️ Tip nắp +${lidTip}k`:"")); } fx("💖");resetCup();current=customers.findIndex(x=>!x.done);if(customers.filter(x=>!x.done).length<maxCustomerQueue())scheduleNextCustomer(false);renderShop();save()}
+ const quyt=Math.random()<0.025; if(quyt){ S.cash=Math.max(0,S.cash-sale); S.quits=S.quits||{count:0,lost:0,recovered:0}; S.quits.count++;S.quits.lost+=sale; toast(`🏃 Khách nhận đồ rồi bùng tiền ${money(sale)}!`); setTimeout(()=>policeCatchQuyt(sale),900); } else { toast("💖 Đơn hoàn hảo! +"+sale+"k"+(lidTip?` · 🏷️ Tip nắp +${lidTip}k`:"")); } fx("💖");resetCup();current=customers.findIndex(x=>!x.done);if(customers.filter(x=>!x.done).length<maxCustomerQueue())scheduleNextCustomer(false);renderShop();checkLevelMissions(false);save()}
 function renderStock(){let snackCount=Object.values(S.stock.snacks||{}).reduce((a,b)=>a+b,0),ingCount=Object.values(S.stock.ingredients||{}).reduce((a,b)=>a+b,0),topCount=Object.values(S.stock.toppings||{}).reduce((a,b)=>a+b,0);document.getElementById("stock").innerHTML=`🥤 Ly S/M/L/XL/XXL: <b>${S.unlockedSizes.map(n=>n+":"+(S.stock.cups[n]||0)).join(" · ")}</b><br>🧪 Nguyên liệu: <b>${ingCount}</b> phần<br>🍡 Topping: <b>${topCount}</b> phần<br>🍢 Đồ ăn vặt: <b>${snackCount}</b> phần`}
 function renderStats(){const t=S.today||{served:0,wrong:0,left:0,revenue:0};document.getElementById("served").textContent=t.served;document.getElementById("wrong").textContent=t.wrong;document.getElementById("left").textContent=t.left;document.getElementById("todayEarn").textContent=money(t.revenue)}
 function closeShopEarly(){if(confirm("Đóng cửa sớm? Các khách còn lại sẽ rời đi.")){S.shopOpen=false;shopStartTime=0;lastTickAt=0;clearTimeout(arrivalTimer);arrivalTimer=null;updateTop();customers.forEach(o=>{if(!o.done){o.waitSeconds=getCustomerWaitSeconds(o);o.leftAt=Date.now();o.done=true;o.leftEarly=true;o.served=false;S.stats.left++;S.today.left++;}});endDay()}}
@@ -1445,7 +1518,7 @@ function endDay(){
  S.shopOpen=false;
  clearInterval(timer);timer=null;shopStartTime=0;lastTickAt=0;clearTimeout(arrivalTimer);arrivalTimer=null;clearInterval(pourTimer);pourTimer=null;pouring=false;
  generateDayReviews();
- const unpaidPenalty=applyUnpaidPenalty();updateTop();clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;const employeeCost=employeeDailyCost();let revenue=(S.today?.revenue||0),rent=12+S.day*2,utilities=5+Math.floor(S.day/2)+Object.keys(S.equipment||{}).filter(k=>S.equipment[k]).length*8,waste=0,snackWaste=0,profit=revenue-rent-utilities-waste-snackWaste-employeeCost;const onlineNet=onlineDailyRevenue();profit+=onlineNet;const dailyExpenses=rent+utilities+waste+snackWaste+employeeCost;S.cash=Math.max(0,S.cash-dailyExpenses);S.cash+=onlineNet;S.stats.totalProfit=(S.stats.totalProfit||0)+profit;S.stats.days++;S.stats.bestDay=Math.max(S.stats.bestDay,profit);S.quests.profit=(S.quests.profit||0)+Math.max(0,profit);let questBonus=S.quests.served>=(5+S.day)?30:0;S.cash+=questBonus;document.getElementById("sumDay").textContent=S.day;document.getElementById("profit").textContent=(profit>=0?"+":"")+money(profit);document.getElementById("sumLine").textContent=`Hôm nay bạn phục vụ ${S.today?.served||0} ly và kiếm được ${money(revenue)} doanh thu.`;document.getElementById("summaryStats").innerHTML=`<div class="statBox"><b>${money(revenue)}</b>Doanh thu</div><div class="statBox"><b>-${money(rent)}</b>Tiền thuê</div><div class="statBox"><b>-${money(utilities)}</b>Điện nước</div><div class="statBox"><b>${questBonus?"+30k":"—"}</b>Thưởng</div>`;document.getElementById("ledger").innerHTML=`<p>Doanh thu: <b>${money(revenue)}</b></p><p>Thuê mặt bằng: <b>-${money(rent)}</b></p><p>Điện nước: <b>-${money(utilities)}</b></p><p>Hàng hao hụt: <b>-${money(waste+snackWaste)}</b></p><hr><p>Online: <b>+${money(onlineNet)}</b></p><p>Lương nhân viên: <b>-${money(employeeCost)}</b></p><p>Phốt không trả lương: <b>${unpaidPenalty?("-"+unpaidPenalty.toFixed(2)+" sao"):"—"}</b></p><p>Lợi nhuận ngày: <b>${money(profit)}</b></p><p>Số dư: <b>${money(S.cash)}</b></p>`;document.getElementById("achievements").innerHTML=`<div class="quest ${S.stats.served>=10?"done":""}">🥤 Phục vụ 10 ly</div><div class="quest ${S.rating>=4.5?"done":""}">⭐ Đạt 4.5 sao</div><div class="quest ${S.level>=5?"done":""}">🏆 Cấp 5</div>`;if(S.loan?.principal && S.day>=S.loan.dueDay-10){let remain=S.loan.total-S.loan.paid;let pay=Math.min(remain,Math.ceil(S.loan.total/10));if(S.cash>=pay){S.cash-=pay;S.loan.paid+=pay;toast("💳 Trả góp vay "+money(pay))}else{toast("⚠️ Không đủ tiền trả góp khoản vay")};if(S.loan.paid>=S.loan.total)S.loan={principal:0,total:0,paid:0,dueDay:0}}S.history.push({day:S.day,profit,revenue,online:onlineNet});save();show("summary")}
+ const unpaidPenalty=applyUnpaidPenalty();updateTop();clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;const employeeCost=employeeDailyCost();let revenue=(S.today?.revenue||0),rent=12+S.day*2,utilities=5+Math.floor(S.day/2)+Object.keys(S.equipment||{}).filter(k=>S.equipment[k]).length*8,waste=0,snackWaste=0,profit=revenue-rent-utilities-waste-snackWaste-employeeCost;const onlineNet=onlineDailyRevenue();profit+=onlineNet;const dailyExpenses=rent+utilities+waste+snackWaste+employeeCost;S.cash=Math.max(0,S.cash-dailyExpenses);S.cash+=onlineNet;S.stats.totalProfit=(S.stats.totalProfit||0)+profit;S.stats.days++;S.stats.bestDay=Math.max(S.stats.bestDay,profit);S.quests.profit=(S.quests.profit||0)+Math.max(0,profit);let questBonus=S.quests.served>=(5+S.day)?30:0;S.cash+=questBonus;document.getElementById("sumDay").textContent=S.day;document.getElementById("profit").textContent=(profit>=0?"+":"")+money(profit);document.getElementById("sumLine").textContent=`Hôm nay bạn phục vụ ${S.today?.served||0} ly và kiếm được ${money(revenue)} doanh thu.`;document.getElementById("summaryStats").innerHTML=`<div class="statBox"><b>${money(revenue)}</b>Doanh thu</div><div class="statBox"><b>-${money(rent)}</b>Tiền thuê</div><div class="statBox"><b>-${money(utilities)}</b>Điện nước</div><div class="statBox"><b>${questBonus?"+30k":"—"}</b>Thưởng</div>`;document.getElementById("ledger").innerHTML=`<p>Doanh thu: <b>${money(revenue)}</b></p><p>Thuê mặt bằng: <b>-${money(rent)}</b></p><p>Điện nước: <b>-${money(utilities)}</b></p><p>Hàng hao hụt: <b>-${money(waste+snackWaste)}</b></p><hr><p>Online: <b>+${money(onlineNet)}</b></p><p>Lương nhân viên: <b>-${money(employeeCost)}</b></p><p>Phốt không trả lương: <b>${unpaidPenalty?("-"+unpaidPenalty.toFixed(2)+" sao"):"—"}</b></p><p>Lợi nhuận ngày: <b>${money(profit)}</b></p><p>Số dư: <b>${money(S.cash)}</b></p>`;document.getElementById("achievements").innerHTML=`<div class="quest ${S.stats.served>=10?"done":""}">🥤 Phục vụ 10 ly</div><div class="quest ${S.rating>=4.5?"done":""}">⭐ Đạt 4.5 sao</div><div class="quest ${S.level>=5?"done":""}">🏆 Cấp 5</div>`;if(S.loan?.principal && S.day>=S.loan.dueDay-10){let remain=S.loan.total-S.loan.paid;let pay=Math.min(remain,Math.ceil(S.loan.total/10));if(S.cash>=pay){S.cash-=pay;S.loan.paid+=pay;toast("💳 Trả góp vay "+money(pay))}else{toast("⚠️ Không đủ tiền trả góp khoản vay")};if(S.loan.paid>=S.loan.total)S.loan={principal:0,total:0,paid:0,dueDay:0}}S.history.push({day:S.day,profit,revenue,online:onlineNet});checkLevelMissions(false);save();show("summary")}
 function claimDaily(){if(claimed)return toast("Đã nhận thưởng");claimed=true;S.cash+=20;gainXP(10);toast("🎁 +20k thưởng");save();updateTop()}
 function resolveNextDayCrime(){
   S.theft=Object.assign({count:0,lost:0,recovered:0,lastDay:0},S.theft||{});
@@ -1502,7 +1575,7 @@ function manageTab(mode){
  ["tabUp","tabMenu","tabStaff","tabOnline","tabQuest"].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle("on",id===(mode==="up"?"tabUp":mode==="menu"?"tabMenu":mode==="staff"?"tabStaff":mode==="online"?"tabOnline":"tabQuest"))});
  renderManage();
 }
-function buyEquipment(key,cost,name){S.equipment=S.equipment||{};if(S.equipment[key])return toast("✅ Đã trang bị");if(S.cash<cost)return toast("💰 Không đủ tiền");S.cash-=cost;S.equipment[key]=true;if(key==="branding")S.branding=Object.assign({bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"},S.branding||{});save();renderManage();renderPrep();updateTop();toast("🛠️ Đã mua: "+name);if(key==="branding")setTimeout(editBranding,120)}
+function buyEquipment(key,cost,name){S.equipment=S.equipment||{};if(S.equipment[key])return toast("✅ Đã trang bị");if(S.cash<cost)return toast("💰 Không đủ tiền");S.cash-=cost;S.equipment[key]=true;if(key==="branding")S.branding=Object.assign({bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"},S.branding||{});checkLevelMissions(false);save();renderManage();renderPrep();updateTop();toast("🛠️ Đã mua: "+name);if(key==="branding")setTimeout(editBranding,120)}
 function takeLoan(amount){S.loan=S.loan||{principal:0,total:0,paid:0,dueDay:0};if(S.loan.principal>0)return toast("💳 Hãy trả khoản vay hiện tại trước");if(amount>1000||amount<=0)return toast("💰 Khoản vay không hợp lệ");S.cash+=amount;S.loan={principal:amount,total:Math.ceil(amount*1.25),paid:0,dueDay:S.day+10};save();renderManage();updateTop();toast("💳 Đã vay "+money(amount)+" · trả trong 10 ngày")}
 
 const EMPLOYEE_ROLES={
@@ -1575,7 +1648,7 @@ function hireEmployee(key,cost,name,condition=true){
  S.cash-=cost;S.employees[key]=true;S.employeePayEnabled=true;
  ensureEmployeeRoster();
  const e=S.employeeRoster[key];e.wage=wage;e.hiredDay=S.day;
- save();renderManage();updateTop();
+ checkLevelMissions(false);save();renderManage();updateTop();
  toast((info.gender==="female"?"👩":"👨")+" Đã thuê "+info.name+" · "+name+" · deal "+wage+"k/giờ");
 }
 
@@ -1612,8 +1685,8 @@ function applyUnpaidPenalty(){
  applyRatingChange(-penalty);
  return penalty;
 }
-function buyOnlinePlatform(){S.online=S.online||{platform:false,tablets:0};if(S.online.platform)return toast("✅ Đã mở nền tảng");const ok=(S.stats.totalProfit||0)>=15000&&S.stats.days>=60&&S.rating>=4;if(!ok)return toast("🔒 Chưa đủ điều kiện mở đơn online");if(S.cash<3000)return toast("💰 Cần 3.000k để gia nhập Soppi");S.cash-=3000;S.online.platform=true;save();renderManage();updateTop();toast("🚚 Đã mở nền tảng Soppi")}
-function buyTablet(){S.online=S.online||{platform:false,tablets:0};if(!S.online.platform)return toast("🔒 Hãy mở nền tảng online trước");if((S.online.tablets||0)>=5)return toast("📱 Tối đa 5 tablet");if(S.cash<7000)return toast("💰 Cần 7.000k mua tablet");S.cash-=7000;S.online.tablets=(S.online.tablets||0)+1;save();renderManage();updateTop();toast("📱 Đã mua tablet nhận đơn") }
+function buyOnlinePlatform(){S.online=S.online||{platform:false,tablets:0};if(S.online.platform)return toast("✅ Đã mở nền tảng");const ok=(S.stats.totalProfit||0)>=15000&&S.stats.days>=60&&S.rating>=4;if(!ok)return toast("🔒 Chưa đủ điều kiện mở đơn online");if(S.cash<3000)return toast("💰 Cần 3.000k để gia nhập Soppi");S.cash-=3000;S.online.platform=true;checkLevelMissions(false);save();renderManage();updateTop();toast("🚚 Đã mở nền tảng Soppi")}
+function buyTablet(){S.online=S.online||{platform:false,tablets:0};if(!S.online.platform)return toast("🔒 Hãy mở nền tảng online trước");if((S.online.tablets||0)>=5)return toast("📱 Tối đa 5 tablet");if(S.cash<7000)return toast("💰 Cần 7.000k mua tablet");S.cash-=7000;S.online.tablets=(S.online.tablets||0)+1;checkLevelMissions(false);save();renderManage();updateTop();toast("📱 Đã mua tablet nhận đơn") }
 function employeeDailyCost(){ensureEmployeeRoster();const active=["counter1","brewer","online","counter2"].filter(k=>S.employees?.[k]===true);if(!active.length)return 0;if(S.employeePayEnabled===false)return 0;const hoursPerDay=5;return active.reduce((sum,k)=>sum+Number(S.employeeRoster?.[k]?.wage||employeeWage(k)),0)*hoursPerDay}
 function hiredEmployeeCount(){return Object.values(S.employees||{}).filter(v=>v===true).length}
 function onlineDailyRevenue(){if(!S.online?.platform||!S.online?.tablets)return 0;let orders=Math.min(S.online.tablets,2+Math.floor(S.day/10));let gross=orders*45;let fee=Math.round(gross*.2);S.stats.onlineRevenue=(S.stats.onlineRevenue||0)+Math.max(0,gross-fee);return Math.max(0,gross-fee)}
@@ -1674,8 +1747,9 @@ function renderManage(){
   return;
  }
  if(manageMode==="quest"){
-  let target=5+S.day;
-  b.innerHTML=`<h3>🎯 Nhiệm vụ ngày ${S.day}</h3><div class="quest ${S.quests.served>=target?"done":""}">🥤 Phục vụ ${S.quests.served}/${target} khách <span>${S.quests.served>=target?"✅":"+30k cuối ngày"}</span></div><div class="quest ${S.quests.perfect>=3?"done":""}">💖 Làm 3 ly hoàn hảo <span>${S.quests.perfect>=3?"✅":"+"}</span></div>`;
+  checkLevelMissions(false);
+  const target=5+S.day;
+  b.innerHTML=`<h3>🎯 Nhiệm vụ ngày ${S.day}</h3><div class="quest ${S.quests.served>=target?"done":""}">🥤 Phục vụ ${S.quests.served}/${target} khách <span>${S.quests.served>=target?"✅ +30k cuối ngày":"+30k cuối ngày"}</span></div><div class="quest ${S.quests.perfect>=3?"done":""}">💖 Làm 3 ly hoàn hảo <span>${S.quests.perfect>=3?"✅":"+"}</span></div><div style="margin-top:16px">${renderLevelMissions()}</div>`;
   return;
  }
  const normal=Object.entries(TEAS).filter(([n,t])=>t.type==="normal"), special=Object.entries(TEAS).filter(([n,t])=>t.type==="special");
@@ -1702,7 +1776,7 @@ function renderManage(){
  (unlockedSnacks.length?`<h3 style="margin-top:18px">📦 Nhập đồ ăn vặt</h3>`+unlockedSnacks.map(n=>{let t=SNACKS[n];return `<div class="upgrade"><div><b>${t.emoji} ${n}</b><div class="mini">Còn ${S.stock.snacks[n]||0} · nhập +3</div></div><button class="btn secondary" onclick="buySnack('${n}')">+3 · ${t.cost*3}k</button></div>`}).join(""):"")+
  `<div class="snackBox" style="margin-top:14px"><b>💡 Tất cả mua sắm & mở khóa ở đây</b><div class="mini">Mua công thức → mở nguyên liệu. Nâng Nghiên cứu → mở nước đặc biệt. Lên cấp → nhận cỡ ly và topping. Mở công thức đồ ăn vặt → mới nhập hàng được. Màn hình chuẩn bị chỉ để kiểm tra kho và mở cửa.</div></div>`;
 }
-function buyRecipe(name){const t=TEAS[name];if(!t||t.type!=="normal"||S.recipes.includes(name))return;const cost=t.recipe||0;if(S.cash<cost)return toast("💰 Không đủ tiền mua công thức");S.cash-=cost;S.recipes.push(name);S.unlockedTeas=S.recipes.slice();unlockIngredientsFor(name,true);save();renderPrep();renderManage();updateTop();toast("📖 Đã mua công thức: "+name)}
+function buyRecipe(name){const t=TEAS[name];if(!t||t.type!=="normal"||S.recipes.includes(name))return;const cost=t.recipe||0;if(S.cash<cost)return toast("💰 Không đủ tiền mua công thức");S.cash-=cost;S.recipes.push(name);S.unlockedTeas=S.recipes.slice();unlockIngredientsFor(name,true);checkLevelMissions(false);save();renderPrep();renderManage();updateTop();toast("📖 Đã mua công thức: "+name)}
 function upgrade(k,c){
  if(!["speed","quality","capacity","decor","special"].includes(k))return toast("⚠️ Nâng cấp không hợp lệ");
  const max={speed:2,quality:3,capacity:3,decor:3,special:8}[k];
@@ -1716,6 +1790,7 @@ function upgrade(k,c){
    recalcRatingFromReviews();
  }
  if(k==="special")syncSpecialDrinks(true);
+ checkLevelMissions(false);
  save();
  toast(k==="special"?"⭐ Nghiên cứu thành công":k==="quality"?"💎 Công thức chuẩn đã nâng cấp":k==="capacity"?"🪑 Thêm bàn thành công":k==="decor"?"🌸 Rating cơ bản đã tăng":"⚡ Khách mất kiên nhẫn chậm hơn");
  renderManage();renderPrep();updateTop();
