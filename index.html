@@ -84,13 +84,18 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
 .eventNotice{display:flex;align-items:center;gap:10px;margin:10px 0;padding:8px 10px;border:1px solid var(--line);border-radius:14px;background:#fff7ed;font-size:12px;font-weight:800}.eventNotice img{width:42px;height:42px;object-fit:contain;border-radius:10px}
 </style><style>
 .assetImg{width:64px;height:64px;object-fit:contain;object-position:center;display:block;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:64px;height:64px;float:none;margin:0;pointer-events:none}.snackChoice .assetImg,.choice .assetImg{width:42px;height:42px;object-fit:contain;object-position:center;vertical-align:middle}.customerImg{width:112px;height:112px;object-fit:contain;object-position:center;display:block;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/backgrounds/bg_quaytra.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
-.inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style><style> .customerImg,.order .assetImg{object-fit:contain!important;object-position:center!important;} .customerStage .customer{overflow:visible!important;} </style><!-- Tiệm Trà Xinh favicon -->
-<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png?v=53">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=53">
-<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/favicon-192.png?v=53">
-<link rel="icon" type="image/png" sizes="512x512" href="assets/icons/favicon-512.png?v=53">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/favicon-180.png?v=53">
-<link rel="manifest" href="assets/icons/favicon-96.png?v=53">
+.inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style><style> .customerImg,.order .assetImg{object-fit:contain!important;object-position:center!important;} .customerStage .customer{overflow:visible!important;} </style><!-- Tiệm Trà Xinh V65 favicon -->
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png?v=65">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=65">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48.png?v=65">
+<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96.png?v=65">
+<link rel="icon" type="image/png" sizes="144x144" href="assets/icons/favicon-144.png?v=65">
+<link rel="icon" type="image/png" sizes="180x180" href="assets/icons/favicon-180.png?v=65">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/favicon-192.png?v=65">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icons/favicon-512.png?v=65">
+<link rel="shortcut icon" href="assets/icons/favicon-32.png?v=65">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/favicon-180.png?v=65">
+<link rel="manifest" href="assets/icons/site.webmanifest?v=65">
 <meta name="theme-color" content="#5a3020">
 <style id="v56-square-avatar-fix">
 .customerStage .customer{width:156px!important;height:156px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;}
@@ -263,13 +268,13 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
    <span class="settingIcon">📖</span><span class="settingText"><b>Hướng dẫn</b><span>Hướng dẫn cách chơi từ đầu đến mở rộng quán</span></span><span class="settingValue">Xem</span>
   </button>
   <button class="settingsAction" type="button" onclick="showWhatsNew()">
-   <span class="settingIcon">🎁</span><span class="settingText"><b>Có gì mới</b><span>Thông tin cập nhật phiên bản hiện tại</span></span><span class="settingValue">V55</span>
+   <span class="settingIcon">🎁</span><span class="settingText"><b>Có gì mới</b><span>Thông tin cập nhật phiên bản hiện tại</span></span><span class="settingValue">V65</span>
   </button>
-  <button class="settingsAction good" type="button" onclick="location.reload(true)">
+  <button class="settingsAction good" type="button" onclick="location.href=location.pathname+'?v='+Date.now()">
    <span class="settingIcon">🔄</span><span class="settingText"><b>Cập nhật bản mới</b><span>Tải lại web để nhận phiên bản mới nhất</span></span><span class="settingValue">Tải lại</span>
   </button>
   <button class="settingsAction" type="button" onclick="openZaloSettings()">
-   <span class="settingIcon">💬</span><span class="settingText"><b>Nhóm Zalo Trà Thủ</b><span>Thêm liên kết nhóm Zalo của bạn</span></span><span class="settingValue">Thiết lập</span>
+   <span class="settingIcon">💬</span><span class="settingText"><b>Nhóm Zalo Trà Thủ</b><span>Thêm hoặc mở liên kết nhóm Zalo đã lưu</span></span><span class="settingValue" id="zaloSettingValue">Thiết lập</span>
   </button>
   <button class="settingsAction" type="button" onclick="toggleGuideMode()">
    <span class="settingIcon">📖</span><span class="settingText"><b>Chỉ dẫn từng bước</b><span>Hiển thị gợi ý khi bắt đầu các phần chơi</span></span><span class="settingValue" id="guideModeValue">Tự động</span>
@@ -328,13 +333,17 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
    <span class="settingIcon">🔑</span><span class="settingText"><b>Khôi phục từ mã</b><span>Dán mã sao lưu để phục hồi tiến trình</span></span><span class="settingValue">Nhập mã</span>
   </button>
 
+  <button class="settingsAction" type="button" onclick="resetSettingsOnly()">
+   <span class="settingIcon">♻️</span><span class="settingText"><b>Đặt lại cài đặt</b><span>Đưa giao diện, âm thanh, nhạc, chỉ dẫn và liên kết Zalo về mặc định; không xóa tiến trình.</span></span><span class="settingValue">Đặt lại</span>
+  </button>
+
   <div class="settingsSectionTitle">⚠️ Quản lý dữ liệu</div>
   <button class="settingsAction settingsDanger" type="button" onclick="confirmDeleteAll()">
    <span class="settingIcon">🗑️</span><span class="settingText"><b>Xóa toàn bộ dữ liệu</b><span>Xóa tiến trình, tiền, nâng cấp và lịch sử trên thiết bị</span></span><span class="settingValue">Xóa</span>
   </button>
 
   <div class="settingsDivider"></div>
-  <div class="mini" style="text-align:center">Tiệm Trà Xinh V48 · HTML5 · Dữ liệu trò chơi lưu trên thiết bị</div>
+  <div class="mini" style="text-align:center">Tiệm Trà Xinh V65 · HTML5 · Dữ liệu trò chơi lưu trên thiết bị</div>
   <button class="btn secondary wide" style="margin-top:12px" type="button" onclick="closeSettings()">Đóng cài đặt</button>
  </div>
 </div>
@@ -399,6 +408,7 @@ function syncSettingsUI(){
  const a=document.getElementById("sfxToggle"),b=document.getElementById("musicToggle");
  if(a){a.textContent=sfx?"Bật":"Tắt";a.classList.toggle("on",sfx)}
  if(b){b.textContent=music?"Bật":"Tắt";b.classList.toggle("on",music)}
+ const zv=document.getElementById("zaloSettingValue");if(zv)zv.textContent=getSetting("zaloLink","")?"Mở / sửa":"Thiết lập";
  const v=getSetting("musicVolume",0.35), r=document.getElementById("musicVolume");if(r)r.value=v;
 }
 
@@ -427,16 +437,42 @@ function showGuide(){
   alert("📖 HƯỚNG DẪN TIỆM TRÀ XINH\n\n1. Vào Kho để mua ly và nguyên liệu.\n2. Vào Menu để chọn món nước và đồ ăn vặt muốn bán.\n3. Vào Nâng cấp để mua trang bị, vay tiền hoặc thuê nhân viên.\n4. Mở cửa để nhận khách.\n5. Chọn đúng size, trà, topping, đường, đá và đồ ăn vặt.\n6. Giữ nút rót để đạt khoảng 66% ± 9%.\n7. Một ngày bán hàng kéo dài 10 phút, từ 07:00 đến 17:00; khách tiếp tục tới trong suốt thời gian đó.\n8. Dùng tiền lãi để nhập hàng, mở khóa công thức và nâng cấp quán.");
 }
 function showWhatsNew(){
-  alert("🎁 CÓ GÌ MỚI — V27\\n\\n• Cài đặt được mở rộng đầy đủ.\\n• Thêm nhạc chill riêng từ MP3/M4A/WAV/OGG.\\n• Bật/tắt nhạc và âm thanh.\\n• Chọn giao diện Kem sữa / Đêm chill.\\n• Sao lưu và khôi phục tiến trình.\\n• Khôi phục từ file hoặc mã sao lưu.\\n• Quản lý chỉ dẫn từng bước.\\n• Thêm đánh giá khách hàng ngẫu nhiên.\\n• Khách có thể khen, góp ý hoặc chê.\\n• Chủ quán có thể phản hồi từng đánh giá.");
+  alert("🎁 CÓ GÌ MỚI — V65\\n\\n• Cài đặt được mở rộng đầy đủ.\\n• Thêm nhạc chill riêng từ MP3/M4A/WAV/OGG.\\n• Bật/tắt nhạc và âm thanh.\\n• Chọn giao diện Kem sữa / Đêm chill.\\n• Sao lưu và khôi phục tiến trình.\\n• Khôi phục từ file hoặc mã sao lưu.\\n• Quản lý chỉ dẫn từng bước.\\n• Thêm đánh giá khách hàng ngẫu nhiên.\\n• Khách có thể khen, góp ý hoặc chê.\\n• Chủ quán có thể phản hồi từng đánh giá.");
 }
 function openZaloSettings(){
   const old=getSetting("zaloLink","");
+  if(old && /^https?:\/\//i.test(old)){
+    if(confirm("💬 Đã có link nhóm Zalo. Nhấn OK để mở nhóm, Hủy để sửa link.")){window.open(old,"_blank","noopener");return;}
+  }
   const link=prompt("💬 Dán link nhóm Zalo của bạn (để trống để xóa):",old);
   if(link===null)return;
-  setSetting("zaloLink",link.trim());
-  if(link.trim()) toast("💬 Đã lưu link nhóm Zalo");
-  else toast("💬 Đã xóa link nhóm Zalo");
+  const clean=link.trim();
+  if(clean && !/^https?:\/\//i.test(clean))return toast("⚠️ Link phải bắt đầu bằng https:// hoặc http://");
+  setSetting("zaloLink",clean); syncSettingsUI();
+  toast(clean?"💬 Đã lưu link nhóm Zalo":"💬 Đã xóa link nhóm Zalo");
 }
+function resetSettingsOnly(){
+ if(!confirm("♻️ Đặt lại toàn bộ cài đặt về mặc định? Tiến trình quán sẽ không bị xóa."))return;
+ ["dayTime","theme","music","musicVolume","sfx","guideMode","zaloLink"].forEach(k=>localStorage.removeItem("ttx_setting_"+k));
+ setSetting("dayTime",10);setSetting("theme","cream");setSetting("music",true);setSetting("musicVolume",0.35);setSetting("sfx",true);setSetting("guideMode",true);
+ document.body.classList.remove("nightTheme");
+ syncSettingsUI();applyStoredSettings();toast("♻️ Đã đặt lại cài đặt · tiến trình vẫn được giữ");
+}
+function playSfx(kind="click"){
+ if(!getSetting("sfx",true))return;
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  const ac=window.__ttxAudioContext||(window.__ttxAudioContext=new AC());
+  if(ac.state==="suspended")ac.resume();
+  const osc=ac.createOscillator(),gain=ac.createGain();
+  const now=ac.currentTime;
+  osc.type=kind==="error"?"sawtooth":"sine";
+  osc.frequency.value=kind==="success"?660:kind==="error"?180:420;
+  gain.gain.setValueAtTime(0.0001,now);gain.gain.exponentialRampToValueAtTime(0.035,now+0.01);gain.gain.exponentialRampToValueAtTime(0.0001,now+0.08);
+  osc.connect(gain);gain.connect(ac.destination);osc.start(now);osc.stop(now+0.09);
+ }catch(e){}
+}
+
 function getBackupPayload(){return {app:"TiemTraXinh",version:26,createdAt:new Date().toISOString(),state:S};}
 function exportBackup(){
   try{
@@ -449,7 +485,7 @@ function restoreAutoSave(){
   const raw=localStorage.getItem("TTX_FULL_SAVE");
   if(!raw)return toast("📭 Chưa có bản tự lưu");
   if(!confirm("Khôi phục bản tự lưu hiện tại? Dữ liệu đang chơi sẽ được thay thế."))return;
-  try{S=Object.assign(clone(DEFAULT),JSON.parse(raw));load();updateTop();renderReviews();renderPrep();closeSettings();toast("📅 Đã khôi phục bản tự lưu");}
+  try{S=Object.assign(clone(DEFAULT),JSON.parse(raw));normalizeSnackUnlocks();syncLevelUnlocks(false);save();updateTop();renderReviews();renderPrep();closeSettings();toast("📅 Đã khôi phục bản tự lưu");}
   catch(e){toast("⚠️ Bản tự lưu không hợp lệ")}
 }
 async function importBackup(file){
@@ -458,7 +494,7 @@ async function importBackup(file){
     const raw=await file.text(), data=JSON.parse(raw), state=data.state||data;
     if(!state || typeof state!=="object" || !state.shopName)throw new Error("invalid");
     if(!confirm("Khôi phục file sao lưu này? Tiến trình hiện tại sẽ được thay thế."))return;
-    S=Object.assign(clone(DEFAULT),state);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("📥 Đã khôi phục bản sao lưu");
+    S=Object.assign(clone(DEFAULT),state);normalizeSnackUnlocks();syncLevelUnlocks(false);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("📥 Đã khôi phục bản sao lưu");
   }catch(e){toast("⚠️ File sao lưu không hợp lệ")}
 }
 function restoreCodeDialog(){
@@ -468,7 +504,7 @@ function restoreCodeDialog(){
     const data=JSON.parse(code),state=data.state||data;
     if(!state || typeof state!=="object" || !state.shopName)throw new Error("invalid");
     if(!confirm("Khôi phục dữ liệu từ mã này?"))return;
-    S=Object.assign(clone(DEFAULT),state);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("🔑 Đã khôi phục từ mã");
+    S=Object.assign(clone(DEFAULT),state);normalizeSnackUnlocks();syncLevelUnlocks(false);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("🔑 Đã khôi phục từ mã");
   }catch(e){toast("⚠️ Mã sao lưu không hợp lệ")}
 }
 function confirmDeleteAll(){
@@ -673,11 +709,10 @@ function syncLevelUnlocks(showToast=true){
 }
 
 function normalizeSnackUnlocks(){
-  // Đồ ăn vặt chỉ tồn tại từ Lv.2. Dọn toàn bộ trạng thái snack của save cũ khi Lv.1.
   S.unlockedSnacks=Array.isArray(S.unlockedSnacks)?S.unlockedSnacks:[];
   S.menuSnacks=Array.isArray(S.menuSnacks)?S.menuSnacks:[];
-  S.stock=S.stock||{};
-  S.stock.snacks=S.stock.snacks||{};
+  S.stock=S.stock||{}; S.stock.snacks=S.stock.snacks||{};
+  Object.keys(SNACKS).forEach(n=>{if(S.stock.snacks[n]==null)S.stock.snacks[n]=0});
   if(Number(S.level||1)<2){
     S.snackSystemUnlocked=false;
     S.unlockedSnacks=[];
@@ -687,7 +722,8 @@ function normalizeSnackUnlocks(){
   }
   S.snackSystemUnlocked=true;
   S.unlockedSnacks=S.unlockedSnacks.filter(n=>SNACKS[n]);
-  S.menuSnacks=S.menuSnacks.filter(n=>S.unlockedSnacks.includes(n));
+  // Món chưa nhập kho không được nằm trong menu bán và không thể được khách gọi.
+  S.menuSnacks=S.menuSnacks.filter(n=>S.unlockedSnacks.includes(n) && (S.stock.snacks[n]||0)>0);
 }
 function load(){
  let x=localStorage.getItem("TTX_FULL_SAVE");if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
@@ -726,7 +762,7 @@ function wipe(){
   const second=confirm("🚨 XÁC NHẬN LẦN CUỐI\n\nThao tác này không thể hoàn tác. Nhấn OK để xóa toàn bộ dữ liệu, hoặc Hủy để giữ nguyên tiến trình.");
   if(second){localStorage.removeItem("TTX_FULL_SAVE");location.reload();}
 }
-function startPrep(){renderPrep();show("prep")}
+function startPrep(){renderPrep();show("prep");if(getSetting("guideMode",true)&&Number(S.day||1)<=2)toast("📖 Hướng dẫn: vào Kho/Nâng cấp để nhập hàng → chỉnh Menu → Mở cửa")}
 
 function clampRating(n){return Math.max(0,Math.min(5,Number(n)||0))}
 function hasCustomerRatings(){return Array.isArray(S.reviews)&&S.reviews.length>0}
@@ -990,7 +1026,7 @@ function renderPrep(){
  document.getElementById("ingredientInventory").innerHTML=`<div class="snackBox"><b>🧪 Nguyên liệu đã mở khóa</b><div class="ingredientGrid">${ings.map(n=>{let t=INGREDIENTS[n];return `<div class="ingredientCard"><div><b>${t.emoji} ${n}</b><div class="mini">Còn ${S.stock.ingredients[n]||0}</div></div><span class="unlockBadge">Đã mở</span></div>`}).join("")}</div></div>`;
  document.getElementById("snackInventory").innerHTML=S.level<2?`<div class="snackBox"><b>🔒 Đồ ăn vặt</b><div class="mini">Mở khóa từ cấp 2. Hiện tại quán chưa thể bán đồ ăn vặt.</div></div>`:`<div class="snackBox"><b>🍢 Đồ ăn vặt đã mở khóa</b><div class="snackGrid">${(S.unlockedSnacks||[]).map(n=>{let t=SNACKS[n];return `<div class="snackItem"><div><b>${assetTag(assetSnack(n),n,"assetImg")}${n}</b><div class="mini">Còn ${S.stock.snacks[n]||0}</div></div><span class="unlockBadge">Đã mở</span></div>`}).join("")||`<div class="mini" style="grid-column:1/-1">🔒 Chưa có món ăn vặt. Mở khóa công thức trong Nâng cấp từ Lv.2.</div>`}</div></div>`;
  const menu=Object.entries(TEAS).filter(([n])=>S.menuDrinks.includes(n));
- const menuSnacks=(S.menuSnacks||[]).filter(n=>SNACKS[n]);
+ const menuSnacks=Number(S.level||1)>=2?(S.menuSnacks||[]).filter(n=>SNACKS[n]&&(S.stock.snacks?.[n]||0)>0):[];
  document.getElementById("menu").innerHTML=menu.map(([n,t])=>`<div class="menuItem">${assetTag(assetTea(n),n)}<b>${n}</b><div class="mini">${t.price}k / ly · ${t.type==="special"?"⭐ Đặc biệt":"📖 Đã mở"}</div><div class="mini">🧪 ${t.ingredients.join(" + ")}</div></div>`).join("")+menuSnacks.map(n=>{let t=SNACKS[n];return `<div class="menuItem">${assetTag(assetSnack(n),n)}<b>${n}</b><div class="mini">${t.price}k / phần · 🍢 Đồ ăn vặt</div></div>`}).join("")+`<div class="menuItem"><b>📋 Menu đang bán</b><div class="mini">${menu.length} nước · ${menuSnacks.length} món ăn vặt</div><button class="btn gold" style="margin-top:7px" onclick="show('manage');manageTab('menu')">✏️ Sửa menu</button></div>`;
  document.getElementById("dailyQuest").innerHTML=`<div class="quest"><span>🎯</span><div><b>Phục vụ ${5+S.day} khách</b><div class="progress"><i style="width:${Math.min(100,S.quests.served/(5+S.day)*100)}%"></i></div></div></div><div class="quest"><span>✨</span><div><b>${S.quests.perfect} ly hoàn hảo</b></div></div>`;
  const rc=document.getElementById("prepReviewCount");if(rc){const n=(S.reviews||[]).length;const avg=n?(S.reviews.reduce((a,r)=>a+r.stars,0)/n):0;rc.textContent=n?`${avg.toFixed(1)} ⭐ · ${n}`:"Chưa có"}
@@ -998,7 +1034,7 @@ function renderPrep(){
 function buyCup(k){let cost=(8+Math.max(0,SIZES[k].price));if(S.cash<cost)return toast("💰 Không đủ tiền mua ly");S.cash-=cost;S.stock.cups[k]=(S.stock.cups[k]||0)+4;save();renderPrep();renderManage();updateTop()}
 function buyIngredient(n){let t=INGREDIENTS[n];if(!t)return;let cost=t.cost*5;if(S.cash<cost)return toast("💰 Không đủ tiền mua nguyên liệu");S.cash-=cost;S.stock.ingredients[n]=(S.stock.ingredients[n]||0)+5;save();renderPrep();renderManage();updateTop()}
 function buyTopping(n){let t=TOPS[n];if(!t)return;let cost=t.cost*4;if(S.cash<cost)return toast("💰 Không đủ tiền nhập topping");S.cash-=cost;S.stock.toppings[n]=(S.stock.toppings[n]||0)+4;save();renderPrep();renderManage();updateTop()}
-function buySnack(name){let t=SNACKS[name];if(!t)return;if(!S.unlockedSnacks.includes(name))return toast("🔒 Hãy mở khóa công thức món ăn vặt trước");let cost=t.cost*3;if(S.cash<cost)return toast("💰 Không đủ tiền nhập món");S.cash-=cost;S.stock.snacks[name]=(S.stock.snacks[name]||0)+3;save();renderPrep();renderManage();updateTop()}
+function buySnack(name){let t=SNACKS[name];if(!t)return;if(Number(S.level||1)<2)return toast("🔒 Đồ ăn vặt chỉ mở từ cấp 2");if(!S.unlockedSnacks.includes(name))return toast("🔒 Hãy mở khóa công thức món ăn vặt trước");let cost=t.cost*3;if(S.cash<cost)return toast("💰 Không đủ tiền nhập món");S.cash-=cost;S.stock.snacks[name]=(S.stock.snacks[name]||0)+3;save();renderPrep();renderManage();updateTop()}
 function availableTeas(){let list=(S.menuDrinks||[]).filter(n=>S.recipes.includes(n)&&TEAS[n]);return list.length?list:S.recipes.filter(n=>TEAS[n]).slice(0,1)}
 function availableTops(){return S.unlockedTops||[]}
 function availableSizes(){return S.unlockedSizes||["S","M","L"]}
@@ -1010,10 +1046,17 @@ function customerAsset(o){
   return `assets/customers/${o.gender==='female'?'female':'male'}/khach_${o.gender==='female'?'nu':'nam'}_${file}.png`;
 }
 function makeOrder(){
- let tea=availableTeas()[Math.floor(Math.random()*availableTeas().length)],top=availableTops()[Math.floor(Math.random()*availableTops().length)],size=availableSizes()[Math.floor(Math.random()*availableSizes().length)],sweet=[30,50,70,100][Math.floor(Math.random()*4)],ice=[30,50,70,100][Math.floor(Math.random()*4)],wantsSnack=(S.menuSnacks||[]).length>0&&Math.random()<0.38,snack=wantsSnack?S.menuSnacks[Math.floor(Math.random()*S.menuSnacks.length)]:null,c=CUSTOMERS[Math.floor(Math.random()*CUSTOMERS.length)];
- return {name:c.name,gender:c.gender,avatar:c.avatar,tea,top,size,sweet,ice,snack,patience:100,done:false,served:false,leftEarly:false,id:Date.now()+Math.random()}
+ normalizeSnackUnlocks();
+ const teaList=availableTeas(), topList=availableTops(), sizeList=availableSizes();
+ let tea=teaList[Math.floor(Math.random()*teaList.length)],top=topList[Math.floor(Math.random()*topList.length)],size=sizeList[Math.floor(Math.random()*sizeList.length)],sweet=[30,50,70,100][Math.floor(Math.random()*4)],ice=[30,50,70,100][Math.floor(Math.random()*4)];
+ const snackPool=Number(S.level||1)>=2?(S.menuSnacks||[]).filter(n=>(S.stock.snacks?.[n]||0)>0&&S.unlockedSnacks.includes(n)):[];
+ const wantsSnack=snackPool.length>0&&Math.random()<0.38;
+ const snack=wantsSnack?snackPool[Math.floor(Math.random()*snackPool.length)]:null;
+ const c=CUSTOMERS[Math.floor(Math.random()*CUSTOMERS.length)];
+ return {name:c.name,gender:c.gender,avatar:c.avatar,tea,top,size,sweet,ice,snack,patience:100,done:false,served:false,leftEarly:false,id:Date.now()+Math.random()};
 }
 function openShop(){
+  normalizeSnackUnlocks();
   S.menuDrinks=S.menuDrinks||[];
   S.menuSnacks=S.menuSnacks||[];
   if(!S.menuDrinks.length)return toast("📋 Menu chưa có nước · Hãy vào Sửa menu để thêm món");
@@ -1165,10 +1208,20 @@ function renderOrders(){
 
 function renderStage(){let o=customers[current],e=document.getElementById("customerStage");if(!o){e.innerHTML="";return}let mood=o.done?"😊":o.patience>60?"😊":o.patience>30?"😐":"😤";e.innerHTML=`<div class="customer">${assetTag(customerAsset(o),o.name,"customerImg")}</div><div class="bubble">${mood} <b>${o.name}</b> ${o.gender==="male"?"(Nam)":"(Nữ)"}: “Cho mình ${o.tea} ${o.size}, ${o.top}, ${o.sweet}% đường, ${o.ice}% đá${o.snack?` và thêm ${SNACKS[o.snack].emoji} ${o.snack}`:""} nhé!”</div>`}
 function selectCustomer(i){if(customers[i].done)return;current=i;resetCup();renderShop()}
-function renderControls(){normalizeSnackUnlocks();let o=customers[current];if(!o)return;document.getElementById("selected").innerHTML=`<div class="tags"><b>Đơn của ${o.name}:</b><span class="tag">${o.gender==="male"?"♂ Nam":"♀ Nữ"}</span><span class="tag">${o.size}</span><span class="tag">${o.tea}</span><span class="tag">${o.top}</span><span class="tag">${o.sweet}% đường</span><span class="tag">${o.ice}% đá</span>${o.snack?`<span class="tag snackTag">${SNACKS[o.snack].emoji} ${o.snack}</span>`:""}</div>`;choices("sizes",availableSizes(),"size");choices("teas",availableTeas(),"tea");choices("toppings",availableTops(),"top");choices("sweet",[30,50,70,100],"sweet");choices("ice",[30,50,70,100],"ice");document.getElementById("snacks").innerHTML=S.level<2?`<div class="mini" style="padding:8px">🔒 Đồ ăn vặt mở từ cấp 2.</div>`:[null,...(S.unlockedSnacks||[])].map(v=>`<button class="snackChoice ${cup.snack===v?"on":""}" onclick="chooseSnack(${v===null?"null":"'"+v.replace(/'/g,"\\'")+"'"})">${v?(assetTag(assetSnack(v),v,"assetImg"))+v:"Không thêm"}</button>`).join("");document.getElementById("snackHint").textContent=o.snack?`Khách gọi thêm: ${SNACKS[o.snack].emoji} ${o.snack}`:"Khách này không gọi đồ ăn vặt.";document.getElementById("liquid").style.height=cup.pour+"%";document.getElementById("meter").textContent=`Mức nước: ${Math.round(cup.pour||0)}% · mục tiêu 66% ± 9%`}
+function renderSnackChoices(){
+ const box=document.getElementById("snacks"); if(!box)return;
+ if(Number(S.level||1)<2){box.innerHTML='<div class="mini" style="padding:8px">🔒 Đồ ăn vặt mở từ cấp 2.</div>';return;}
+ const pool=(S.menuSnacks||[]).filter(n=>(S.stock.snacks?.[n]||0)>0&&S.unlockedSnacks.includes(n));
+ const html=[null,...pool].map(v=>{
+   const safe=v?String(v).replace(/\\/g,"\\\\").replace(/'/g,"\\'"):null;
+   return `<button class="snackChoice ${cup.snack===v?"on":""}" onclick="chooseSnack(${v===null?"null":"'"+safe+"'"})">${v?(assetTag(assetSnack(v),v,"assetImg")+v):"Không thêm"}</button>`;
+ }).join("");
+ box.innerHTML=html||'<div class="mini" style="padding:8px">📦 Chưa có món ăn vặt trong kho.</div>';
+}
+function renderControls(){normalizeSnackUnlocks();let o=customers[current];if(!o)return;document.getElementById("selected").innerHTML=`<div class="tags"><b>Đơn của ${o.name}:</b><span class="tag">${o.gender==="male"?"♂ Nam":"♀ Nữ"}</span><span class="tag">${o.size}</span><span class="tag">${o.tea}</span><span class="tag">${o.top}</span><span class="tag">${o.sweet}% đường</span><span class="tag">${o.ice}% đá</span>${o.snack?`<span class="tag snackTag">${SNACKS[o.snack].emoji} ${o.snack}</span>`:""}</div>`;choices("sizes",availableSizes(),"size");choices("teas",availableTeas(),"tea");choices("toppings",availableTops(),"top");choices("sweet",[30,50,70,100],"sweet");choices("ice",[30,50,70,100],"ice");renderSnackChoices();document.getElementById("snackHint").textContent=o.snack?`Khách gọi thêm: ${SNACKS[o.snack].emoji} ${o.snack}`:"Khách này không gọi đồ ăn vặt.";document.getElementById("liquid").style.height=cup.pour+"%";document.getElementById("meter").textContent=`Mức nước: ${Math.round(cup.pour||0)}% · mục tiêu 66% ± 9%`}
 function choices(id,arr,key){document.getElementById(id).innerHTML=arr.map(v=>{let label=v,img="";if(key==="top"){label=v;img=assetTag(assetTop(v),v)}else if(key==="tea"){label=v;img=assetTag(assetTea(v),v)}else if(key==="size")label=(SIZES[v]?.emoji||"🥤")+" "+v;else if(key==="sweet"||key==="ice")label=v+"%";return `<button class="choice ${String(cup[key])===String(v)?"on":""}" onclick="choose('${key}','${String(v).replace(/'/g,"\'")}')">${img}${label}</button>`}).join("")}
 function choose(k,v){cup[k]=(k==="sweet"||k==="ice")?+v:v;renderControls()}
-function chooseSnack(v){if(S.level<2){cup.snack=null;renderControls();return toast("🔒 Đồ ăn vặt mở từ cấp 2");}cup.snack=v;renderControls()}
+function chooseSnack(v){normalizeSnackUnlocks();if(Number(S.level||1)<2){cup.snack=null;renderControls();return toast("🔒 Đồ ăn vặt mở từ cấp 2");}if(v!==null && (!(S.menuSnacks||[]).includes(v)||(S.stock.snacks?.[v]||0)<=0)){cup.snack=null;renderControls();return toast("📦 Món ăn vặt chưa có trong kho hoặc chưa bán");}cup.snack=v;renderControls()}
 function resetCup(){cup={size:null,tea:null,pour:0,top:null,sweet:null,ice:null,snack:null};renderControls()}
 const pb=document.getElementById("pourBtn");function startPour(e){if(e){e.preventDefault();e.stopPropagation()}if(pouring)return;pouring=true;try{if(e&&e.pointerId!=null)pb.setPointerCapture(e.pointerId)}catch(_){}clearInterval(pourTimer);pourTimer=setInterval(()=>{cup.pour=Math.min(100,(cup.pour||0)+2.4);document.getElementById("liquid").style.height=cup.pour+"%";if(cup.pour>=100)stopPour()},60)}function stopPour(e){if(e){e.preventDefault();e.stopPropagation()}pouring=false;clearInterval(pourTimer);renderControls()}pb.addEventListener("pointerdown",startPour,{passive:false});["pointerup","pointercancel","lostpointercapture"].forEach(x=>pb.addEventListener(x,stopPour,{passive:false}));pb.addEventListener("touchstart",e=>{e.preventDefault();e.stopPropagation();startPour(e)},{passive:false});pb.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("touchcancel",e=>{e.preventDefault();e.stopPropagation();stopPour(e)},{passive:false});pb.addEventListener("contextmenu",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("selectstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("dragstart",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("copy",e=>{e.preventDefault();e.stopPropagation();return false});pb.addEventListener("cut",e=>{e.preventDefault();e.stopPropagation();return false});
 function serve(){
@@ -1236,7 +1289,7 @@ function policeCatchQuyt(amount){
 function nextDay(){S.shopOpen=false;shopStartTime=0;lastTickAt=0;dayEnding=false;claimed=false;clearInterval(timer);timer=null;clearInterval(pourTimer);pourTimer=null;pouring=false;clearTimeout(arrivalTimer);arrivalTimer=null;customers=[];current=-1;S.today={served:0,wrong:0,left:0,revenue:0};S.day++;S.quests={served:0,perfect:0,profit:0,claimed:false};for(const n of S.unlockedSizes)S.stock.cups[n]=Math.min(SIZES[n].stockMax,S.stock.cups[n]+2);for(const n of S.unlockedIngredients)S.stock.ingredients[n]=Math.min(20,(S.stock.ingredients[n]||0)+2);for(const n of S.unlockedTops)S.stock.toppings[n]=Math.min(15,(S.stock.toppings[n]||0)+1);for(const n of (S.unlockedSnacks||[]))S.stock.snacks[n]=Math.min(12,(S.stock.snacks[n]||0)+1);syncSpecialDrinks(true);syncLevelUnlocks(true);resolveNextDayCrime();save();startPrep()}
 function syncSpecialDrinks(showToast=true){S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh";S.shopOpen=!!S.shopOpen;S.equipment=S.equipment||{};S.loan=Object.assign({principal:0,total:0,paid:0,dueDay:0},S.loan||{});S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});S.online=Object.assign({platform:false,tablets:0},S.online||{});S.stats=S.stats||{};S.stats.totalProfit=S.stats.totalProfit||S.history?.reduce((a,h)=>a+(h.profit||0),0)||0;S.stats.onlineRevenue=S.stats.onlineRevenue||0;S.shopOpen=!!S.shopOpen;S.upgrades=S.upgrades||{};S.upgrades.special=S.upgrades.special||0;S.recipes=S.recipes||["Truyền thống"];S.unlockedTeas=S.recipes.slice();for(const [n,t] of Object.entries(TEAS)){if(t.type==="special"&&S.upgrades.special>=t.special&&!S.recipes.includes(n)){S.recipes.push(n);S.unlockedTeas.push(n);unlockIngredientsFor(n,showToast);if(showToast)toast("⭐ Mở khóa nước đặc biệt: "+n)}}for(const [n,t] of Object.entries(TOPS))if(S.level>=t.unlock&&!S.unlockedTops.includes(n)){S.unlockedTops.push(n);S.stock.toppings[n]=(S.stock.toppings[n]||0)+5;if(showToast)toast("🍡 Mở topping: "+n)}}
 
-function buySnackRecipe(name){let t=SNACKS[name];if(!t)return;if(S.level<2)return toast("🔒 Đồ ăn vặt mở từ cấp 2");S.snackSystemUnlocked=true;if((S.unlockedSnacks||[]).includes(name))return toast("✅ Món này đã mở khóa");if(S.cash<t.recipe)return toast("💰 Không đủ tiền mở khóa công thức");S.cash-=t.recipe;S.unlockedSnacks.push(name);S.stock.snacks[name]=(S.stock.snacks[name]||0)+3;save();toast("🍢 Mở khóa: "+t.emoji+" "+name+" · +3 phần");renderManage();renderPrep();updateTop()}
+function buySnackRecipe(name){let t=SNACKS[name];if(!t)return;if(S.level<2)return toast("🔒 Đồ ăn vặt mở từ cấp 2");S.snackSystemUnlocked=true;if((S.unlockedSnacks||[]).includes(name))return toast("✅ Món này đã mở khóa");if(S.cash<t.recipe)return toast("💰 Không đủ tiền mở khóa công thức");S.cash-=t.recipe;S.unlockedSnacks.push(name);S.stock.snacks[name]=S.stock.snacks[name]||0;save();toast("🍢 Mở khóa công thức: "+t.emoji+" "+name+" · hãy nhập kho trước khi bán");renderManage();renderPrep();updateTop()}
 function manageTab(mode){
  manageMode=mode;
  ["tabUp","tabMenu","tabStaff","tabOnline","tabQuest"].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle("on",id===(mode==="up"?"tabUp":mode==="menu"?"tabMenu":mode==="staff"?"tabStaff":mode==="online"?"tabOnline":"tabQuest"))});
@@ -1306,6 +1359,12 @@ function onlineDailyRevenue(){if(!S.online?.platform||!S.online?.tablets)return 
 
 function toggleMenuItem(type,name){
  S.menuDrinks=S.menuDrinks||[];S.menuSnacks=S.menuSnacks||[];
+ if(type==="snack"){
+   normalizeSnackUnlocks();
+   if(Number(S.level||1)<2)return toast("🔒 Đồ ăn vặt chỉ mở từ cấp 2");
+   if(!(S.unlockedSnacks||[]).includes(name))return toast("🔒 Món này chưa được mở khóa");
+   if((S.stock.snacks?.[name]||0)<=0)return toast("📦 Món này chưa nhập kho");
+ }
  const arr=type==="drink"?S.menuDrinks:S.menuSnacks;
  const allowed=type==="drink"?S.recipes:(S.unlockedSnacks||[]);
  if(!allowed.includes(name))return toast("🔒 Món này chưa được mở khóa");
@@ -1342,7 +1401,7 @@ function renderManage(){
  }
  if(manageMode==="menu"){
   const drinks=Object.entries(TEAS).filter(([n])=>S.recipes.includes(n));
-  const snacks=Object.entries(SNACKS).filter(([n])=>(S.unlockedSnacks||[]).includes(n));
+  const snacks=Number(S.level||1)>=2?Object.entries(SNACKS).filter(([n])=>(S.unlockedSnacks||[]).includes(n)&&(S.stock.snacks?.[n]||0)>0):[];
   const dc=S.menuDrinks||[],sc=S.menuSnacks||[];
   b.innerHTML=`<div class="sectionTitle"><div><h3>📋 Sửa menu</h3><div class="mini">Chọn món được phép xuất hiện và được khách gọi trong ngày.</div></div><span class="tag">${dc.length} nước · ${sc.length} đồ ăn</span></div>
   <div class="menuSummary"><b>💡 Cách dùng</b><div class="mini">Mua/mở khóa công thức trước → bấm <b>Thêm vào menu</b>. Bỏ món khỏi menu thì khách sẽ không gọi món đó nữa. Bạn có thể thay đổi menu bất cứ lúc nào trước khi mở cửa.</div></div>
@@ -1392,6 +1451,8 @@ updateTop();
 document.addEventListener("click",e=>{
  const m=document.getElementById("settingsModal");
  if(m && e.target===m)closeSettings();
+ const t=e.target.closest?.("button.btn,button.settingsAction,button.navItem,button.menuFab,button.openShopBtn,button.settingsClose");
+ if(t)playSfx("click");
 });
 
 try{applyStoredSettings()}catch(e){}
