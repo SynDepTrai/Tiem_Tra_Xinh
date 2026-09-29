@@ -1,3 +1,0 @@
-/* V30 image-safe rules */
-img{max-width:100%;}
-.assetImg,.customerImg,.inlineIcon{object-fit:contain!important;object-position:center!important;}
