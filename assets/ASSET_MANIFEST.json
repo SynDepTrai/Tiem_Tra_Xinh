@@ -1,0 +1,10 @@
+{
+  "fixed": [
+    "snacks",
+    "toppings",
+    "syrups"
+  ],
+  "method": "largest closed artwork contour per cell; white canvas; no labels/card backgrounds",
+  "source": "a_wide_clean_colorful_asset_sheet_sprite_sheet.png",
+  "other_groups": "preserved unchanged"
+}
