@@ -65,6 +65,7 @@ body.settings-open{overflow:hidden}
 .backupCode{width:100%;min-height:110px;resize:vertical;padding:12px;border:2px solid #ead9ca;border-radius:14px;background:#fff;font:13px monospace;color:#4b3428;box-sizing:border-box}
 .settingsDanger{border-color:#e7a1a1!important;background:#fff1f1!important;color:#9d3434!important}
 .settingsLinkInput{width:100%;padding:12px;border:2px solid #ead9ca;border-radius:14px;box-sizing:border-box;font:inherit}
+.adminEditGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.adminEditGrid label{display:grid;gap:5px;font-size:12px;font-weight:900;color:#6d5142}.adminEditGrid input{width:100%;box-sizing:border-box;padding:10px 11px;border:2px solid #ead9ca;border-radius:12px;background:#fff;color:#4b3428;font:inherit;font-weight:800}@media(max-width:600px){.adminEditGrid{grid-template-columns:1fr}}
 @media(max-width:600px){
  .settingsAction{padding:14px 12px}.settingsAction .settingValue{font-size:14px}
  .settingsSectionTitle{font-size:17px}.settingsCard{max-height:calc(100vh - 78px);overflow:auto}
@@ -416,8 +417,8 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
    <span class="settingIcon">🔑</span><span class="settingText"><b>Khôi phục từ mã</b><span>Dán mã sao lưu để phục hồi tiến trình</span></span><span class="settingValue">Nhập mã</span>
   </button>
 
-  <button class="settingsAction" type="button" onclick="resetSettingsOnly()">
-   <span class="settingIcon">♻️</span><span class="settingText"><b>Đặt lại cài đặt</b><span>Đưa giao diện, âm thanh, nhạc, chỉ dẫn và liên kết Facebook về mặc định; không xóa tiến trình.</span></span><span class="settingValue">Đặt lại</span>
+  <button id="adminResetSettingsBtn" class="settingsAction" type="button" onclick="resetSettingsOnly()" style="display:none">
+   <span class="settingIcon">♻️</span><span class="settingText"><b>Đặt lại cài đặt · ADMIN</b><span>Chỉ Admin được phép đưa giao diện, âm thanh, nhạc, chỉ dẫn và liên kết Facebook về mặc định.</span></span><span class="settingValue">Đặt lại</span>
   </button>
 
   <div class="settingsSectionTitle">⚠️ Quản lý dữ liệu</div>
@@ -518,14 +519,54 @@ function adminLogin(){
 function adminLogout(){sessionStorage.removeItem("TTX_ADMIN_UNLOCKED");toast("👤 Đã thoát chế độ Admin");renderAdminPanel()}
 function renderAdminPanel(){
   const box=document.getElementById("adminPanel");if(!box)return;
-  if(!isAdminUnlocked()){box.innerHTML='<button class="btn gold wide" type="button" onclick="adminLogin()">👑 Đăng nhập Admin</button>';return}
+  const resetBtn=document.getElementById("adminResetSettingsBtn");
+  if(!isAdminUnlocked()){
+    if(resetBtn)resetBtn.style.display="none";
+    box.innerHTML='<button class="btn gold wide" type="button" onclick="adminLogin()">👑 Đăng nhập Admin</button>';
+    return;
+  }
+  if(resetBtn)resetBtn.style.display="flex";
   box.innerHTML=`<div class="adminBox">
    <div class="adminBadge">👑 ADMIN ĐANG BẬT</div>
-   <p class="mini">Admin quản lý Facebook và danh sách nhạc đóng gói sẵn. Muốn thay đổi cho tất cả người chơi, sửa <b>ADMIN_CONFIG</b> rồi deploy lại web.</p>
+   <p class="mini">Quyền Admin chỉ có hiệu lực trên người chơi hiện tại. Bạn có thể chỉnh trực tiếp tiến trình của tài khoản đang đăng nhập.</p>
+   <div class="adminRow"><b>🎮 Chỉnh tiến trình</b>
+    <div class="adminEditGrid">
+      <label>Cấp độ<input id="adminLevelInput" type="number" min="1" max="100" value="${Number(S.level)||1}"></label>
+      <label>Kinh nghiệm XP<input id="adminXpInput" type="number" min="0" max="999999999" value="${Number(S.xp)||0}"></label>
+      <label>Tiền (k)<input id="adminCashInput" type="number" min="0" max="999999999" value="${Number(S.cash)||0}"></label>
+      <label>Đánh giá ⭐<input id="adminRatingInput" type="number" min="0" max="5" step="0.1" value="${Number(S.rating||0).toFixed(1)}"></label>
+      <label>Ngày<input id="adminDayInput" type="number" min="1" max="99999" value="${Number(S.day)||1}"></label>
+      <label>Cấp độ chuỗi<input id="adminCompanyLevelInput" type="number" min="1" max="100" value="${Number(S.companyLevel||S.level||1)}"></label>
+    </div>
+   </div>
+   <div class="row"><button class="btn primary" type="button" onclick="saveAdminProgress()">💾 Lưu tiến trình Admin</button><button class="btn gold" type="button" onclick="adminMaxProgress()">⚡ Max nhanh</button></div>
    <div class="adminRow"><b>📘 Facebook Admin</b><input id="adminFacebookInput" class="settingsLinkInput" value="${escapeAttr(getSetting("facebookLink",ADMIN_CONFIG.facebookLink||""))}" placeholder="https://www.facebook.com/..." /></div>
    <div class="adminRow"><b>🎵 Nhạc có sẵn</b><span class="mini">Đặt MP3 vào thư mục <code>music/</code> và khai báo trong <code>ADMIN_CONFIG.music</code>. Người chơi sẽ tự thấy.</span></div>
-   <div class="row"><button class="btn primary" type="button" onclick="saveAdminFacebook()">💾 Lưu Facebook</button><button class="btn secondary" type="button" onclick="adminLogout()">Thoát Admin</button></div>
+   <div class="row"><button class="btn secondary" type="button" onclick="saveAdminFacebook()">💾 Lưu Facebook</button><button class="btn secondary" type="button" onclick="adminLogout()">Thoát Admin</button></div>
   </div>`;
+}
+function saveAdminProgress(){
+  if(!isAdminUnlocked())return adminLogin();
+  const level=Math.max(1,Math.min(100,Math.floor(Number(document.getElementById("adminLevelInput")?.value)||1)));
+  const xp=Math.max(0,Math.min(999999999,Math.floor(Number(document.getElementById("adminXpInput")?.value)||0)));
+  const cash=Math.max(0,Math.min(999999999,Math.floor(Number(document.getElementById("adminCashInput")?.value)||0)));
+  const rating=Math.max(0,Math.min(5,Number(document.getElementById("adminRatingInput")?.value)||0));
+  const day=Math.max(1,Math.min(99999,Math.floor(Number(document.getElementById("adminDayInput")?.value)||1)));
+  const companyLevel=Math.max(1,Math.min(100,Math.floor(Number(document.getElementById("adminCompanyLevelInput")?.value)||1)));
+  S.level=level;S.xp=xp;S.cash=cash;S.globalCash=cash;S.rating=Number(rating.toFixed(1));S.day=day;S.companyLevel=companyLevel;
+  ensureLevelMissionState();
+  syncLevelUnlocks(false);
+  syncSpecialDrinks(false);
+  normalizeSnackUnlocks();
+  save();updateTop();renderPrep();renderReviews();renderAdminPanel();
+  toast(`👑 Đã cập nhật Admin · Lv.${S.level} · ${S.xp} XP · ${money(S.cash)}`);
+}
+function adminMaxProgress(){
+  if(!isAdminUnlocked())return adminLogin();
+  S.level=100;S.xp=100000000;S.cash=999999999;S.globalCash=S.cash;S.rating=5;S.companyLevel=100;
+  ensureLevelMissionState();syncLevelUnlocks(false);syncSpecialDrinks(false);normalizeSnackUnlocks();
+  save();updateTop();renderPrep();renderReviews();renderAdminPanel();
+  toast("⚡ ADMIN: Đã nâng tiến trình lên mức tối đa");
 }
 function saveAdminFacebook(){
   if(!isAdminUnlocked())return adminLogin();
