@@ -476,12 +476,40 @@ const ADMIN_CONFIG={
   // {name:"Nhạc quán 01", url:"music/nhac-quan-01.mp3"}
   music:[]
 };
+function getAccountSession(){
+  try{
+    const raw=localStorage.getItem("TTX_ACCOUNT_SESSION");
+    if(!raw)return null;
+    const a=JSON.parse(raw);
+    if(!a||!a.username)return null;
+    return {username:String(a.username).trim().toLowerCase(),displayName:String(a.displayName||a.username).trim().slice(0,24)};
+  }catch(e){return null}
+}
+function requireAccountSession(){
+  const a=getAccountSession();
+  if(!a){
+    try{sessionStorage.setItem("TTX_RETURN_TO_GAME",location.href)}catch(e){}
+    if(!/user\.html(?:[?#]|$)/i.test(location.href))location.replace("user.html");
+    return null;
+  }
+  return a;
+}
+function accountKeyPart(){
+  const a=getAccountSession();
+  return a?encodeURIComponent(a.username):"guest";
+}
 function getPlayerId(){
+  const a=getAccountSession();
+  if(a){
+    const id="ACC_"+a.username.replace(/[^a-z0-9_-]/gi,"_").slice(0,48);
+    try{localStorage.setItem("TTX_PLAYER_ID",id);localStorage.setItem("TTX_PLAYER_NAME_"+id,a.displayName||a.username)}catch(e){}
+    return id;
+  }
   let id=localStorage.getItem("TTX_PLAYER_ID");
   if(!id){id="P"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,7).toUpperCase();try{localStorage.setItem("TTX_PLAYER_ID",id)}catch(e){}}
   return id;
 }
-function getPlayerSaveKey(){return "TTX_SAVE_V1_"+getPlayerId()}
+function getPlayerSaveKey(){const a=getAccountSession();return a?"TTX_ACCOUNT_SAVE_"+accountKeyPart():"TTX_SAVE_V1_"+getPlayerId()}
 function getPlayerName(){return localStorage.getItem("TTX_PLAYER_NAME_"+getPlayerId())||"Người chơi"}
 function setPlayerName(v){v=String(v||"").trim().replace(/\s+/g," ").slice(0,24);if(v)localStorage.setItem("TTX_PLAYER_NAME_"+getPlayerId(),v)}
 function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V4_"+getPlayerId()}
@@ -1475,6 +1503,13 @@ function auditStoreBooks(){
  save();return true;
 }
 function showBusinessBooks(){snapshotActiveStore();const rows=Object.entries(STORE_DEFS).filter(([id])=>S.stores?.[id]?.opened).map(([id,d])=>{const st=S.stores[id];const h=st.history||[];const rev=h.reduce((a,x)=>a+Number(x.revenue||0),0);const prof=h.reduce((a,x)=>a+Number(x.profit||0),0);return `<div class="card"><h3>${d.icon} ${d.name}</h3><div class="statGrid"><div class="statBox"><b>${money(rev)}</b>Doanh thu</div><div class="statBox"><b>${money(prof)}</b>Lợi nhuận</div><div class="statBox"><b>${h.length}</b>Ngày ghi sổ</div></div><div class="mini" style="margin-top:8px">Nhân viên: ${Object.values(st.employees||{}).filter(Boolean).length} · Sổ sách độc lập theo cửa hàng.</div></div>`}).join("");const ledger=document.getElementById("ledger");if(ledger)ledger.innerHTML=rows+`<div style="margin-top:12px"><button class="btn secondary" onclick="auditStoreBooks()">🚓 Kiểm tra giấy tờ</button></div>`;show("summary")}
+function logoutAccount(){
+  try{save();persistAdminProgress();}catch(e){}
+  sessionStorage.removeItem("TTX_ADMIN_UNLOCKED");
+  localStorage.removeItem("TTX_ACCOUNT_SESSION");
+  location.replace("user.html");
+}
+
 function newGame(){clearPersistedAdminProgress();sessionStorage.removeItem("TTX_ADMIN_UNLOCKED");clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;clearInterval(pourTimer);pourTimer=null;pouring=false;shopStartTime=0;lastTickAt=0;elapsed=0;S=clone(DEFAULT);S.shopName="Tiệm Trà Xinh";S.renameUsed=false;S.cash=500;S.globalCash=500;S.rating=0;S.reviews=[];S.today={served:0,wrong:0,left:0,revenue:0};S.day=1;S.companyLevel=1;S.activeStoreId="tea";S.storeSelectionDone=false;S.stores={};dayEnding=false;customers=[];current=-1;initStoreSystem();save();openStoreChooser()}
 function continueGame(){load();initStoreSystem();openStoreChooser()}
 function wipe(){
@@ -2404,6 +2439,12 @@ function bindStoreChainInteractions(){
 
 window.addEventListener("pagehide",()=>{try{if(S&&S.__adminProgressPersistent){applyPersistedAdminProgress();persistAdminProgress();}}catch(e){}});
 window.addEventListener("beforeunload",()=>{try{if(S&&S.__adminProgressPersistent){applyPersistedAdminProgress();persistAdminProgress();}}catch(e){}});
+if(!requireAccountSession()){throw new Error("TTX_ACCOUNT_REQUIRED");}
+const __accountSession=getAccountSession();
+try{
+  const accountNameEl=document.getElementById("accountUserLabel");
+  if(accountNameEl)accountNameEl.textContent="👤 "+(__accountSession?.displayName||__accountSession?.username||"Người chơi");
+}catch(e){}
 migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();applyPersistedAdminProgress();initStoreSystem();applyPersistedAdminProgress();save();applyPersistedAdminProgress();persistAdminProgress();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 // Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
