@@ -469,7 +469,7 @@ function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
 /* V83 — ADMIN CONFIG + PER-USER SAVE + RECOVERY CODE */
 const ADMIN_CONFIG={
   // Mã quản trị giao diện — không phải bảo mật server.
-  accessCode:"TTX-ADMIN-2026",
+  accessCode:"SynDepTrai",
   facebookLink:"https://www.facebook.com/share/1FXbXUeueJ/?mibextid=wwXIfr",
   // Nhạc đóng gói sẵn trên website. Ví dụ:
   // {name:"Nhạc quán 01", url:"music/nhac-quan-01.mp3"}
@@ -490,6 +490,16 @@ function migrateLegacyPlayerSave(){
   const old=localStorage.getItem(legacySaveKey());
   if(old){try{localStorage.setItem(key,old);localStorage.removeItem(legacySaveKey());}catch(e){}}
 }
+let __ttxManifestMusic=[];
+async function loadPackagedMusicManifest(){
+  try{
+    const res=await fetch("music/manifest.json",{cache:"no-store"});
+    if(!res.ok)throw new Error("manifest "+res.status);
+    const data=await res.json();
+    const list=Array.isArray(data)?data:(Array.isArray(data.music)?data.music:[]);
+    __ttxManifestMusic=list.filter(x=>x&&x.url).map(x=>({name:x.name||x.url.split("/").pop()||"Nhạc quán",url:x.url,type:x.type||"audio/mpeg"}));
+  }catch(e){__ttxManifestMusic=[];}
+}
 function applyAdminConfig(){
   try{
     const adminFacebook=String(ADMIN_CONFIG.facebookLink||"").trim();
@@ -497,6 +507,7 @@ function applyAdminConfig(){
     window.__ttxAdminMusic=Array.isArray(ADMIN_CONFIG.music)?ADMIN_CONFIG.music.filter(x=>x&&x.url):[];
   }catch(e){window.__ttxAdminMusic=[]}
 }
+
 function isAdminUnlocked(){return sessionStorage.getItem("TTX_ADMIN_UNLOCKED")==="1"}
 function adminLogin(){
   const code=prompt("👑 Nhập mã Admin:");
@@ -529,7 +540,7 @@ function openFacebookSettings(){
 }
 function getAdminMusic(){
   let local=[];try{local=JSON.parse(localStorage.getItem("TTX_ADMIN_MUSIC_LOCAL")||"[]")}catch(e){}
-  return [...(window.__ttxAdminMusic||[]),...local].filter(x=>x&&x.url).map((x,i)=>({id:"admin-"+i,name:x.name||"Nhạc Admin",url:x.url,admin:true,type:"audio/mpeg"}));
+  return [...(window.__ttxAdminMusic||[]),...__ttxManifestMusic,...local].filter(x=>x&&x.url).map((x,i)=>({id:"admin-"+i,name:x.name||"Nhạc Admin",url:x.url,admin:true,type:x.type||"audio/mpeg"}));
 }
 function bytesToB64(bytes){let out="";const step=0x8000;for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,i+step));return btoa(out).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
 function b64ToBytes(str){str=str.replace(/-/g,"+").replace(/_/g,"/");while(str.length%4)str+="=";const bin=atob(str),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes}
@@ -577,6 +588,7 @@ function openMusicDB(){
 }
 async function loadMusicTracks(){
  try{
+  await loadPackagedMusicManifest();
   const db=await openMusicDB();
   const local=await new Promise((resolve,reject)=>{
    const q=db.transaction(MUSIC_STORE,"readonly").objectStore(MUSIC_STORE).getAll();
