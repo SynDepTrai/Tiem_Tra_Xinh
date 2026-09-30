@@ -484,6 +484,33 @@ function getPlayerId(){
 function getPlayerSaveKey(){return "TTX_SAVE_V1_"+getPlayerId()}
 function getPlayerName(){return localStorage.getItem("TTX_PLAYER_NAME_"+getPlayerId())||"Người chơi"}
 function setPlayerName(v){v=String(v||"").trim().replace(/\s+/g," ").slice(0,24);if(v)localStorage.setItem("TTX_PLAYER_NAME_"+getPlayerId(),v)}
+function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V1_"+getPlayerId()}
+function persistAdminProgress(){
+  try{
+    if(!S || !S.__adminProgressPersistent)return;
+    localStorage.setItem(getAdminProgressKey(),JSON.stringify({
+      level:Number(S.level)||1,xp:Number(S.xp)||0,cash:Number(S.cash)||0,
+      rating:Number(S.rating)||0,day:Number(S.day)||1,
+      companyLevel:Number(S.companyLevel||S.level||1)||1
+    }));
+  }catch(e){}
+}
+function applyPersistedAdminProgress(){
+  try{
+    const raw=localStorage.getItem(getAdminProgressKey());
+    if(!raw)return;
+    const a=JSON.parse(raw);
+    if(!a||typeof a!=="object")return;
+    S.__adminProgressPersistent=true;
+    S.level=Math.max(1,Number(a.level)||1);
+    S.xp=Math.max(0,Number(a.xp)||0);
+    S.cash=Math.max(0,Number(a.cash)||0);
+    S.globalCash=S.cash;
+    S.rating=Math.max(0,Math.min(5,Number(a.rating)||0));
+    S.day=Math.max(1,Number(a.day)||1);
+    S.companyLevel=Math.max(1,Number(a.companyLevel||S.level)||1);
+  }catch(e){}
+}
 function legacySaveKey(){return "TTX_FULL_SAVE"}
 function migrateLegacyPlayerSave(){
   const key=getPlayerSaveKey();
@@ -553,7 +580,7 @@ function saveAdminProgress(){
   const rating=Math.max(0,Math.min(5,Number(document.getElementById("adminRatingInput")?.value)||0));
   const day=Math.max(1,Math.min(99999,Math.floor(Number(document.getElementById("adminDayInput")?.value)||1)));
   const companyLevel=Math.max(1,Math.min(100,Math.floor(Number(document.getElementById("adminCompanyLevelInput")?.value)||1)));
-  S.level=level;S.xp=xp;S.cash=cash;S.globalCash=cash;S.rating=Number(rating.toFixed(1));S.day=day;S.companyLevel=companyLevel;
+  S.level=level;S.xp=xp;S.cash=cash;S.globalCash=cash;S.rating=Number(rating.toFixed(1));S.day=day;S.companyLevel=companyLevel;S.__adminProgressPersistent=true;
   ensureLevelMissionState();
   syncLevelUnlocks(false);
   syncSpecialDrinks(false);
@@ -563,7 +590,7 @@ function saveAdminProgress(){
 }
 function adminMaxProgress(){
   if(!isAdminUnlocked())return adminLogin();
-  S.level=100;S.xp=100000000;S.cash=999999999;S.globalCash=S.cash;S.rating=5;S.companyLevel=100;
+  S.level=100;S.xp=100000000;S.cash=999999999;S.globalCash=S.cash;S.rating=5;S.companyLevel=100;S.__adminProgressPersistent=true;
   ensureLevelMissionState();syncLevelUnlocks(false);syncSpecialDrinks(false);normalizeSnackUnlocks();
   save();updateTop();renderPrep();renderReviews();renderAdminPanel();
   toast("⚡ ADMIN: Đã nâng tiến trình lên mức tối đa");
@@ -979,7 +1006,7 @@ function load(){
  S.unlockedIngredients=S.unlockedIngredients||["Trà đen"];for(const n of S.recipes)unlockIngredientsFor(n,false);
  for(const n of Object.keys(SNACKS))if(S.stock.snacks[n]==null)S.stock.snacks[n]=0;
  normalizeSnackUnlocks();
- syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();snapshotActiveStore();save();
+ syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();applyPersistedAdminProgress();S.globalCash=S.cash;snapshotActiveStore();save();
 }
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));const target=document.getElementById(id);if(target)target.classList.add("active");document.body.classList.toggle("inShop",id==="shop");document.querySelectorAll(".navItem").forEach(b=>b.classList.remove("active"));const map={prep:0,manage:1,reviews:3,cardgame:5,summary:6};if(map[id]!=null&&document.querySelectorAll(".navItem")[map[id]])document.querySelectorAll(".navItem")[map[id]].classList.add("active");updateTop()}
 function updateTop(){const storeDef=STORE_DEFS[S.activeStoreId||"tea"]||STORE_DEFS.tea;const n=S.shopName||storeDef.name;const nameEl=document.getElementById("signShopName");if(nameEl)nameEl.textContent=n.toUpperCase();const st=document.getElementById("signStatus");if(st){st.textContent=S.shopOpen?"OPEN":"CLOSE";st.className="statusPill "+(S.shopOpen?"open":"closed")}const d=document.getElementById("day");if(d)d.textContent="Ngày "+S.day;const c=document.getElementById("cash");if(c)c.textContent=money(S.cash);const r=document.getElementById("rating");if(r)r.textContent=hasCustomerRatings()?S.rating.toFixed(1):"0.0";const lv=document.getElementById("level");if(lv)lv.textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);const xh=document.getElementById("xpHome");if(xh)xh.style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent=n;const hc=document.getElementById("headerClock");if(hc)hc.textContent=S.shopOpen?(document.getElementById("clock")?.textContent||"07:00"):"07:00";}
@@ -1085,7 +1112,7 @@ function initStoreSystem(){
  save();
 }
 function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
-function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S))}
+function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);persistAdminProgress();localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S))}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
 function openStore(id){
