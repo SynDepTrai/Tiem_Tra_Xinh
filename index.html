@@ -1074,41 +1074,48 @@ const STORE_DEFS={
 };
 const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","branding","loan","employees","online","quests","levelMissions","history","dayReward","reviews","reviewSeq","ratingPenalty","ratingBonus","quits","theft","police","security","cardGame"];
 function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);x.storeBusiness=clone(S.storeBusiness||null);return x}
-function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};return storeSnapshotFrom(base)}
+function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:def.icon||"🧋",slogan:"Ngon từng món"};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0,opened:false,openedAt:0};base.storeIdentity={id:def.id||"",name:def.name,icon:def.icon,kind:def.kind,tag:def.tag};return storeSnapshotFrom(base)}
+function ensureStoreInstance(id){const d=STORE_DEFS[id];if(!d)return null;S.stores=S.stores||{};if(!S.stores[id])S.stores[id]=id==="tea"?storeSnapshot():genericStoreSnapshot({...d,id});const st=S.stores[id];st.storeIdentity=Object.assign({id,name:d.name,icon:d.icon,kind:d.kind,tag:d.tag},st.storeIdentity||{});st.storeBusiness=Object.assign({kind:d.kind,menu:[d.tag],dailyBase:id==="tea"?0:120,dailyPerEmployee:55,active:false,auditGap:0,opened:id==="tea",openedAt:id==="tea"?Date.now():0},st.storeBusiness||{});if(id==="tea")st.opened=true;return st}
 function storeSnapshotFrom(base){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);return x}
 function initStoreSystem(){
  S.stores=S.stores||{};S.companyLevel=Math.max(1,Number(S.companyLevel||S.level||1));S.activeStoreId=STORE_DEFS[S.activeStoreId]?S.activeStoreId:"tea";S.storeSelectionDone=!!S.storeSelectionDone;S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);S.cash=S.globalCash;
- if(!S.stores.tea)S.stores.tea=storeSnapshot();
- for(const [id,def] of Object.entries(STORE_DEFS))if(id!=="tea"&&!S.stores[id])S.stores[id]=genericStoreSnapshot(def);
- if(!S.stores.tea.storeBusiness)S.stores.tea.storeBusiness={kind:"tea",menu:["Trà sữa • trà • đồ ăn vặt"],dailyBase:0,dailyPerEmployee:55,active:false,auditGap:0};
- Object.values(S.stores).forEach(st=>{st.storeBusiness=st.storeBusiness||{kind:"generic",menu:[],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};st.storeBusiness.auditGap=Number(st.storeBusiness.auditGap||0)});
- Object.keys(S.stores).forEach(id=>{if(STORE_DEFS[id])S.stores[id].opened=!!S.stores[id].opened});
- S.stores.tea.opened=true;S.stores[S.activeStoreId]=S.stores[S.activeStoreId]||genericStoreSnapshot(STORE_DEFS[S.activeStoreId]||STORE_DEFS.tea);S.stores[S.activeStoreId].opened=true;save();
+ for(const id of Object.keys(STORE_DEFS))ensureStoreInstance(id);
+ S.stores.tea.opened=true;S.stores.tea.storeBusiness.opened=true;
+ if(S.stores[S.activeStoreId]&&!S.stores[S.activeStoreId].opened)S.activeStoreId="tea";
+ save();
 }
 function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
 function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S))}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
 function openStore(id){
- const d=STORE_DEFS[id];if(!d)return;
+ const d=STORE_DEFS[id];if(!d||id==="tea")return id==="tea"?switchStore("tea"):undefined;
+ initStoreSystem();
  if(S.stores[id]?.opened)return switchStore(id);
  if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);
  if(S.cash<d.openCost)return showStoreRequirement(id);
  S.cash-=d.openCost;
- S.stores[id]=S.stores[id]||genericStoreSnapshot(d);
- S.stores[id].opened=true;
- S.stores[id].storeBusiness=Object.assign({kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0},S.stores[id].storeBusiness||{});
- syncGlobalCash();save();
+ const st=ensureStoreInstance(id);if(!st)return;
+ st.opened=true;st.storeBusiness.opened=true;st.storeBusiness.active=false;st.storeBusiness.openedAt=Date.now();st.shopOpen=false;
+ syncGlobalCash();snapshotActiveStore();save();
  closeStoreChooser();
- // Quán mới dùng chung mô hình vận hành của Tiệm Trà Xinh: pha chế, khách, kho, menu, nâng cấp...
- switchStore(id);
  toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);
- toast(`🚀 Bắt đầu chuỗi cửa hàng tại ${d.icon} ${d.name}!`);
+ toast(`🚀 ${d.name} đã được thêm vào chuỗi. Bấm “Bắt đầu kinh doanh” để chuyển sang quán.`);
  fx("🎉");
+ setTimeout(()=>switchStore(id),80);
 }
 function snapshotActiveStore(){if(!S.activeStoreId)return;S.stores=S.stores||{};S.stores[S.activeStoreId]=storeSnapshot();S.stores[S.activeStoreId].opened=true}
-function loadStoreSnapshot(id){const snap=S.stores?.[id];if(!snap)return false;const global={stores:S.stores,companyLevel:S.companyLevel,activeStoreId:id,globalCash:Number(S.cash||S.globalCash||0),day:S.day};S=Object.assign(clone(DEFAULT),clone(snap));S.stores=global.stores;S.companyLevel=global.companyLevel;S.activeStoreId=id;S.globalCash=global.globalCash;S.cash=global.globalCash;S.day=global.day;S.shopOpen=false;normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);return true}
-function switchStore(id){if(!S.stores?.[id]?.opened)return toast("🔒 Quán này chưa được mở");if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");snapshotActiveStore();if(!loadStoreSnapshot(id))return;save();renderPrep();updateTop();closeStoreChooser();toast(`🏪 Đã chuyển sang ${STORE_DEFS[id].icon} ${STORE_DEFS[id].name}`)}
+function loadStoreSnapshot(id){
+ initStoreSystem();const st=ensureStoreInstance(id);if(!st||!st.opened)return false;const snap=S.stores[id];
+ const global={stores:S.stores,companyLevel:S.companyLevel,activeStoreId:id,globalCash:Number(S.cash||S.globalCash||0),day:S.day,storeSelectionDone:S.storeSelectionDone};
+ S=Object.assign(clone(DEFAULT),clone(snap));S.stores=global.stores;S.companyLevel=global.companyLevel;S.activeStoreId=id;S.globalCash=global.globalCash;S.cash=global.globalCash;S.day=global.day;S.storeSelectionDone=true;S.shopOpen=false;
+ S.storeBusiness=Object.assign({kind:STORE_DEFS[id].kind,menu:[STORE_DEFS[id].tag],dailyBase:id==="tea"?0:120,dailyPerEmployee:55,active:false,auditGap:0,opened:true,openedAt:Date.now()},S.storeBusiness||{});S.storeBusiness.active=true;
+ normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);return true
+}
+function switchStore(id){
+ initStoreSystem();const d=STORE_DEFS[id];if(!d)return toast("🏪 Cửa hàng không tồn tại");if(!S.stores?.[id]?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");
+ snapshotActiveStore();if(!loadStoreSnapshot(id))return;S.stores[id].opened=true;S.stores[id].storeBusiness.opened=true;S.stores[id].storeBusiness.active=true;save();renderPrep();updateTop();closeStoreChooser();toast(`🏪 Đã chuyển sang ${d.icon} ${d.name}`)
+}
 function closeStoreChooser(){
   const modal=document.getElementById("storeModal");
   if(!modal)return;
