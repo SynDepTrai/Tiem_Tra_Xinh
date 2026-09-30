@@ -484,32 +484,60 @@ function getPlayerId(){
 function getPlayerSaveKey(){return "TTX_SAVE_V1_"+getPlayerId()}
 function getPlayerName(){return localStorage.getItem("TTX_PLAYER_NAME_"+getPlayerId())||"Người chơi"}
 function setPlayerName(v){v=String(v||"").trim().replace(/\s+/g," ").slice(0,24);if(v)localStorage.setItem("TTX_PLAYER_NAME_"+getPlayerId(),v)}
-function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V1_"+getPlayerId()}
+function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V2_"+getPlayerId()}
+function getAdminProgressPayload(){
+  return {
+    enabled:true,
+    playerId:getPlayerId(),
+    level:Math.max(1,Number(S?.level)||1),
+    xp:Math.max(0,Number(S?.xp)||0),
+    cash:Math.max(0,Number(S?.cash)||0),
+    globalCash:Math.max(0,Number(S?.globalCash)||Number(S?.cash)||0),
+    rating:Math.max(0,Math.min(5,Number(S?.rating)||0)),
+    day:Math.max(1,Number(S?.day)||1),
+    companyLevel:Math.max(1,Number(S?.companyLevel||S?.level)||1),
+    activeStoreId:STORE_DEFS&&STORE_DEFS[S?.activeStoreId]?S.activeStoreId:"tea"
+  };
+}
 function persistAdminProgress(){
   try{
     if(!S || !S.__adminProgressPersistent)return;
-    localStorage.setItem(getAdminProgressKey(),JSON.stringify({
-      level:Number(S.level)||1,xp:Number(S.xp)||0,cash:Number(S.cash)||0,
-      rating:Number(S.rating)||0,day:Number(S.day)||1,
-      companyLevel:Number(S.companyLevel||S.level||1)||1
-    }));
-  }catch(e){}
+    const payload=getAdminProgressPayload();
+    S.__adminProgress=payload;
+    localStorage.setItem(getAdminProgressKey(),JSON.stringify(payload));
+  }catch(e){console.warn("persist admin",e)}
 }
 function applyPersistedAdminProgress(){
   try{
-    const raw=localStorage.getItem(getAdminProgressKey());
-    if(!raw)return;
+    let raw=localStorage.getItem(getAdminProgressKey());
+    // Compatibility with the previous Admin key.
+    if(!raw){
+      const oldKey="TTX_ADMIN_PROGRESS_V1_"+getPlayerId();
+      raw=localStorage.getItem(oldKey);
+    }
+    if(!raw && S && S.__adminProgress)raw=JSON.stringify(S.__adminProgress);
+    if(!raw)return false;
     const a=JSON.parse(raw);
-    if(!a||typeof a!=="object")return;
+    if(!a||a.enabled===false||typeof a!=="object")return false;
+    if(a.playerId && a.playerId!==getPlayerId())return false;
     S.__adminProgressPersistent=true;
+    S.__adminProgress=Object.assign({},a);
     S.level=Math.max(1,Number(a.level)||1);
     S.xp=Math.max(0,Number(a.xp)||0);
-    S.cash=Math.max(0,Number(a.cash)||0);
+    S.cash=Math.max(0,Number(a.cash ?? a.globalCash)||0);
     S.globalCash=S.cash;
     S.rating=Math.max(0,Math.min(5,Number(a.rating)||0));
     S.day=Math.max(1,Number(a.day)||1);
     S.companyLevel=Math.max(1,Number(a.companyLevel||S.level)||1);
+    return true;
+  }catch(e){console.warn("apply admin",e);return false}
+}
+function clearPersistedAdminProgress(){
+  try{
+    localStorage.removeItem(getAdminProgressKey());
+    localStorage.removeItem("TTX_ADMIN_PROGRESS_V1_"+getPlayerId());
   }catch(e){}
+  if(S){delete S.__adminProgressPersistent;delete S.__adminProgress;}
 }
 function legacySaveKey(){return "TTX_FULL_SAVE"}
 function migrateLegacyPlayerSave(){
@@ -581,18 +609,24 @@ function saveAdminProgress(){
   const day=Math.max(1,Math.min(99999,Math.floor(Number(document.getElementById("adminDayInput")?.value)||1)));
   const companyLevel=Math.max(1,Math.min(100,Math.floor(Number(document.getElementById("adminCompanyLevelInput")?.value)||1)));
   S.level=level;S.xp=xp;S.cash=cash;S.globalCash=cash;S.rating=Number(rating.toFixed(1));S.day=day;S.companyLevel=companyLevel;S.__adminProgressPersistent=true;
-  ensureLevelMissionState();
-  syncLevelUnlocks(false);
-  syncSpecialDrinks(false);
-  normalizeSnackUnlocks();
-  save();updateTop();renderPrep();renderReviews();renderAdminPanel();
+  ensureLevelMissionState();syncLevelUnlocks(false);syncSpecialDrinks(false);normalizeSnackUnlocks();
+  persistAdminProgress();
+  save();
+  // Re-apply after save/normalization so no secondary synchronizer can replace Admin values.
+  applyPersistedAdminProgress();
+  persistAdminProgress();
+  snapshotActiveStore();
+  localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S));
+  updateTop();renderPrep();renderReviews();renderAdminPanel();
   toast(`👑 Đã cập nhật Admin · Lv.${S.level} · ${S.xp} XP · ${money(S.cash)}`);
 }
 function adminMaxProgress(){
   if(!isAdminUnlocked())return adminLogin();
   S.level=100;S.xp=100000000;S.cash=999999999;S.globalCash=S.cash;S.rating=5;S.companyLevel=100;S.__adminProgressPersistent=true;
   ensureLevelMissionState();syncLevelUnlocks(false);syncSpecialDrinks(false);normalizeSnackUnlocks();
-  save();updateTop();renderPrep();renderReviews();renderAdminPanel();
+  persistAdminProgress();save();applyPersistedAdminProgress();persistAdminProgress();snapshotActiveStore();
+  localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S));
+  updateTop();renderPrep();renderReviews();renderAdminPanel();
   toast("⚡ ADMIN: Đã nâng tiến trình lên mức tối đa");
 }
 function saveAdminFacebook(){
@@ -1006,7 +1040,9 @@ function load(){
  S.unlockedIngredients=S.unlockedIngredients||["Trà đen"];for(const n of S.recipes)unlockIngredientsFor(n,false);
  for(const n of Object.keys(SNACKS))if(S.stock.snacks[n]==null)S.stock.snacks[n]=0;
  normalizeSnackUnlocks();
- syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();applyPersistedAdminProgress();S.globalCash=S.cash;snapshotActiveStore();save();
+ syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();applyPersistedAdminProgress();
+// Chuẩn hóa các giá trị global sau khi khởi tạo chuỗi, rồi mới ghi save cuối cùng.
+S.globalCash=S.cash;snapshotActiveStore();save();
 }
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));const target=document.getElementById(id);if(target)target.classList.add("active");document.body.classList.toggle("inShop",id==="shop");document.querySelectorAll(".navItem").forEach(b=>b.classList.remove("active"));const map={prep:0,manage:1,reviews:3,cardgame:5,summary:6};if(map[id]!=null&&document.querySelectorAll(".navItem")[map[id]])document.querySelectorAll(".navItem")[map[id]].classList.add("active");updateTop()}
 function updateTop(){const storeDef=STORE_DEFS[S.activeStoreId||"tea"]||STORE_DEFS.tea;const n=S.shopName||storeDef.name;const nameEl=document.getElementById("signShopName");if(nameEl)nameEl.textContent=n.toUpperCase();const st=document.getElementById("signStatus");if(st){st.textContent=S.shopOpen?"OPEN":"CLOSE";st.className="statusPill "+(S.shopOpen?"open":"closed")}const d=document.getElementById("day");if(d)d.textContent="Ngày "+S.day;const c=document.getElementById("cash");if(c)c.textContent=money(S.cash);const r=document.getElementById("rating");if(r)r.textContent=hasCustomerRatings()?S.rating.toFixed(1):"0.0";const lv=document.getElementById("level");if(lv)lv.textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);const xh=document.getElementById("xpHome");if(xh)xh.style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent=n;const hc=document.getElementById("headerClock");if(hc)hc.textContent=S.shopOpen?(document.getElementById("clock")?.textContent||"07:00"):"07:00";}
@@ -1099,50 +1135,142 @@ const STORE_DEFS={
  bread:{name:"Tiệm Bánh Mì",icon:"🥖",unlockLevel:11,openCost:50000,kind:"generic",tag:"Bánh mì • đồ ăn sáng",desc:"Bánh mì nóng và các loại nhân."},
  grocery:{name:"Tạp Hóa",icon:"🏪",unlockLevel:15,openCost:50000,kind:"generic",tag:"Đồ uống • bánh • hàng tiêu dùng",desc:"Cửa hàng bán hàng tiêu dùng hằng ngày."}
 };
-const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","branding","loan","employees","online","quests","levelMissions","history","dayReward","reviews","reviewSeq","ratingPenalty","ratingBonus","quits","theft","police","security","cardGame"];
-function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);x.storeBusiness=clone(S.storeBusiness||null);return x}
-function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:def.icon||"🧋",slogan:"Ngon từng món"};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0,opened:false,openedAt:0};base.storeIdentity={id:def.id||"",name:def.name,icon:def.icon,kind:def.kind,tag:def.tag};return storeSnapshotFrom(base)}
-function ensureStoreInstance(id){const d=STORE_DEFS[id];if(!d)return null;S.stores=S.stores||{};if(!S.stores[id])S.stores[id]=id==="tea"?storeSnapshot():genericStoreSnapshot({...d,id});const st=S.stores[id];st.storeIdentity=Object.assign({id,name:d.name,icon:d.icon,kind:d.kind,tag:d.tag},st.storeIdentity||{});st.storeBusiness=Object.assign({kind:d.kind,menu:[d.tag],dailyBase:id==="tea"?0:120,dailyPerEmployee:55,active:false,auditGap:0,opened:id==="tea",openedAt:id==="tea"?Date.now():0},st.storeBusiness||{});if(id==="tea")st.opened=true;return st}
-function storeSnapshotFrom(base){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);return x}
-function initStoreSystem(){
- S.stores=S.stores||{};S.companyLevel=Math.max(1,Number(S.companyLevel||S.level||1));S.activeStoreId=STORE_DEFS[S.activeStoreId]?S.activeStoreId:"tea";S.storeSelectionDone=!!S.storeSelectionDone;S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);S.cash=S.globalCash;
- for(const id of Object.keys(STORE_DEFS))ensureStoreInstance(id);
- S.stores.tea.opened=true;S.stores.tea.storeBusiness.opened=true;
- if(S.stores[S.activeStoreId]&&!S.stores[S.activeStoreId].opened)S.activeStoreId="tea";
- save();
+const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","branding","loan","employees","online","quests","levelMissions","history","dayReward","reviews","reviewSeq","ratingPenalty","ratingBonus","quits","theft","police","security","cardGame"];
+function storeSnapshot(){
+  const x={};
+  for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);
+  x.storeBusiness=clone(S.storeBusiness||null);
+  x.storeIdentity=clone(S.storeIdentity||null);
+  // These are company-global and must never be owned by an individual store snapshot.
+  delete x.cash;delete x.globalCash;delete x.level;delete x.xp;delete x.companyLevel;delete x.day;delete x.activeStoreId;delete x.storeSelectionDone;delete x.__adminProgressPersistent;delete x.__adminProgress;
+  return x;
 }
-function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
-function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);persistAdminProgress();localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S))}
+function storeSnapshotFrom(base){
+  const x={};
+  for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);
+  if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);
+  if(base.storeIdentity)x.storeIdentity=clone(base.storeIdentity);
+  delete x.cash;delete x.globalCash;delete x.level;delete x.xp;delete x.companyLevel;delete x.day;delete x.activeStoreId;delete x.storeSelectionDone;delete x.__adminProgressPersistent;delete x.__adminProgress;
+  return x;
+}
+function genericStoreSnapshot(def){
+  const base=clone(DEFAULT);
+  base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;
+  base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};
+  base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];
+  base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:def.icon||"🧋",slogan:"Ngon từng món"};
+  base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;
+  base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};
+  base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0,opened:false,openedAt:0,lastPassiveDay:0};
+  base.storeIdentity={id:def.id||"",name:def.name,icon:def.icon,kind:def.kind,tag:def.tag};
+  return storeSnapshotFrom(base);
+}
+function ensureStoreInstance(id){
+  const d=STORE_DEFS[id];if(!d)return null;
+  S.stores=S.stores||{};
+  if(!S.stores[id])S.stores[id]=id==="tea"?storeSnapshot():genericStoreSnapshot({...d,id});
+  const st=S.stores[id];
+  st.storeIdentity=Object.assign({id,name:d.name,icon:d.icon,kind:d.kind,tag:d.tag},st.storeIdentity||{});
+  st.storeBusiness=Object.assign({kind:d.kind,menu:[d.tag],dailyBase:id==="tea"?0:120,dailyPerEmployee:55,active:false,auditGap:0,opened:id==="tea",openedAt:id==="tea"?Date.now():0,lastPassiveDay:0},st.storeBusiness||{});
+  if(id==="tea")st.opened=true;
+  // Migrate old snapshots that accidentally contained company-global fields.
+  delete st.cash;delete st.globalCash;delete st.level;delete st.xp;delete st.companyLevel;delete st.day;delete st.activeStoreId;delete st.storeSelectionDone;delete st.__adminProgressPersistent;delete st.__adminProgress;
+  return st;
+}
+function initStoreSystem(){
+  S.stores=S.stores||{};
+  S.companyLevel=Math.max(1,Number(S.companyLevel||S.level||1));
+  S.level=Math.max(1,Number(S.level||1));
+  S.xp=Math.max(0,Number(S.xp)||0);
+  S.day=Math.max(1,Number(S.day)||1);
+  S.activeStoreId=STORE_DEFS[S.activeStoreId]?S.activeStoreId:"tea";
+  S.storeSelectionDone=!!S.storeSelectionDone;
+  S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);
+  S.cash=S.globalCash;
+  for(const id of Object.keys(STORE_DEFS))ensureStoreInstance(id);
+  S.stores.tea.opened=true;S.stores.tea.storeBusiness.opened=true;
+  if(S.stores[S.activeStoreId]&&!S.stores[S.activeStoreId].opened)S.activeStoreId="tea";
+}
+function syncGlobalCash(){S.globalCash=Math.max(0,Number(S.cash)||0)}
+function save(){
+  syncGlobalCash();
+  S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);
+  persistAdminProgress();
+  localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S));
+}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
 function openStore(id){
- const d=STORE_DEFS[id];if(!d||id==="tea")return id==="tea"?switchStore("tea"):undefined;
- initStoreSystem();
- if(S.stores[id]?.opened)return switchStore(id);
- if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);
- if(S.cash<d.openCost)return showStoreRequirement(id);
- S.cash-=d.openCost;
- const st=ensureStoreInstance(id);if(!st)return;
- st.opened=true;st.storeBusiness.opened=true;st.storeBusiness.active=false;st.storeBusiness.openedAt=Date.now();st.shopOpen=false;
- syncGlobalCash();snapshotActiveStore();save();
- closeStoreChooser();
- toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);
- toast(`🚀 ${d.name} đã được thêm vào chuỗi. Bấm “Bắt đầu kinh doanh” để chuyển sang quán.`);
- fx("🎉");
- setTimeout(()=>switchStore(id),80);
+  const d=STORE_DEFS[id];if(!d||id==="tea")return id==="tea"?switchStore("tea"):undefined;
+  initStoreSystem();
+  if(S.stores[id]?.opened)return switchStore(id);
+  if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);
+  if(S.cash<d.openCost)return showStoreRequirement(id);
+  S.cash-=d.openCost;
+  const st=ensureStoreInstance(id);if(!st)return;
+  st.opened=true;st.storeBusiness.opened=true;st.storeBusiness.active=false;st.storeBusiness.openedAt=Date.now();st.shopOpen=false;
+  syncGlobalCash();snapshotActiveStore();save();
+  closeStoreChooser();
+  toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);
+  toast(`🚀 ${d.name} đã được thêm vào chuỗi. Bấm “Bắt đầu kinh doanh” để chuyển sang quán.`);
+  fx("🎉");
+  setTimeout(()=>switchStore(id),80);
 }
-function snapshotActiveStore(){if(!S.activeStoreId)return;S.stores=S.stores||{};S.stores[S.activeStoreId]=storeSnapshot();S.stores[S.activeStoreId].opened=true}
+function snapshotActiveStore(){
+  if(!S.activeStoreId)return;
+  S.stores=S.stores||{};
+  const snap=storeSnapshot();
+  snap.opened=true;
+  S.stores[S.activeStoreId]=snap;
+}
 function loadStoreSnapshot(id){
- initStoreSystem();const st=ensureStoreInstance(id);if(!st||!st.opened)return false;const snap=S.stores[id];
- const global={stores:S.stores,companyLevel:S.companyLevel,activeStoreId:id,globalCash:Number(S.cash||S.globalCash||0),day:S.day,storeSelectionDone:S.storeSelectionDone};
- S=Object.assign(clone(DEFAULT),clone(snap));S.stores=global.stores;S.companyLevel=global.companyLevel;S.activeStoreId=id;S.globalCash=global.globalCash;S.cash=global.globalCash;S.day=global.day;S.storeSelectionDone=true;S.shopOpen=false;
- S.storeBusiness=Object.assign({kind:STORE_DEFS[id].kind,menu:[STORE_DEFS[id].tag],dailyBase:id==="tea"?0:120,dailyPerEmployee:55,active:false,auditGap:0,opened:true,openedAt:Date.now()},S.storeBusiness||{});S.storeBusiness.active=true;
- normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);return true
+  initStoreSystem();
+  const st=ensureStoreInstance(id);if(!st||!st.opened)return false;
+  const snap=clone(S.stores[id]);
+  const global={
+    stores:S.stores,
+    companyLevel:S.companyLevel,
+    level:S.level,
+    xp:S.xp,
+    day:S.day,
+    activeStoreId:id,
+    globalCash:Number(S.cash||S.globalCash||0),
+    storeSelectionDone:true,
+    adminPersistent:!!S.__adminProgressPersistent,
+    adminProgress:clone(S.__adminProgress||null)
+  };
+  S=Object.assign(clone(DEFAULT),snap);
+  S.stores=global.stores;
+  S.companyLevel=global.companyLevel;
+  S.level=global.level;
+  S.xp=global.xp;
+  S.activeStoreId=id;
+  S.globalCash=global.globalCash;
+  S.cash=global.globalCash;
+  S.day=global.day;
+  S.storeSelectionDone=true;
+  S.__adminProgressPersistent=global.adminPersistent;
+  if(global.adminProgress)S.__adminProgress=global.adminProgress;
+  S.shopOpen=false;
+  S.storeBusiness=Object.assign({kind:STORE_DEFS[id].kind,menu:[STORE_DEFS[id].tag],dailyBase:id==="tea"?0:120,dailyPerEmployee:55,active:false,auditGap:0,opened:true,openedAt:Date.now(),lastPassiveDay:0},S.storeBusiness||{});
+  S.storeIdentity=Object.assign({id,name:STORE_DEFS[id].name,icon:STORE_DEFS[id].icon,kind:STORE_DEFS[id].kind,tag:STORE_DEFS[id].tag},S.storeIdentity||{});
+  normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);
+  applyPersistedAdminProgress();
+  return true;
 }
 function switchStore(id){
- initStoreSystem();const d=STORE_DEFS[id];if(!d)return toast("🏪 Cửa hàng không tồn tại");if(!S.stores?.[id]?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");
- snapshotActiveStore();if(!loadStoreSnapshot(id))return;S.stores[id].opened=true;S.stores[id].storeBusiness.opened=true;S.stores[id].storeBusiness.active=true;save();renderPrep();updateTop();closeStoreChooser();toast(`🏪 Đã chuyển sang ${d.icon} ${d.name}`)
+  initStoreSystem();
+  const d=STORE_DEFS[id];if(!d)return toast("🏪 Cửa hàng không tồn tại");
+  if(!S.stores?.[id]?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);
+  if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");
+  snapshotActiveStore();
+  if(!loadStoreSnapshot(id))return;
+  S.stores[id].opened=true;S.stores[id].storeBusiness.opened=true;S.stores[id].storeBusiness.active=true;
+  applyPersistedAdminProgress();
+  save();renderPrep();updateTop();closeStoreChooser();
+  toast(`🏪 Đã chuyển sang ${d.icon} ${d.name}`);
 }
+
 function closeStoreChooser(){
   const modal=document.getElementById("storeModal");
   if(!modal)return;
@@ -1255,30 +1383,36 @@ function renderStoreChooser(){
  const desc=document.getElementById("storeModalDesc");if(desc)desc.innerHTML=`Công ty Lv.<b>${level}</b> · Vốn hiện có <b>${money(S.cash)}</b>. Bấm từng quán để xem chính xác điều kiện mở.`;
 }
 function companyBusinessIncome(){
- let totalProfit=0,totalRevenue=0;const rows=[];
- for(const [id,d] of Object.entries(STORE_DEFS)){
-   // Chỉ các quán ĐÃ MỞ và KHÔNG phải quán chủ đang trực tiếp làm mới được tính thu nhập nhân viên tự động.
-   if(id===S.activeStoreId||!S.stores?.[id]?.opened)continue;
-   const st=S.stores[id];const empKeys=Object.keys(st.employees||{}).filter(k=>st.employees[k]===true);
-   if(!empKeys.length)continue;
-   const base=Number(st.storeBusiness?.dailyBase||120),per=Number(st.storeBusiness?.dailyPerEmployee||55);
-   const revenue=Math.max(0,base+empKeys.length*per);
-   const wageEnabled=st.employeePayEnabled!==false;
-   const wage=wageEnabled?empKeys.reduce((sum,k)=>{const role=EMPLOYEE_ROLES[k];const e=st.employeeRoster?.[k];return sum+(role?Number(e?.wage||st.employeeDeals?.[k]||role.base):0)},0)*10:0;
-   const rent=12+S.day*2,utilities=5;
-   const profit=Math.max(0,revenue-wage-rent-utilities);
-   st.today=Object.assign({served:0,wrong:0,left:0,revenue:0},st.today||{});
-   st.today.revenue=revenue;
-   st.stats=st.stats||{};st.stats.revenue=(st.stats.revenue||0)+revenue;st.stats.totalProfit=(st.stats.totalProfit||0)+profit;st.stats.days=(st.stats.days||0)+1;
-   st.history=st.history||[];st.history.push({day:S.day,profit,revenue,wage,rent,utilities,passive:true,store:d.name,employees:empKeys.length});
-   totalRevenue+=revenue;totalProfit+=profit;rows.push({id,name:d.name,revenue,profit,emp:empKeys.length,wage});
- }
- if(totalRevenue||totalProfit){
-   S.stats=S.stats||{};S.stats.revenue=(S.stats.revenue||0)+totalRevenue;S.stats.totalProfit=(S.stats.totalProfit||0)+totalProfit;
-   S.cash+=totalProfit;syncGlobalCash();
-   toast(`🏢 Nhân viên tại quán khác đã kiếm ${money(totalRevenue)} doanh thu · lãi ${money(totalProfit)} hôm nay`);
- }
- return {rows,totalRevenue,totalProfit};
+  let totalProfit=0,totalRevenue=0;const rows=[];
+  const day=Math.max(1,Number(S.day)||1);
+  for(const [id,d] of Object.entries(STORE_DEFS)){
+    if(id===S.activeStoreId||!S.stores?.[id]?.opened)continue;
+    const st=ensureStoreInstance(id);if(!st)continue;
+    st.storeBusiness=Object.assign({dailyBase:id==="tea"?0:120,dailyPerEmployee:55,lastPassiveDay:0},st.storeBusiness||{});
+    if(Number(st.storeBusiness.lastPassiveDay||0)>=day)continue;
+    const empKeys=Object.keys(st.employees||{}).filter(k=>st.employees[k]===true);
+    if(!empKeys.length){st.storeBusiness.lastPassiveDay=day;continue;}
+    const base=Number(st.storeBusiness.dailyBase||120),per=Number(st.storeBusiness.dailyPerEmployee||55);
+    const revenue=Math.max(0,base+empKeys.length*per);
+    const wageEnabled=st.employeePayEnabled!==false;
+    const wage=wageEnabled?empKeys.reduce((sum,k)=>{
+      const role=EMPLOYEE_ROLES[k],e=st.employeeRoster?.[k];
+      return sum+(role?Number(e?.wage||st.employeeDeals?.[k]||role.base):0);
+    },0)*10:0;
+    const rent=12+day*2,utilities=5;
+    const profit=Math.max(0,revenue-wage-rent-utilities);
+    st.today=Object.assign({served:0,wrong:0,left:0,revenue:0},st.today||{});st.today.revenue=revenue;
+    st.stats=st.stats||{};st.stats.revenue=(st.stats.revenue||0)+revenue;st.stats.totalProfit=(st.stats.totalProfit||0)+profit;st.stats.days=(st.stats.days||0)+1;
+    st.history=st.history||[];st.history.push({day,profit,revenue,wage,rent,utilities,passive:true,store:d.name,employees:empKeys.length});
+    st.storeBusiness.lastPassiveDay=day;
+    totalRevenue+=revenue;totalProfit+=profit;rows.push({id,name:d.name,revenue,profit,emp:empKeys.length,wage});
+  }
+  if(totalRevenue||totalProfit){
+    S.stats=S.stats||{};S.stats.revenue=(S.stats.revenue||0)+totalRevenue;S.stats.totalProfit=(S.stats.totalProfit||0)+totalProfit;
+    S.cash=Math.max(0,Number(S.cash||0)+totalProfit);syncGlobalCash();
+    toast(`🏢 Nhân viên tại quán khác đã kiếm ${money(totalRevenue)} doanh thu · lãi ${money(totalProfit)} hôm nay`);
+  }
+  return {rows,totalRevenue,totalProfit};
 }
 function auditStoreBooks(){
  snapshotActiveStore();
@@ -1300,13 +1434,13 @@ function auditStoreBooks(){
  save();return true;
 }
 function showBusinessBooks(){snapshotActiveStore();const rows=Object.entries(STORE_DEFS).filter(([id])=>S.stores?.[id]?.opened).map(([id,d])=>{const st=S.stores[id];const h=st.history||[];const rev=h.reduce((a,x)=>a+Number(x.revenue||0),0);const prof=h.reduce((a,x)=>a+Number(x.profit||0),0);return `<div class="card"><h3>${d.icon} ${d.name}</h3><div class="statGrid"><div class="statBox"><b>${money(rev)}</b>Doanh thu</div><div class="statBox"><b>${money(prof)}</b>Lợi nhuận</div><div class="statBox"><b>${h.length}</b>Ngày ghi sổ</div></div><div class="mini" style="margin-top:8px">Nhân viên: ${Object.values(st.employees||{}).filter(Boolean).length} · Sổ sách độc lập theo cửa hàng.</div></div>`}).join("");const ledger=document.getElementById("ledger");if(ledger)ledger.innerHTML=rows+`<div style="margin-top:12px"><button class="btn secondary" onclick="auditStoreBooks()">🚓 Kiểm tra giấy tờ</button></div>`;show("summary")}
-function newGame(){clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;clearInterval(pourTimer);pourTimer=null;pouring=false;shopStartTime=0;lastTickAt=0;elapsed=0;S=clone(DEFAULT);S.shopName="Tiệm Trà Xinh";S.renameUsed=false;S.cash=500;S.globalCash=500;S.rating=0;S.reviews=[];S.today={served:0,wrong:0,left:0,revenue:0};S.day=1;S.companyLevel=1;S.activeStoreId="tea";S.storeSelectionDone=false;S.stores={};dayEnding=false;customers=[];current=-1;initStoreSystem();save();openStoreChooser()}
+function newGame(){clearPersistedAdminProgress();sessionStorage.removeItem("TTX_ADMIN_UNLOCKED");clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;clearInterval(pourTimer);pourTimer=null;pouring=false;shopStartTime=0;lastTickAt=0;elapsed=0;S=clone(DEFAULT);S.shopName="Tiệm Trà Xinh";S.renameUsed=false;S.cash=500;S.globalCash=500;S.rating=0;S.reviews=[];S.today={served:0,wrong:0,left:0,revenue:0};S.day=1;S.companyLevel=1;S.activeStoreId="tea";S.storeSelectionDone=false;S.stores={};dayEnding=false;customers=[];current=-1;initStoreSystem();save();openStoreChooser()}
 function continueGame(){load();initStoreSystem();openStoreChooser()}
 function wipe(){
   const first=confirm("⚠️ CẢNH BÁO XÓA DỮ LIỆU\n\nTất cả tiến trình của Tiệm Trà Xinh sẽ bị xóa vĩnh viễn trên thiết bị này, gồm: tên quán, tiền, cấp độ, EXP, công thức, nguyên liệu, topping, đồ ăn vặt và các nâng cấp.\n\nBạn có chắc chắn muốn tiếp tục?");
   if(!first) return;
   const second=confirm("🚨 XÁC NHẬN LẦN CUỐI\n\nThao tác này không thể hoàn tác. Nhấn OK để xóa toàn bộ dữ liệu, hoặc Hủy để giữ nguyên tiến trình.");
-  if(second){localStorage.removeItem(getPlayerSaveKey());Object.keys(localStorage).filter(k=>k.startsWith("ttx_setting_")).forEach(k=>localStorage.removeItem(k));location.reload();}
+  if(second){clearPersistedAdminProgress();sessionStorage.removeItem("TTX_ADMIN_UNLOCKED");localStorage.removeItem(getPlayerSaveKey());Object.keys(localStorage).filter(k=>k.startsWith("ttx_setting_")).forEach(k=>localStorage.removeItem(k));location.reload();}
 }
 function startPrep(){try{renderPrep()}catch(err){console.error("renderPrep error",err);try{renderPrepFallback()}catch(_){}}show("prep");if(getSetting("guideMode",true)&&Number(S.day||1)<=2)toast("📖 Hướng dẫn: vào Kho/Nâng cấp để nhập hàng → chỉnh Menu → Mở cửa")}
 
@@ -1659,7 +1793,7 @@ function makeOrder(){
 }
 function openGenericShop(){clearTimeout(arrivalTimer);arrivalTimer=null;S.shopOpen=true;S.today={served:0,wrong:0,left:0,revenue:0};elapsed=0;shopStartTime=Date.now();lastTickAt=shopStartTime;dayEnding=false;show("shop");const stage=document.getElementById("customerStage");if(stage)stage.innerHTML=`<div style="font-size:100px">${(STORE_DEFS[S.activeStoreId]||STORE_DEFS.noodle).icon}</div><div class="bubble">🏪 ${STORE_DEFS[S.activeStoreId].name} đang mở cửa. Nhân viên và khách đang hoạt động.</div>`;const orders=document.getElementById("orders");if(orders)orders.innerHTML=`<div class="order">⏱️ Đang vận hành tự động · doanh thu sẽ được ghi vào sổ sách riêng.</div>`;clearInterval(timer);timer=setInterval(tickGeneric,1000);updateTop();toast(`🌅 Mở cửa ${STORE_DEFS[S.activeStoreId].name} · 10 phút = một ngày.`)}
 function tickGeneric(){if(!S.shopOpen||!shopStartTime)return;const totalDay=GAME_DAY_SECONDS,now=Date.now();elapsed=Math.min(totalDay,Math.floor((now-shopStartTime)/1000));const gameMinutes=Math.min(600,Math.floor(elapsed));const absoluteMinute=GAME_START_MINUTE+gameMinutes;const hour=Math.floor(absoluteMinute/60),minute=absoluteMinute%60;const clock=document.getElementById("clock"),ct=`${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}`;if(clock)clock.textContent=ct;const hc=document.getElementById("headerClock");if(hc)hc.textContent=ct;updateShopDayProgress();if(elapsed>=totalDay){clearInterval(timer);timer=null;S.shopOpen=false;endGenericDay()}}
-function endGenericDay(){const d=STORE_DEFS[S.activeStoreId]||STORE_DEFS.noodle;const emp=Object.values(S.employees||{}).filter(Boolean).length;const base=Number(S.storeBusiness?.dailyBase||120);const per=Number(S.storeBusiness?.dailyPerEmployee||55);const revenue=base+emp*per;const wage=employeeDailyCost();const profit=Math.max(0,revenue-wage-10);S.cash+=profit;S.today.revenue=revenue;S.stats.revenue=(S.stats.revenue||0)+revenue;S.stats.totalProfit=(S.stats.totalProfit||0)+profit;S.stats.served=(S.stats.served||0)+Math.max(1,Math.floor(revenue/15));S.stats.days=(S.stats.days||0)+1;S.history=S.history||[];S.history.push({day:S.day,revenue,profit,passive:false,store:d.name});snapshotActiveStore();const passive=companyBusinessIncome();const totalRevenue=revenue+(passive.totalRevenue||0);const totalProfit=profit+(passive.totalProfit||0);S.dayEnding=true;save();document.getElementById("sumDay").textContent=S.day;document.getElementById("profit").textContent="+"+money(totalProfit);document.getElementById("sumLine").textContent=`Tổng chuỗi hôm nay: doanh thu ${money(totalRevenue)} · lợi nhuận ${money(totalProfit)}.`;document.getElementById("ledger").innerHTML=`<p>🏪 ${d.name}: doanh thu <b>${money(revenue)}</b> · lợi nhuận <b>${money(profit)}</b></p>`+(passive.rows||[]).map(r=>`<p>👨‍🍳 ${STORE_DEFS[r.id]?.name||r.name}: nhân viên ${r.emp} · doanh thu <b>+${money(r.revenue)}</b> · lãi <b>+${money(r.profit)}</b></p>`).join("")+`<hr><p><b>Tổng doanh thu toàn chuỗi: ${money(totalRevenue)}</b></p><p><b>Tổng lợi nhuận toàn chuỗi: ${money(totalProfit)}</b></p>`;show("summary")}
+function endGenericDay(){if(dayEnding)return;dayEnding=true;const d=STORE_DEFS[S.activeStoreId]||STORE_DEFS.noodle;const emp=Object.values(S.employees||{}).filter(Boolean).length;const base=Number(S.storeBusiness?.dailyBase||120);const per=Number(S.storeBusiness?.dailyPerEmployee||55);const revenue=base+emp*per;const wage=employeeDailyCost();const profit=Math.max(0,revenue-wage-10);S.cash+=profit;S.today.revenue=revenue;S.stats.revenue=(S.stats.revenue||0)+revenue;S.stats.totalProfit=(S.stats.totalProfit||0)+profit;S.stats.served=(S.stats.served||0)+Math.max(1,Math.floor(revenue/15));S.stats.days=(S.stats.days||0)+1;S.history=S.history||[];S.history.push({day:S.day,revenue,profit,passive:false,store:d.name});snapshotActiveStore();const passive=companyBusinessIncome();const totalRevenue=revenue+(passive.totalRevenue||0);const totalProfit=profit+(passive.totalProfit||0);S.dayEnding=true;save();document.getElementById("sumDay").textContent=S.day;document.getElementById("profit").textContent="+"+money(totalProfit);document.getElementById("sumLine").textContent=`Tổng chuỗi hôm nay: doanh thu ${money(totalRevenue)} · lợi nhuận ${money(totalProfit)}.`;document.getElementById("ledger").innerHTML=`<p>🏪 ${d.name}: doanh thu <b>${money(revenue)}</b> · lợi nhuận <b>${money(profit)}</b></p>`+(passive.rows||[]).map(r=>`<p>👨‍🍳 ${STORE_DEFS[r.id]?.name||r.name}: nhân viên ${r.emp} · doanh thu <b>+${money(r.revenue)}</b> · lãi <b>+${money(r.profit)}</b></p>`).join("")+`<hr><p><b>Tổng doanh thu toàn chuỗi: ${money(totalRevenue)}</b></p><p><b>Tổng lợi nhuận toàn chuỗi: ${money(totalProfit)}</b></p>`;show("summary")}
 function openShop(){
   // Mọi quán trong chuỗi đều mở cửa theo mô hình Tiệm Trà Xinh.
   normalizeSnackUnlocks();
@@ -2227,10 +2361,10 @@ function bindStoreChainInteractions(){
 }
 
 
-migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();initStoreSystem();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
+migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();initStoreSystem();applyPersistedAdminProgress();save();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 // Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem(getPlayerSaveKey());if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem(getPlayerSaveKey());if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();initStoreSystem();applyPersistedAdminProgress();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
 document.getElementById("nameModal").addEventListener("click",e=>{if(e.target.id==="nameModal")closeNameModal()});
 updateTop();
 
