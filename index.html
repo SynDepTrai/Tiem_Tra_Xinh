@@ -191,7 +191,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   <span class="statPill moneyPill">💰 <b id="cash">500k</b></span>
   <span class="statPill ratingPill">⭐ <b id="rating">0.0</b></span>
   <span class="statPill levelPill">🏆 Lv.<b id="level">1</b></span>
-  <span id="signStatus" class="statusPill closed">CLOSE</span><button class="storeTopBtn" type="button" title="Chuỗi cửa hàng" onclick="forceOpenStoreChooser()" onpointerup="forceOpenStoreChooser()">🏪 Quán</button>
+  <span id="signStatus" class="statusPill closed">CLOSE</span><button class="storeTopBtn" type="button" title="Chuỗi cửa hàng" onclick="forceOpenStoreChooser()" onpointerup="forceOpenStoreChooser()">🏪 Quán</button><button class="storeTopBtn" type="button" title="Đăng xuất tài khoản" onclick="logoutAccount()">🚪 Thoát</button>
  </div>
  <div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div>
 </header>
@@ -395,7 +395,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
    <b>👤 Người chơi riêng</b>
    <div class="mini">Mỗi người chơi có một kho save riêng trên thiết bị này.</div>
    <div class="row" style="margin-top:8px"><span class="tag">Mã: <b id="playerIdValue"></b></span><span class="tag" id="playerNameValue"></span></div>
-   <div class="row" style="margin-top:8px"><button class="btn secondary" type="button" onclick="changePlayerProfile()">👤 Đổi người chơi</button><button class="btn gold" type="button" onclick="makeRecoveryCode()">🔐 Tạo mã khôi phục</button></div>
+   <div class="row" style="margin-top:8px"><button class="btn secondary" type="button" onclick="changePlayerProfile()">👤 Đổi người chơi</button><button class="btn gold" type="button" onclick="makeRecoveryCode()">🔐 Tạo mã khôi phục</button><button class="btn danger" type="button" onclick="logoutAccount()">🚪 Đăng xuất</button></div>
   </div>
   <div id="adminPanel"></div>
 
@@ -468,6 +468,34 @@ const ICONS={"🥤":"assets/drinks/trasua.png","🧋":"assets/drinks/trasua.png"
 function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
 /* ===== V59 FULL SETTINGS + CHILL MUSIC ===== */
 /* V83 — ADMIN CONFIG + PER-USER SAVE + RECOVERY CODE */
+/* V96 — CENTRAL USER REGISTRY
+   Static hosting cannot write real JSON files on the server. The project therefore ships
+   data/users/ as the canonical structure, while the browser keeps the live registry in
+   localStorage. Admin can edit any registered user on this device; import/export can be
+   used to move the registry between devices. */
+const USER_DB_KEY='TTX_USER_DB_V1';
+function readUserDB(){try{const x=JSON.parse(localStorage.getItem(USER_DB_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}}
+function writeUserDB(db){try{localStorage.setItem(USER_DB_KEY,JSON.stringify(db));return true}catch(e){console.warn('user db save',e);return false}}
+function currentUsername(){const a=getAccountSession();return a?String(a.username).toLowerCase():''}
+function syncCurrentAccountRecord(){
+  const u=currentUsername(); if(!u||typeof S==='undefined')return;
+  const db=readUserDB(); const old=db[u]||{};
+  db[u]=Object.assign({},old,{username:u,displayName:getPlayerName(),version:1,lastSavedAt:Date.now(),progress:clone(S)});
+  writeUserDB(db);
+}
+function loadAccountRecord(username){
+  const db=readUserDB(),r=db[String(username||'').toLowerCase()];
+  return r&&r.progress?clone(r.progress):null;
+}
+function updateAccountRecord(username,progress,meta={}){
+  const u=String(username||'').trim().toLowerCase();if(!u)return false;
+  const db=readUserDB(),old=db[u]||{};
+  db[u]=Object.assign({},old,meta,{username:u,version:1,lastSavedAt:Date.now(),progress:clone(progress)});
+  return writeUserDB(db);
+}
+function deleteAccountRecord(username){const db=readUserDB(),u=String(username||'').toLowerCase();delete db[u];return writeUserDB(db)}
+function exportUserDB(){const blob=new Blob([JSON.stringify(readUserDB(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tiem-tra-xinh-users.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function importUserDBFile(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{const f=input.files?.[0];if(!f)return;try{const db=JSON.parse(await f.text());if(!db||typeof db!=='object')throw new Error('bad');writeUserDB(db);toast('📥 Đã nhập dữ liệu người chơi');renderAdminPanel()}catch(e){toast('❌ File dữ liệu không hợp lệ')}};input.click()}
 const ADMIN_CONFIG={
   // Mã quản trị giao diện — không phải bảo mật server.
   accessCode:"SynDepTrai",
@@ -638,10 +666,34 @@ function renderAdminPanel(){
     </div>
    </div>
    <div class="row"><button class="btn primary" type="button" onclick="saveAdminProgress()">💾 Lưu tiến trình Admin</button><button class="btn gold" type="button" onclick="adminMaxProgress()">⚡ Max nhanh</button></div>
+   <div class="adminRow"><b>👥 QUẢN LÝ TÀI KHOẢN</b><div class="mini">Mỗi tài khoản có một hồ sơ và một tiến trình riêng. Admin có thể chỉnh người chơi trên thiết bị này.</div><div id="adminUsersList" style="margin-top:8px"></div><div class="row" style="margin-top:8px"><button class="btn secondary" type="button" onclick="exportUserDB()">📤 Xuất dữ liệu Users</button><button class="btn secondary" type="button" onclick="importUserDBFile()">📥 Nhập dữ liệu Users</button></div></div>
    <div class="adminRow"><b>📘 Facebook Admin</b><input id="adminFacebookInput" class="settingsLinkInput" value="${escapeAttr(getSetting("facebookLink",ADMIN_CONFIG.facebookLink||""))}" placeholder="https://www.facebook.com/..." /></div>
    <div class="adminRow"><b>🎵 Nhạc có sẵn</b><span class="mini">Đặt MP3 vào thư mục <code>music/</code> và khai báo trong <code>ADMIN_CONFIG.music</code>. Người chơi sẽ tự thấy.</span></div>
    <div class="row"><button class="btn secondary" type="button" onclick="saveAdminFacebook()">💾 Lưu Facebook</button><button class="btn secondary" type="button" onclick="adminLogout()">Thoát Admin</button></div>
   </div>`;
+}
+function renderAdminUsers(){
+ const box=document.getElementById('adminUsersList'); if(!box)return;
+ const db=readUserDB(),keys=Object.keys(db);
+ if(!keys.length){box.innerHTML='<div class="mini">Chưa có hồ sơ người chơi trong User DB.</div>';return}
+ box.innerHTML=keys.map(u=>{const r=db[u]||{},p=r.progress||{};return `<div class="adminUserCard" style="padding:10px;border:1px solid #e7c98d;border-radius:12px;margin:7px 0;background:#fffaf0"><div style="display:flex;justify-content:space-between;gap:8px"><b>👤 ${escapeAttr(r.displayName||u)}</b><span class="mini">@${escapeAttr(u)}</span></div><div class="adminEditGrid" style="margin-top:7px"><label>Tiền<input data-u="${escapeAttr(u)}" data-f="cash" type="number" value="${Number(p.cash||0)}"></label><label>Cấp<input data-u="${escapeAttr(u)}" data-f="level" type="number" value="${Number(p.level||1)}"></label><label>XP<input data-u="${escapeAttr(u)}" data-f="xp" type="number" value="${Number(p.xp||0)}"></label><label>⭐ Sao<input data-u="${escapeAttr(u)}" data-f="rating" type="number" step="0.1" min="0" max="5" value="${Number(p.rating||0)}"></label><label>Ngày<input data-u="${escapeAttr(u)}" data-f="day" type="number" value="${Number(p.day||1)}"></label><label>Chuỗi<input data-u="${escapeAttr(u)}" data-f="companyLevel" type="number" value="${Number(p.companyLevel||p.level||1)}"></label></div><div class="row" style="margin-top:7px"><button class="btn primary" type="button" onclick="adminSaveUser('${escapeAttr(u)}')">💾 Lưu User</button><button class="btn danger" type="button" onclick="adminDeleteUser('${escapeAttr(u)}')">🗑️ Xóa</button></div></div>`}).join('');
+}
+function adminSaveUser(u){
+ if(!isAdminUnlocked())return adminLogin();
+ const db=readUserDB(),r=db[u];if(!r?.progress)return toast('❌ Không tìm thấy dữ liệu user');
+ const root=document.querySelector(`[data-u="${CSS.escape(u)}"]`); const p=clone(r.progress);
+ document.querySelectorAll(`[data-u="${CSS.escape(u)}"]`).forEach(el=>{const f=el.dataset.f;if(f)p[f]=Number(el.value)||0});
+ p.level=Math.max(1,Math.floor(p.level||1));p.companyLevel=Math.max(1,Math.floor(p.companyLevel||p.level));p.xp=Math.max(0,Math.floor(p.xp||0));p.cash=Math.max(0,Math.floor(p.cash||0));p.globalCash=p.cash;p.day=Math.max(1,Math.floor(p.day||1));p.rating=Math.max(0,Math.min(5,Number(p.rating)||0));
+ updateAccountRecord(u,p,{displayName:r.displayName||u,adminEditedAt:Date.now()});
+ if(u===currentUsername()){S=p;S.__adminProgressPersistent=true;save();load();updateTop();renderPrep();}
+ renderAdminUsers();toast(`👑 Đã cập nhật @${u}`);
+}
+function adminDeleteUser(u){
+ if(!isAdminUnlocked())return adminLogin();
+ if(u===currentUsername())return toast('⚠️ Không thể xóa tài khoản đang đăng nhập');
+ if(!confirm(`Xóa toàn bộ dữ liệu của @${u}?`))return;
+ deleteAccountRecord(u);try{const db=JSON.parse(localStorage.getItem('TTX_ACCOUNTS_V1')||'{}');delete db[u];localStorage.setItem('TTX_ACCOUNTS_V1',JSON.stringify(db))}catch(e){}
+ renderAdminUsers();toast('🗑️ Đã xóa user');
 }
 function saveAdminProgress(){
   if(!isAdminUnlocked())return adminLogin();
@@ -1071,7 +1123,9 @@ function normalizeSnackUnlocks(){
 }
 function load(){
  migrateLegacyPlayerSave();
- let x=localStorage.getItem(getPlayerSaveKey());if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
+ let x=localStorage.getItem(getPlayerSaveKey());
+ if(!x){const rec=loadAccountRecord(currentUsername());if(rec)x=JSON.stringify(rec);}
+ if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
  if(typeof S.renameUsed!=="boolean") S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";
  S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.ratingBonus=Math.max(0,Number(S.ratingBonus)||0); ensureLevelMissionState(); S.employeeInfo=S.employeeInfo||{}; S.employeeRoster=S.employeeRoster||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
  recalcRatingFromReviews();
@@ -1202,10 +1256,15 @@ function storeSnapshotFrom(base){
   return x;
 }
 function genericStoreSnapshot(def){
-  const base=clone(DEFAULT);
-  base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;
+  // Every new store is a full copy of the Tiệm Trà Xinh gameplay model, not a passive placeholder.
+  // It gets its own independent state, while keeping the same recipes/menu/stock schema so all
+  // existing customer, preparation, inventory, employee and upgrade functions work immediately.
+  const teaBase=S?.stores?.tea ? clone(S.stores.tea) : clone(DEFAULT);
+  const base=Object.assign(clone(DEFAULT),teaBase);
+  base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;
   base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};
   base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];
+  base.reviews=[];base.reviewSeq=0;base.rating=0;base.ratingPenalty=0;base.ratingBonus=0;
   base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:def.icon||"🧋",slogan:"Ngon từng món"};
   base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;
   base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};
@@ -1251,6 +1310,7 @@ function save(){
   S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);
   const mainRaw=JSON.stringify(S);
   try{localStorage.setItem(getPlayerSaveKey(),mainRaw)}catch(e){console.warn("save player",e)}
+  syncCurrentAccountRecord();
   if(S.__adminProgressPersistent)persistAdminProgress();
 }
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
@@ -1326,18 +1386,30 @@ function switchStore(id){
   snapshotActiveStore();
   if(!loadStoreSnapshot(id))return;
   S.stores[id].opened=true;S.stores[id].storeBusiness.opened=true;S.stores[id].storeBusiness.active=true;
+  // All stores use the full Tiệm Trà Xinh gameplay engine. Only the business book/name is different.
+  normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);
   applyPersistedAdminProgress();
-  save();renderPrep();updateTop();closeStoreChooser();
-  toast(`🏪 Đã chuyển sang ${d.icon} ${d.name}`);
+  save();renderPrep();updateTop();closeStoreChooser();show("prep");
+  toast(`🏪 Đã chuyển sang ${d.icon} ${d.name}. Bạn có thể mở cửa và bán hàng.`);
 }
 
 function startStoreBusiness(id){
   const d=STORE_DEFS[id];
   if(!d)return toast("🏪 Cửa hàng không tồn tại");
   initStoreSystem();
-  if(!S.stores?.[id]?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);
-  if(id===S.activeStoreId){closeStoreChooser();renderPrep();show("prep");updateTop();toast(`📍 Bạn đang ở ${d.icon} ${d.name}`);return;}
-  switchStore(id);
+  const st=S.stores?.[id];
+  if(!st?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);
+  // A store switch is a real state transition. Persist the current store first, then load the
+  // target store's independent book and immediately show its preparation screen.
+  if(id!==S.activeStoreId){
+    switchStore(id);
+    return;
+  }
+  S.activeStoreId=id;
+  S.shopOpen=false;
+  clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;
+  renderPrep();show("prep");updateTop();closeStoreChooser();save();
+  toast(`📍 Đã chuyển sang ${d.icon} ${d.name}. Hãy vào Bán hàng → Mở cửa để kinh doanh.`);
 }
 
 function closeStoreChooser(){
