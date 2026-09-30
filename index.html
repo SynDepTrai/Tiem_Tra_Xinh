@@ -1073,7 +1073,7 @@ const STORE_DEFS={
  grocery:{name:"Tạp Hóa",icon:"🏪",unlockLevel:15,openCost:50000,kind:"generic",tag:"Đồ uống • bánh • hàng tiêu dùng",desc:"Cửa hàng bán hàng tiêu dùng hằng ngày."}
 };
 const STORE_STATE_KEYS=["shopName","renameUsed","shopOpen","rating","xp","level","stock","upgrades","unlockedTeas","recipes","menuDrinks","menuSnacks","unlockedTops","unlockedSizes","unlockedIngredients","unlockedSnacks","snackSystemUnlocked","stats","today","employeeDeals","employeeInfo","employeeRoster","employeePayEnabled","unpaidDays","equipment","branding","loan","employees","online","quests","levelMissions","history","dayReward","reviews","reviewSeq","ratingPenalty","ratingBonus","quits","theft","police","security","cardGame"];
-function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);return x}
+function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S[k]);x.storeBusiness=clone(S.storeBusiness||null);return x}
 function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};return storeSnapshotFrom(base)}
 function storeSnapshotFrom(base){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);return x}
 function initStoreSystem(){
@@ -1089,7 +1089,23 @@ function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
 function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S))}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
-function openStore(id){const d=STORE_DEFS[id];if(!d)return;if(S.stores[id]?.opened)return switchStore(id);if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);if(S.cash<d.openCost)return showStoreRequirement(id);S.cash-=d.openCost;S.stores[id].opened=true;S.stores[id].storeBusiness=S.stores[id].storeBusiness||{kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false};syncGlobalCash();save();renderStoreChooser();toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);fx("🎉");}
+function openStore(id){
+ const d=STORE_DEFS[id];if(!d)return;
+ if(S.stores[id]?.opened)return switchStore(id);
+ if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);
+ if(S.cash<d.openCost)return showStoreRequirement(id);
+ S.cash-=d.openCost;
+ S.stores[id]=S.stores[id]||genericStoreSnapshot(d);
+ S.stores[id].opened=true;
+ S.stores[id].storeBusiness=Object.assign({kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0},S.stores[id].storeBusiness||{});
+ syncGlobalCash();save();
+ closeStoreChooser();
+ // Quán mới dùng chung mô hình vận hành của Tiệm Trà Xinh: pha chế, khách, kho, menu, nâng cấp...
+ switchStore(id);
+ toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);
+ toast(`🚀 Bắt đầu chuỗi cửa hàng tại ${d.icon} ${d.name}!`);
+ fx("🎉");
+}
 function snapshotActiveStore(){if(!S.activeStoreId)return;S.stores=S.stores||{};S.stores[S.activeStoreId]=storeSnapshot();S.stores[S.activeStoreId].opened=true}
 function loadStoreSnapshot(id){const snap=S.stores?.[id];if(!snap)return false;const global={stores:S.stores,companyLevel:S.companyLevel,activeStoreId:id,globalCash:Number(S.cash||S.globalCash||0),day:S.day};S=Object.assign(clone(DEFAULT),clone(snap));S.stores=global.stores;S.companyLevel=global.companyLevel;S.activeStoreId=id;S.globalCash=global.globalCash;S.cash=global.globalCash;S.day=global.day;S.shopOpen=false;normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);return true}
 function switchStore(id){if(!S.stores?.[id]?.opened)return toast("🔒 Quán này chưa được mở");if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");snapshotActiveStore();if(!loadStoreSnapshot(id))return;save();renderPrep();updateTop();closeStoreChooser();toast(`🏪 Đã chuyển sang ${STORE_DEFS[id].icon} ${STORE_DEFS[id].name}`)}
@@ -1167,12 +1183,13 @@ function renderStoreChooser(){
  const next=ids.find(id=>id!=="tea"&&!(S.stores?.[id]?.opened)&&STORE_DEFS[id].unlockLevel>level);
  const nextDef=next?STORE_DEFS[next]:null;
  const nextText=nextDef?`<div class="card" style="grid-column:1/-1;background:#fff7e8;border:2px solid #f0c56b;text-align:left"><div class="row between"><div><b>🧭 Cửa hàng tiếp theo</b><div style="font-size:20px;font-weight:800;margin-top:4px">${nextDef.icon} ${nextDef.name}</div></div><span class="tag">🔒 Công ty Lv.${nextDef.unlockLevel}</span></div><div class="mini" style="margin-top:6px">Bạn đang ở Công ty Lv.${level}. Còn <b>${Math.max(0,nextDef.unlockLevel-level)} cấp</b> nữa để đủ điều kiện mở. Vốn mở cửa: <b>${money(nextDef.openCost)}</b>.</div><button class="btn secondary" type="button" style="margin-top:9px" onclick="showStoreRequirement('${next}')">ℹ️ Xem yêu cầu mở ${nextDef.name}</button></div>`:"";
- box.innerHTML=nextText+ids.map((id,index)=>{
+ const chainStart=`<div class="card" style="grid-column:1/-1;background:linear-gradient(135deg,#fffaf0,#fff1d2);border:2px solid #efb84d;text-align:left"><div class="row between" style="gap:10px"><div><b style="font-size:18px">🚀 Bắt đầu chuỗi cửa hàng</b><div class="mini" style="margin-top:5px">Mở quán mới rồi bấm <b>▶️ Bắt đầu kinh doanh</b>. Các quán trong chuỗi đều dùng chung mô hình vận hành của <b>🧋 Tiệm Trà Xinh</b>: khách hàng, pha chế, kho, menu, nhân viên và nâng cấp.</div></div><span class="tag">${Object.values(S.stores||{}).filter(x=>x?.opened).length}/${Object.keys(STORE_DEFS).length} quán</span></div></div>`;
+ box.innerHTML=chainStart+nextText+ids.map((id,index)=>{
    const d=STORE_DEFS[id],info=storeUnlockSummary(d,id),active=S.activeStoreId===id;
    let action="";
    if(pending&&id==="tea")action=`<button class="btn primary" onclick="selectInitialStore('tea')">▶️ Bắt đầu kinh doanh</button>`;
    else if(active)action=`<button class="btn secondary" disabled>📍 Đang làm</button>`;
-   else if(info.opened)action=`<button class="btn primary" onclick="switchStore('${id}')">Bắt đầu làm</button>`;
+   else if(info.opened)action=`<button class="btn primary" onclick="switchStore('${id}')">▶️ Bắt đầu kinh doanh</button>`;
    else if(!info.levelOk)action=`<button class="btn secondary" type="button" onclick="showStoreRequirement('${id}')">🔒 Xem yêu cầu · Lv.${d.unlockLevel}</button>`;
    else if(!info.cashOk)action=`<button class="btn secondary" type="button" onclick="showStoreRequirement('${id}')">💰 Xem yêu cầu mở</button>`;
    else action=`<button class="btn gold" onclick="openStore('${id}')">🔓 Mở · ${money(d.openCost)}</button>`;
@@ -1555,7 +1572,8 @@ function renderPrepFallback(){
  const rc=document.getElementById("prepReviewCount"); if(rc)rc.textContent="Chưa có";
 }
 function renderPrep(){
- if((S.activeStoreId||"tea")!=="tea"){renderGenericPrep();return;}
+ // V86: mọi cửa hàng trong chuỗi dùng cùng mô hình gameplay của Tiệm Trà Xinh.
+ // Tên/icon cửa hàng vẫn lấy theo STORE_DEFS, còn kho, menu, khách, nâng cấp và nhân viên là sổ riêng.
  normalizeSnackUnlocks();
  document.getElementById("prepDay").textContent=S.day;
  let inv=Object.entries(SIZES).filter(([n])=>S.unlockedSizes.includes(n)).map(([n,z])=>[n,"🥤 Ly "+n]);
@@ -1597,7 +1615,7 @@ function openGenericShop(){clearTimeout(arrivalTimer);arrivalTimer=null;S.shopOp
 function tickGeneric(){if(!S.shopOpen||!shopStartTime)return;const totalDay=GAME_DAY_SECONDS,now=Date.now();elapsed=Math.min(totalDay,Math.floor((now-shopStartTime)/1000));const gameMinutes=Math.min(600,Math.floor(elapsed));const absoluteMinute=GAME_START_MINUTE+gameMinutes;const hour=Math.floor(absoluteMinute/60),minute=absoluteMinute%60;const clock=document.getElementById("clock"),ct=`${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}`;if(clock)clock.textContent=ct;const hc=document.getElementById("headerClock");if(hc)hc.textContent=ct;updateShopDayProgress();if(elapsed>=totalDay){clearInterval(timer);timer=null;S.shopOpen=false;endGenericDay()}}
 function endGenericDay(){const d=STORE_DEFS[S.activeStoreId]||STORE_DEFS.noodle;const emp=Object.values(S.employees||{}).filter(Boolean).length;const base=Number(S.storeBusiness?.dailyBase||120);const per=Number(S.storeBusiness?.dailyPerEmployee||55);const revenue=base+emp*per;const wage=employeeDailyCost();const profit=Math.max(0,revenue-wage-10);S.cash+=profit;S.today.revenue=revenue;S.stats.revenue=(S.stats.revenue||0)+revenue;S.stats.totalProfit=(S.stats.totalProfit||0)+profit;S.stats.served=(S.stats.served||0)+Math.max(1,Math.floor(revenue/15));S.stats.days=(S.stats.days||0)+1;S.history=S.history||[];S.history.push({day:S.day,revenue,profit,passive:false,store:d.name});S.dayEnding=true;snapshotActiveStore();save();document.getElementById("sumDay").textContent=S.day;document.getElementById("profit").textContent="+"+money(profit);document.getElementById("sumLine").textContent=`${d.name}: doanh thu ${money(revenue)} · lợi nhuận ${money(profit)}.`;document.getElementById("ledger").innerHTML=`<p>🏪 ${d.name}</p><p>Doanh thu: <b>${money(revenue)}</b></p><p>Lương nhân viên: <b>-${money(wage)}</b></p><p>Chi phí khác: <b>-10k</b></p><p>Lợi nhuận: <b>${money(profit)}</b></p>`;show("summary")}
 function openShop(){
-  if((S.activeStoreId||"tea")!=="tea"){openGenericShop();return;}
+  // Mọi quán trong chuỗi đều mở cửa theo mô hình Tiệm Trà Xinh.
   normalizeSnackUnlocks();
   S.menuDrinks=S.menuDrinks||[];
   S.menuSnacks=S.menuSnacks||[];
