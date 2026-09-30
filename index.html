@@ -172,7 +172,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   <span class="statPill moneyPill">💰 <b id="cash">500k</b></span>
   <span class="statPill ratingPill">⭐ <b id="rating">0.0</b></span>
   <span class="statPill levelPill">🏆 Lv.<b id="level">1</b></span>
-  <span id="signStatus" class="statusPill closed">CLOSE</span><button class="storeTopBtn" type="button" onclick="openStoreChooser();return false" title="Chuỗi cửa hàng">🏪 Quán</button>
+  <span id="signStatus" class="statusPill closed">CLOSE</span><button class="storeTopBtn" type="button" title="Chuỗi cửa hàng">🏪 Quán</button>
  </div>
  <div class="xpTop"><div class="xpTopLabel"><span>✨ Kinh nghiệm</span><b id="xpText">0 / 100 XP</b></div><div class="xpTrack"><i id="xpTopBar"></i></div></div>
 </header>
@@ -199,7 +199,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   <div id="dailyQuest" class="newQuestList"></div>
  </div>
  <div class="quickGrid">
-  <button class="quickCard" onclick="show('manage');manageTab('up')"><span>📦</span><b>Kho & Nâng cấp</b><small>Nhập hàng · mở khóa</small></button><button class="quickCard" type="button" onclick="openStoreChooser();return false"><span>🏪</span><b>Chuỗi cửa hàng</b><small>Mở quán · đổi quán</small></button>
+  <button class="quickCard" onclick="show('manage');manageTab('up')"><span>📦</span><b>Kho & Nâng cấp</b><small>Nhập hàng · mở khóa</small></button><button class="quickCard storeChainQuick" type="button"><span>🏪</span><b>Chuỗi cửa hàng</b><small>Mở quán · đổi quán</small></button>
   <button class="quickCard" onclick="openReviews()"><span>⭐</span><b>Đánh giá</b><small id="prepReviewCount">Chưa có</small></button>
   <button class="quickCard" onclick="show('manage');manageTab('staff')"><span>👥</span><b>Nhân viên</b><small>Thuê & trả lương</small></button>
   <button class="quickCard" onclick="show('manage');manageTab('menu')"><span>📋</span><b>Sửa menu</b><small>Món đang bán</small></button>
@@ -999,7 +999,7 @@ function renderStoreChooser(){
    const position=index+1;
    const cardClick=(!info.opened && !(info.levelOk&&info.cashOk))?` onclick="showStoreRequirement('${id}')"`:' ';
    const cardCursor=(!info.opened && !(info.levelOk&&info.cashOk))?'cursor:pointer;':'';
-   return `<div class="card" style="text-align:left;position:relative;overflow:hidden;${cardCursor}"${cardClick}>
+   return `<div class="card" data-store-id="${id}" data-store-action="card" style="text-align:left;position:relative;overflow:hidden;${cardCursor}"${cardClick}>
      <div class="row between"><div style="font-size:42px">${d.icon}</div><span class="tag">#${position} · ${info.status}</span></div>
      <h3 style="margin-bottom:4px">${d.name}</h3>
      <div class="mini" style="font-weight:700">${d.tag}</div>
@@ -1889,7 +1889,25 @@ function upgrade(k,c){
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("shop").classList.contains("active"))closeShopEarly()});
 const openShopBtn=document.getElementById("openShopBtn");
 if(openShopBtn){openShopBtn.addEventListener("pointerup",e=>{e.preventDefault();e.stopPropagation();if(!S.shopOpen)openShop();},{passive:false});openShopBtn.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();if(!S.shopOpen)openShop();},{passive:false});}
-const __hadSave=!!localStorage.getItem("TTX_FULL_SAVE");load();initStoreSystem();updateTop();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
+
+/* V77 — robust mobile store-chain interaction */
+function bindStoreChainInteractions(){
+ const quick=[...document.querySelectorAll('.quickCard')];
+ quick.forEach(el=>{if((el.querySelector('b')?.textContent||'').includes('Chuỗi cửa hàng')&&!el.dataset.storeBound){el.dataset.storeBound='1';el.style.cursor='pointer';el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();forceOpenStoreChooser()},{capture:true});el.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();forceOpenStoreChooser()},{passive:false});}});
+ const top=document.querySelector('.storeTopBtn');
+ if(top&&!top.dataset.storeBound){top.dataset.storeBound='1';top.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();forceOpenStoreChooser()},{capture:true});top.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();forceOpenStoreChooser()},{passive:false});}
+ const box=document.getElementById('storeChoices');
+ if(box&&!box.dataset.storeDelegated){box.dataset.storeDelegated='1';box.addEventListener('click',e=>{const el=e.target.closest('[data-store-id]');if(!el)return;const id=el.dataset.storeId;if(!id)return;if(el.dataset.storeAction==='requirement'||el.dataset.storeAction==='card'){e.preventDefault();e.stopPropagation();showStoreRequirement(id);}});}
+}
+function forceOpenStoreChooser(){
+ try{initStoreSystem();}catch(e){console.error('store init',e)}
+ try{renderStoreChooser();}catch(e){console.error('store render',e)}
+ const modal=document.getElementById('storeModal');
+ if(modal){modal.classList.add('show');modal.style.display='flex';modal.style.pointerEvents='auto';modal.style.visibility='visible';}
+ bindStoreChainInteractions();
+}
+
+const __hadSave=!!localStorage.getItem("TTX_FULL_SAVE");load();initStoreSystem();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 // Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem('TTX_FULL_SAVE');if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
