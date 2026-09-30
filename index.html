@@ -484,10 +484,10 @@ function getPlayerId(){
 function getPlayerSaveKey(){return "TTX_SAVE_V1_"+getPlayerId()}
 function getPlayerName(){return localStorage.getItem("TTX_PLAYER_NAME_"+getPlayerId())||"Người chơi"}
 function setPlayerName(v){v=String(v||"").trim().replace(/\s+/g," ").slice(0,24);if(v)localStorage.setItem("TTX_PLAYER_NAME_"+getPlayerId(),v)}
-function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V2_"+getPlayerId()}
+function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V3_"+getPlayerId()}
 function getAdminProgressPayload(){
   return {
-    enabled:true,
+    enabled:true, version:3,
     playerId:getPlayerId(),
     level:Math.max(1,Number(S?.level)||1),
     xp:Math.max(0,Number(S?.xp)||0),
@@ -496,7 +496,7 @@ function getAdminProgressPayload(){
     rating:Math.max(0,Math.min(5,Number(S?.rating)||0)),
     day:Math.max(1,Number(S?.day)||1),
     companyLevel:Math.max(1,Number(S?.companyLevel||S?.level)||1),
-    activeStoreId:STORE_DEFS&&STORE_DEFS[S?.activeStoreId]?S.activeStoreId:"tea"
+    activeStoreId:typeof STORE_DEFS!=='undefined'&&STORE_DEFS[S?.activeStoreId]?S.activeStoreId:"tea"
   };
 }
 function persistAdminProgress(){
@@ -504,22 +504,29 @@ function persistAdminProgress(){
     if(!S || !S.__adminProgressPersistent)return;
     const payload=getAdminProgressPayload();
     S.__adminProgress=payload;
-    localStorage.setItem(getAdminProgressKey(),JSON.stringify(payload));
+    const raw=JSON.stringify(payload);
+    localStorage.setItem(getAdminProgressKey(),raw);
+    // Keep the admin values inside the normal player save as a second durable source.
+    // This is intentionally written independently of save(), so an ordinary save/load
+    // cycle cannot erase the Admin state.
+    localStorage.setItem("TTX_ADMIN_STATE_V3_"+getPlayerId(),raw);
   }catch(e){console.warn("persist admin",e)}
+}
+function readPersistedAdminProgress(){
+  try{
+    const keys=[getAdminProgressKey(),"TTX_ADMIN_STATE_V3_"+getPlayerId(),"TTX_ADMIN_PROGRESS_V2_"+getPlayerId(),"TTX_ADMIN_PROGRESS_V1_"+getPlayerId()];
+    for(const key of keys){
+      const raw=localStorage.getItem(key);if(!raw)continue;
+      const a=JSON.parse(raw);
+      if(a&&a.enabled!==false&&(!a.playerId||a.playerId===getPlayerId()))return a;
+    }
+  }catch(e){console.warn("read admin",e)}
+  return null;
 }
 function applyPersistedAdminProgress(){
   try{
-    let raw=localStorage.getItem(getAdminProgressKey());
-    // Compatibility with the previous Admin key.
-    if(!raw){
-      const oldKey="TTX_ADMIN_PROGRESS_V1_"+getPlayerId();
-      raw=localStorage.getItem(oldKey);
-    }
-    if(!raw && S && S.__adminProgress)raw=JSON.stringify(S.__adminProgress);
-    if(!raw)return false;
-    const a=JSON.parse(raw);
-    if(!a||a.enabled===false||typeof a!=="object")return false;
-    if(a.playerId && a.playerId!==getPlayerId())return false;
+    const a=readPersistedAdminProgress();
+    if(!a)return false;
     S.__adminProgressPersistent=true;
     S.__adminProgress=Object.assign({},a);
     S.level=Math.max(1,Number(a.level)||1);
@@ -529,12 +536,15 @@ function applyPersistedAdminProgress(){
     S.rating=Math.max(0,Math.min(5,Number(a.rating)||0));
     S.day=Math.max(1,Number(a.day)||1);
     S.companyLevel=Math.max(1,Number(a.companyLevel||S.level)||1);
+    if(typeof STORE_DEFS!=='undefined'&&STORE_DEFS[a.activeStoreId]&&S.stores?.[a.activeStoreId]?.opened)S.activeStoreId=a.activeStoreId;
     return true;
   }catch(e){console.warn("apply admin",e);return false}
 }
 function clearPersistedAdminProgress(){
   try{
     localStorage.removeItem(getAdminProgressKey());
+    localStorage.removeItem("TTX_ADMIN_STATE_V3_"+getPlayerId());
+    localStorage.removeItem("TTX_ADMIN_PROGRESS_V2_"+getPlayerId());
     localStorage.removeItem("TTX_ADMIN_PROGRESS_V1_"+getPlayerId());
   }catch(e){}
   if(S){delete S.__adminProgressPersistent;delete S.__adminProgress;}
@@ -1040,9 +1050,12 @@ function load(){
  S.unlockedIngredients=S.unlockedIngredients||["Trà đen"];for(const n of S.recipes)unlockIngredientsFor(n,false);
  for(const n of Object.keys(SNACKS))if(S.stock.snacks[n]==null)S.stock.snacks[n]=0;
  normalizeSnackUnlocks();
+ // Load Admin values BEFORE store initialization and again AFTER it. This prevents
+ // legacy store migration/global-cash normalization from overwriting Admin values.
+ applyPersistedAdminProgress();
  syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();applyPersistedAdminProgress();
-// Chuẩn hóa các giá trị global sau khi khởi tạo chuỗi, rồi mới ghi save cuối cùng.
-S.globalCash=S.cash;snapshotActiveStore();save();
+ // Chuẩn hóa các giá trị global sau khi khởi tạo chuỗi, rồi mới ghi save cuối cùng.
+ S.globalCash=S.cash;snapshotActiveStore();save();applyPersistedAdminProgress();persistAdminProgress();
 }
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));const target=document.getElementById(id);if(target)target.classList.add("active");document.body.classList.toggle("inShop",id==="shop");document.querySelectorAll(".navItem").forEach(b=>b.classList.remove("active"));const map={prep:0,manage:1,reviews:3,cardgame:5,summary:6};if(map[id]!=null&&document.querySelectorAll(".navItem")[map[id]])document.querySelectorAll(".navItem")[map[id]].classList.add("active");updateTop()}
 function updateTop(){const storeDef=STORE_DEFS[S.activeStoreId||"tea"]||STORE_DEFS.tea;const n=S.shopName||storeDef.name;const nameEl=document.getElementById("signShopName");if(nameEl)nameEl.textContent=n.toUpperCase();const st=document.getElementById("signStatus");if(st){st.textContent=S.shopOpen?"OPEN":"CLOSE";st.className="statusPill "+(S.shopOpen?"open":"closed")}const d=document.getElementById("day");if(d)d.textContent="Ngày "+S.day;const c=document.getElementById("cash");if(c)c.textContent=money(S.cash);const r=document.getElementById("rating");if(r)r.textContent=hasCustomerRatings()?S.rating.toFixed(1):"0.0";const lv=document.getElementById("level");if(lv)lv.textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);const xh=document.getElementById("xpHome");if(xh)xh.style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent=n;const hc=document.getElementById("headerClock");if(hc)hc.textContent=S.shopOpen?(document.getElementById("clock")?.textContent||"07:00"):"07:00";}
@@ -1188,6 +1201,8 @@ function initStoreSystem(){
   S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);
   S.cash=S.globalCash;
   for(const id of Object.keys(STORE_DEFS))ensureStoreInstance(id);
+  // Admin progress is company-global and must survive every store initialization.
+  if(S.__adminProgressPersistent)applyPersistedAdminProgress();
   S.stores.tea.opened=true;S.stores.tea.storeBusiness.opened=true;
   if(S.stores[S.activeStoreId]&&!S.stores[S.activeStoreId].opened)S.activeStoreId="tea";
 }
@@ -1195,8 +1210,11 @@ function syncGlobalCash(){S.globalCash=Math.max(0,Number(S.cash)||0)}
 function save(){
   syncGlobalCash();
   S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);
-  persistAdminProgress();
-  localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S));
+  // If Admin mode is persistent, never let a store/global synchronizer replace its values.
+  if(S.__adminProgressPersistent)applyPersistedAdminProgress();
+  const mainRaw=JSON.stringify(S);
+  try{localStorage.setItem(getPlayerSaveKey(),mainRaw)}catch(e){console.warn("save player",e)}
+  if(S.__adminProgressPersistent)persistAdminProgress();
 }
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
@@ -2361,7 +2379,7 @@ function bindStoreChainInteractions(){
 }
 
 
-migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();initStoreSystem();applyPersistedAdminProgress();save();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
+migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();applyPersistedAdminProgress();initStoreSystem();applyPersistedAdminProgress();save();applyPersistedAdminProgress();persistAdminProgress();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 // Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem(getPlayerSaveKey());if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();initStoreSystem();applyPersistedAdminProgress();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
