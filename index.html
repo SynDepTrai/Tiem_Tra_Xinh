@@ -484,10 +484,12 @@ function getPlayerId(){
 function getPlayerSaveKey(){return "TTX_SAVE_V1_"+getPlayerId()}
 function getPlayerName(){return localStorage.getItem("TTX_PLAYER_NAME_"+getPlayerId())||"Người chơi"}
 function setPlayerName(v){v=String(v||"").trim().replace(/\s+/g," ").slice(0,24);if(v)localStorage.setItem("TTX_PLAYER_NAME_"+getPlayerId(),v)}
-function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V3_"+getPlayerId()}
+function getAdminProgressKey(){return "TTX_ADMIN_PROGRESS_V4_"+getPlayerId()}
+function getAdminStateKey(){return "TTX_ADMIN_STATE_V4_"+getPlayerId()}
+function getAdminLegacyKeys(){return ["TTX_ADMIN_PROGRESS_V3_"+getPlayerId(),"TTX_ADMIN_STATE_V3_"+getPlayerId(),"TTX_ADMIN_PROGRESS_V2_"+getPlayerId(),"TTX_ADMIN_PROGRESS_V1_"+getPlayerId()]}
 function getAdminProgressPayload(){
   return {
-    enabled:true, version:3,
+    enabled:true, version:4,
     playerId:getPlayerId(),
     level:Math.max(1,Number(S?.level)||1),
     xp:Math.max(0,Number(S?.xp)||0),
@@ -496,7 +498,7 @@ function getAdminProgressPayload(){
     rating:Math.max(0,Math.min(5,Number(S?.rating)||0)),
     day:Math.max(1,Number(S?.day)||1),
     companyLevel:Math.max(1,Number(S?.companyLevel||S?.level)||1),
-    activeStoreId:typeof STORE_DEFS!=='undefined'&&STORE_DEFS[S?.activeStoreId]?S.activeStoreId:"tea"
+    savedAt:Date.now()
   };
 }
 function persistAdminProgress(){
@@ -506,15 +508,18 @@ function persistAdminProgress(){
     S.__adminProgress=payload;
     const raw=JSON.stringify(payload);
     localStorage.setItem(getAdminProgressKey(),raw);
-    // Keep the admin values inside the normal player save as a second durable source.
-    // This is intentionally written independently of save(), so an ordinary save/load
-    // cycle cannot erase the Admin state.
-    localStorage.setItem("TTX_ADMIN_STATE_V3_"+getPlayerId(),raw);
+    localStorage.setItem(getAdminStateKey(),raw);
+    localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S));
   }catch(e){console.warn("persist admin",e)}
 }
 function readPersistedAdminProgress(){
   try{
-    const keys=[getAdminProgressKey(),"TTX_ADMIN_STATE_V3_"+getPlayerId(),"TTX_ADMIN_PROGRESS_V2_"+getPlayerId(),"TTX_ADMIN_PROGRESS_V1_"+getPlayerId()];
+    const saveRaw=localStorage.getItem(getPlayerSaveKey());
+    if(saveRaw){
+      const saved=JSON.parse(saveRaw);
+      if(saved&&saved.__adminProgress&&saved.__adminProgress.enabled!==false)return saved.__adminProgress;
+    }
+    const keys=[getAdminProgressKey(),getAdminStateKey(),...getAdminLegacyKeys()];
     for(const key of keys){
       const raw=localStorage.getItem(key);if(!raw)continue;
       const a=JSON.parse(raw);
@@ -536,16 +541,16 @@ function applyPersistedAdminProgress(){
     S.rating=Math.max(0,Math.min(5,Number(a.rating)||0));
     S.day=Math.max(1,Number(a.day)||1);
     S.companyLevel=Math.max(1,Number(a.companyLevel||S.level)||1);
-    if(typeof STORE_DEFS!=='undefined'&&STORE_DEFS[a.activeStoreId]&&S.stores?.[a.activeStoreId]?.opened)S.activeStoreId=a.activeStoreId;
+    S.__adminProgress=Object.assign({},a,{enabled:true,version:4,playerId:getPlayerId(),savedAt:Number(a.savedAt)||Date.now()});
+    S.__adminProgressPersistent=true;
     return true;
   }catch(e){console.warn("apply admin",e);return false}
 }
 function clearPersistedAdminProgress(){
   try{
     localStorage.removeItem(getAdminProgressKey());
-    localStorage.removeItem("TTX_ADMIN_STATE_V3_"+getPlayerId());
-    localStorage.removeItem("TTX_ADMIN_PROGRESS_V2_"+getPlayerId());
-    localStorage.removeItem("TTX_ADMIN_PROGRESS_V1_"+getPlayerId());
+    localStorage.removeItem(getAdminStateKey());
+    for(const key of getAdminLegacyKeys())localStorage.removeItem(key);
   }catch(e){}
   if(S){delete S.__adminProgressPersistent;delete S.__adminProgress;}
 }
@@ -620,9 +625,9 @@ function saveAdminProgress(){
   const companyLevel=Math.max(1,Math.min(100,Math.floor(Number(document.getElementById("adminCompanyLevelInput")?.value)||1)));
   S.level=level;S.xp=xp;S.cash=cash;S.globalCash=cash;S.rating=Number(rating.toFixed(1));S.day=day;S.companyLevel=companyLevel;S.__adminProgressPersistent=true;
   ensureLevelMissionState();syncLevelUnlocks(false);syncSpecialDrinks(false);normalizeSnackUnlocks();
+  S.__adminProgress=getAdminProgressPayload();
   persistAdminProgress();
   save();
-  // Re-apply after save/normalization so no secondary synchronizer can replace Admin values.
   applyPersistedAdminProgress();
   persistAdminProgress();
   snapshotActiveStore();
@@ -634,6 +639,7 @@ function adminMaxProgress(){
   if(!isAdminUnlocked())return adminLogin();
   S.level=100;S.xp=100000000;S.cash=999999999;S.globalCash=S.cash;S.rating=5;S.companyLevel=100;S.__adminProgressPersistent=true;
   ensureLevelMissionState();syncLevelUnlocks(false);syncSpecialDrinks(false);normalizeSnackUnlocks();
+  S.__adminProgress=getAdminProgressPayload();
   persistAdminProgress();save();applyPersistedAdminProgress();persistAdminProgress();snapshotActiveStore();
   localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S));
   updateTop();renderPrep();renderReviews();renderAdminPanel();
@@ -1050,12 +1056,13 @@ function load(){
  S.unlockedIngredients=S.unlockedIngredients||["Trà đen"];for(const n of S.recipes)unlockIngredientsFor(n,false);
  for(const n of Object.keys(SNACKS))if(S.stock.snacks[n]==null)S.stock.snacks[n]=0;
  normalizeSnackUnlocks();
- // Load Admin values BEFORE store initialization and again AFTER it. This prevents
- // legacy store migration/global-cash normalization from overwriting Admin values.
- applyPersistedAdminProgress();
- syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();applyPersistedAdminProgress();
- // Chuẩn hóa các giá trị global sau khi khởi tạo chuỗi, rồi mới ghi save cuối cùng.
- S.globalCash=S.cash;snapshotActiveStore();save();applyPersistedAdminProgress();persistAdminProgress();
+ // Load Admin values BEFORE store initialization and again AFTER it. Admin controls only company-global progress;
+ // activeStoreId remains normal player state so switching to Xôi/Mì/Bánh Mì is never undone by Admin restore.
+ const __adminWasLoaded=applyPersistedAdminProgress();
+ syncSpecialDrinks(false);syncLevelUnlocks(false);S.shopOpen=false;initStoreSystem();
+ if(__adminWasLoaded)applyPersistedAdminProgress();
+ S.globalCash=S.cash;snapshotActiveStore();
+ if(__adminWasLoaded)persistAdminProgress();else save();
 }
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));const target=document.getElementById(id);if(target)target.classList.add("active");document.body.classList.toggle("inShop",id==="shop");document.querySelectorAll(".navItem").forEach(b=>b.classList.remove("active"));const map={prep:0,manage:1,reviews:3,cardgame:5,summary:6};if(map[id]!=null&&document.querySelectorAll(".navItem")[map[id]])document.querySelectorAll(".navItem")[map[id]].classList.add("active");updateTop()}
 function updateTop(){const storeDef=STORE_DEFS[S.activeStoreId||"tea"]||STORE_DEFS.tea;const n=S.shopName||storeDef.name;const nameEl=document.getElementById("signShopName");if(nameEl)nameEl.textContent=n.toUpperCase();const st=document.getElementById("signStatus");if(st){st.textContent=S.shopOpen?"OPEN":"CLOSE";st.className="statusPill "+(S.shopOpen?"open":"closed")}const d=document.getElementById("day");if(d)d.textContent="Ngày "+S.day;const c=document.getElementById("cash");if(c)c.textContent=money(S.cash);const r=document.getElementById("rating");if(r)r.textContent=hasCustomerRatings()?S.rating.toFixed(1):"0.0";const lv=document.getElementById("level");if(lv)lv.textContent=S.level;const xpNeed=S.level*100;const xpPct=Math.min(100,(S.xp/xpNeed)*100);const xh=document.getElementById("xpHome");if(xh)xh.style.width=xpPct+"%";const xb=document.getElementById("xpTopBar");if(xb)xb.style.width=xpPct+"%";const xt=document.getElementById("xpText");if(xt)xt.textContent=S.xp+" / "+xpNeed+" XP";const h=document.getElementById("homeShopName");if(h)h.textContent=n;const hc=document.getElementById("headerClock");if(hc)hc.textContent=S.shopOpen?(document.getElementById("clock")?.textContent||"07:00"):"07:00";}
@@ -1208,10 +1215,12 @@ function initStoreSystem(){
 }
 function syncGlobalCash(){S.globalCash=Math.max(0,Number(S.cash)||0)}
 function save(){
+  // Normal gameplay saves the current live state. Admin values are already part of S and
+  // are only restored during load; never re-apply the old Admin checkpoint here because
+  // that would undo legitimate purchases, earnings, store-opening costs, etc.
   syncGlobalCash();
+  if(S.__adminProgressPersistent)S.__adminProgress=getAdminProgressPayload();
   S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);
-  // If Admin mode is persistent, never let a store/global synchronizer replace its values.
-  if(S.__adminProgressPersistent)applyPersistedAdminProgress();
   const mainRaw=JSON.stringify(S);
   try{localStorage.setItem(getPlayerSaveKey(),mainRaw)}catch(e){console.warn("save player",e)}
   if(S.__adminProgressPersistent)persistAdminProgress();
@@ -1280,13 +1289,27 @@ function switchStore(id){
   initStoreSystem();
   const d=STORE_DEFS[id];if(!d)return toast("🏪 Cửa hàng không tồn tại");
   if(!S.stores?.[id]?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);
-  if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");
+  if(S.shopOpen){
+    // Chuyển quán không được làm mất ngày hoặc ép kết thúc ngày. Đóng ca hiện tại rồi chuyển.
+    S.shopOpen=false;clearInterval(timer);timer=null;clearTimeout(arrivalTimer);arrivalTimer=null;
+    customers.forEach(o=>{if(o&&!o.done){o.done=true;o.leftEarly=true;o.served=false;}});
+    customers=[];current=-1;shopStartTime=0;lastTickAt=0;elapsed=0;
+  }
   snapshotActiveStore();
   if(!loadStoreSnapshot(id))return;
   S.stores[id].opened=true;S.stores[id].storeBusiness.opened=true;S.stores[id].storeBusiness.active=true;
   applyPersistedAdminProgress();
   save();renderPrep();updateTop();closeStoreChooser();
   toast(`🏪 Đã chuyển sang ${d.icon} ${d.name}`);
+}
+
+function startStoreBusiness(id){
+  const d=STORE_DEFS[id];
+  if(!d)return toast("🏪 Cửa hàng không tồn tại");
+  initStoreSystem();
+  if(!S.stores?.[id]?.opened)return toast(`🔒 ${d.name} chưa được mở. Hãy mở quán trước.`);
+  if(id===S.activeStoreId){closeStoreChooser();renderPrep();show("prep");updateTop();toast(`📍 Bạn đang ở ${d.icon} ${d.name}`);return;}
+  switchStore(id);
 }
 
 function closeStoreChooser(){
@@ -1326,7 +1349,7 @@ function showStoreRequirement(id){
   if(!req)return;
   let status="";
   if(opened){
-    status=`<div class="quest done"><b>🟢 Đã mở</b><div class="mini">Quán này đã thuộc chuỗi cửa hàng.</div><button class="btn primary" type="button" style="margin-top:10px;width:100%" onclick="switchStore('${id}')">▶️ Bắt đầu kinh doanh tại ${d.name}</button></div>`;
+    status=`<div class="quest done"><b>🟢 Đã mở</b><div class="mini">Quán này đã thuộc chuỗi cửa hàng.</div><button class="btn primary" type="button" style="margin-top:10px;width:100%" onclick="startStoreBusiness('${id}')">▶️ Bắt đầu kinh doanh tại ${d.name}</button></div>`;
   }else{
     const openAction=levelOk&&cashOk
       ? `<button class="btn gold" type="button" style="margin-top:10px;width:100%;font-size:17px;padding:12px" onclick="openStore('${id}')">🏪 Mở quán mới · ${money(d.openCost)}</button><div class="mini" style="margin-top:6px;text-align:center">Sau khi mở, quán sẽ dùng mô hình vận hành của 🧋 Tiệm Trà Xinh.</div>`
@@ -1373,7 +1396,7 @@ function renderStoreChooser(){
    let action="";
    if(pending&&id==="tea")action=`<button class="btn primary" onclick="selectInitialStore('tea')">▶️ Bắt đầu kinh doanh</button>`;
    else if(active)action=`<button class="btn secondary" disabled>📍 Đang làm</button>`;
-   else if(info.opened)action=`<button class="btn primary" onclick="switchStore('${id}')">▶️ Bắt đầu kinh doanh</button>`;
+   else if(info.opened)action=`<button class="btn primary" onclick="startStoreBusiness('${id}')">▶️ Bắt đầu kinh doanh</button>`;
    else if(!info.levelOk)action=`<button class="btn secondary" type="button" onclick="showStoreRequirement('${id}')">🔒 Xem yêu cầu · Lv.${d.unlockLevel}</button>`;
    else if(!info.cashOk)action=`<button class="btn secondary" type="button" onclick="showStoreRequirement('${id}')">💰 Xem yêu cầu mở</button>`;
    else action=`<button class="btn gold" onclick="openStore('${id}')">🔓 Mở · ${money(d.openCost)}</button>`;
@@ -2379,6 +2402,8 @@ function bindStoreChainInteractions(){
 }
 
 
+window.addEventListener("pagehide",()=>{try{if(S&&S.__adminProgressPersistent){applyPersistedAdminProgress();persistAdminProgress();}}catch(e){}});
+window.addEventListener("beforeunload",()=>{try{if(S&&S.__adminProgressPersistent){applyPersistedAdminProgress();persistAdminProgress();}}catch(e){}});
 migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();applyPersistedAdminProgress();initStoreSystem();applyPersistedAdminProgress();save();applyPersistedAdminProgress();persistAdminProgress();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 // Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
