@@ -2183,7 +2183,13 @@ function bindStoreChainInteractions(){
  const top=document.querySelector('.storeTopBtn');
  if(top&&!top.dataset.storeBound){top.dataset.storeBound='1';top.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();forceOpenStoreChooser()},{capture:true});top.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();forceOpenStoreChooser()},{passive:false});}
  const box=document.getElementById('storeChoices');
- if(box&&!box.dataset.storeDelegated){box.dataset.storeDelegated='1';box.addEventListener('click',e=>{const el=e.target.closest('[data-store-id]');if(!el)return;const id=el.dataset.storeId;if(!id)return;if(el.dataset.storeAction==='requirement'||el.dataset.storeAction==='card'){e.preventDefault();e.stopPropagation();showStoreRequirement(id);}});}
+ if(box&&!box.dataset.storeDelegated){box.dataset.storeDelegated='1';box.addEventListener('click',e=>{
+   /* Nút thao tác bên trong thẻ phải được ưu tiên: không để click của thẻ
+      ghi đè onclick của nút Mở quán mới / Bắt đầu kinh doanh. */
+   if(e.target.closest('button,a,input,select,textarea'))return;
+   const el=e.target.closest('[data-store-id]');if(!el)return;const id=el.dataset.storeId;if(!id)return;
+   if(el.dataset.storeAction==='requirement'||el.dataset.storeAction==='card'){e.preventDefault();e.stopPropagation();showStoreRequirement(id);}
+ });}
 }
 
 
