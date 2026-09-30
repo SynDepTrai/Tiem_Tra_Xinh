@@ -795,9 +795,6 @@ function load(){
  let x=localStorage.getItem("TTX_FULL_SAVE");if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
  if(typeof S.renameUsed!=="boolean") S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";
  S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.ratingBonus=Math.max(0,Number(S.ratingBonus)||0); ensureLevelMissionState(); S.employeeInfo=S.employeeInfo||{}; S.employeeRoster=S.employeeRoster||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
- // V41: a brand-new shop starts at 500k and 0 stars. If an old save is still on day 1
- // with no completed day/reviews, migrate it to the new starting state.
- if((S.day||1)===1 && (S.stats?.days||0)===0 && (!Array.isArray(S.reviews)||S.reviews.length===0)){S.cash=500;S.rating=0;}
  recalcRatingFromReviews();
  S.shopOpen=!!S.shopOpen;S.equipment=S.equipment||{};S.branding=Object.assign({bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"},S.branding||{});S.loan=Object.assign({principal:0,total:0,paid:0,dueDay:0},S.loan||{});S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});S.online=Object.assign({platform:false,tablets:0},S.online||{});S.stats=S.stats||{};S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.stats.totalProfit=S.stats.totalProfit||S.history?.reduce((a,h)=>a+(h.profit||0),0)||0;S.stats.onlineRevenue=S.stats.onlineRevenue||0;S.shopOpen=!!S.shopOpen;S.upgrades=S.upgrades||{};S.upgrades.special=S.upgrades.special||0;S.stock=S.stock||{};S.stock.cups=S.stock.cups||{};S.stock.ingredients=S.stock.ingredients||{};S.stock.toppings=S.stock.toppings||{};S.stock.snacks=S.stock.snacks||{};S.unlockedSnacks=Array.isArray(S.unlockedSnacks)?S.unlockedSnacks:[]; S.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},S.employees||{});Object.keys(S.employees).forEach(k=>S.employees[k]=S.employees[k]===true);S.employeeRoster=S.employeeRoster||{};S.employeePayEnabled=S.employeePayEnabled!==false; S.reviews=Array.isArray(S.reviews)?S.reviews:[];S.cardGame=S.cardGame||{bet:20,played:0,wins:0};S.quits=Object.assign({count:0,lost:0,recovered:0},S.quits||{});S.theft=Object.assign({count:0,lost:0,recovered:0,lastDay:0},S.theft||{});S.police=Object.assign({checks:0,arrests:0},S.police||{});S.security=Object.assign({camera:false},S.security||{});S.reviews.forEach(r=>{r.response=r.response||"";r.customerReply=r.customerReply||"";r.customerMood=r.customerMood||""});S.reviewSeq=Number(S.reviewSeq||0);
  // Migrate old V6 generic stock into new system.
@@ -906,19 +903,19 @@ function storeSnapshot(){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(S
 function genericStoreSnapshot(def){const base=clone(DEFAULT);base.shopName=def.name;base.renameUsed=false;base.shopOpen=false;base.rating=0;base.xp=0;base.level=1;base.stats={served:0,wrong:0,left:0,revenue:0,days:0,bestDay:0,totalProfit:0,onlineRevenue:0};base.today={served:0,wrong:0,left:0,revenue:0};base.history=[];base.reviews=[];base.employeeDeals={};base.employeeInfo={};base.employeeRoster={};base.branding={bg:"#fff1c9",logo:"🧋",slogan:"Ngon từng ngụm"};base.employees={counter1:false,brewer:false,online:false,counter2:false};base.employeePayEnabled=true;base.unpaidDays=0;base.equipment={};base.loan={principal:0,total:0,paid:0,dueDay:0};base.storeBusiness={kind:def.kind,menu:[def.tag],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};return storeSnapshotFrom(base)}
 function storeSnapshotFrom(base){const x={};for(const k of STORE_STATE_KEYS)x[k]=clone(base[k]);if(base.storeBusiness)x.storeBusiness=clone(base.storeBusiness);return x}
 function initStoreSystem(){
- S.stores=S.stores||{};S.companyLevel=Math.max(1,Number(S.companyLevel||S.level||1));S.activeStoreId=S.activeStoreId||"tea";S.storeSelectionDone=!!S.storeSelectionDone;S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);S.cash=S.globalCash;
+ S.stores=S.stores||{};S.companyLevel=Math.max(1,Number(S.companyLevel||S.level||1));S.activeStoreId=STORE_DEFS[S.activeStoreId]?S.activeStoreId:"tea";S.storeSelectionDone=!!S.storeSelectionDone;S.globalCash=Number.isFinite(Number(S.globalCash))?Number(S.globalCash):Number(S.cash||500);S.cash=S.globalCash;
  if(!S.stores.tea)S.stores.tea=storeSnapshot();
  for(const [id,def] of Object.entries(STORE_DEFS))if(id!=="tea"&&!S.stores[id])S.stores[id]=genericStoreSnapshot(def);
  if(!S.stores.tea.storeBusiness)S.stores.tea.storeBusiness={kind:"tea",menu:["Trà sữa • trà • đồ ăn vặt"],dailyBase:0,dailyPerEmployee:55,active:false,auditGap:0};
  Object.values(S.stores).forEach(st=>{st.storeBusiness=st.storeBusiness||{kind:"generic",menu:[],dailyBase:120,dailyPerEmployee:55,active:false,auditGap:0};st.storeBusiness.auditGap=Number(st.storeBusiness.auditGap||0)});
  Object.keys(S.stores).forEach(id=>{if(STORE_DEFS[id])S.stores[id].opened=!!S.stores[id].opened});
- S.stores.tea.opened=true;S.stores[S.activeStoreId].opened=true;save();
+ S.stores.tea.opened=true;S.stores[S.activeStoreId]=S.stores[S.activeStoreId]||genericStoreSnapshot(STORE_DEFS[S.activeStoreId]||STORE_DEFS.tea);S.stores[S.activeStoreId].opened=true;save();
 }
 function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
 function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem("TTX_FULL_SAVE",JSON.stringify(S))}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
-function openStore(id){const d=STORE_DEFS[id];if(!d)return;if(S.stores[id]?.opened)return switchStore(id);if(S.companyLevel<d.unlockLevel)return toast(`🔒 ${d.name} mở từ công ty Lv.${d.unlockLevel}`);if(S.cash<d.openCost)return toast(`💰 Cần ${money(d.openCost)} để mở ${d.name}`);S.cash-=d.openCost;S.stores[id].opened=true;S.stores[id].storeBusiness=S.stores[id].storeBusiness||{kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false};syncGlobalCash();save();toast(`🏪 Đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);renderStoreChooser();}
+function openStore(id){const d=STORE_DEFS[id];if(!d)return;if(S.stores[id]?.opened)return switchStore(id);if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);if(S.cash<d.openCost)return showStoreRequirement(id);S.cash-=d.openCost;S.stores[id].opened=true;S.stores[id].storeBusiness=S.stores[id].storeBusiness||{kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false};syncGlobalCash();save();renderStoreChooser();toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);fx("🎉");}
 function snapshotActiveStore(){if(!S.activeStoreId)return;S.stores=S.stores||{};S.stores[S.activeStoreId]=storeSnapshot();S.stores[S.activeStoreId].opened=true}
 function loadStoreSnapshot(id){const snap=S.stores?.[id];if(!snap)return false;const global={stores:S.stores,companyLevel:S.companyLevel,activeStoreId:id,globalCash:Number(S.cash||S.globalCash||0),day:S.day};S=Object.assign(clone(DEFAULT),clone(snap));S.stores=global.stores;S.companyLevel=global.companyLevel;S.activeStoreId=id;S.globalCash=global.globalCash;S.cash=global.globalCash;S.day=global.day;S.shopOpen=false;normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);return true}
 function switchStore(id){if(!S.stores?.[id]?.opened)return toast("🔒 Quán này chưa được mở");if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");snapshotActiveStore();if(!loadStoreSnapshot(id))return;save();renderPrep();updateTop();closeStoreChooser();toast(`🏪 Đã chuyển sang ${STORE_DEFS[id].icon} ${STORE_DEFS[id].name}`)}
@@ -926,6 +923,14 @@ function closeStoreChooser(){
   if(!S.storeSelectionDone)return toast("🏪 Hãy chọn quán để bắt đầu kinh doanh");
   const modal=document.getElementById("storeModal");
   if(modal)modal.classList.remove("show");
+}
+function selectInitialStore(id){
+  initStoreSystem();
+  if(S.storeSelectionDone)return switchStore(id);
+  const d=STORE_DEFS[id];
+  if(!d)return toast("🏪 Cửa hàng không tồn tại");
+  if(id!=="tea")return showStoreRequirement(id);
+  S.activeStoreId="tea";S.storeSelectionDone=true;S.stores=S.stores||{};S.stores.tea=S.stores.tea||storeSnapshot();S.stores.tea.opened=true;save();renderPrep();updateTop();closeStoreChooser();toast("🧋 Bắt đầu kinh doanh tại Tiệm Trà Xinh!");
 }
 function showStoreRequirement(id){
   const d=STORE_DEFS[id];
@@ -1018,7 +1023,7 @@ function companyBusinessIncome(){
    if(!empKeys.length)continue;
    const base=Number(st.storeBusiness?.dailyBase||120),per=Number(st.storeBusiness?.dailyPerEmployee||55);
    const revenue=Math.max(0,base+empKeys.length*per);
-   const wage=empKeys.reduce((sum,k)=>{const role=EMPLOYEE_ROLES[k];return sum+(role?Number(st.employeeDeals?.[k]||role.base):0)},0)*5;
+   const wage=empKeys.reduce((sum,k)=>{const role=EMPLOYEE_ROLES[k];return sum+(role?Number(st.employeeDeals?.[k]||role.base):0)},0)*10;
    const rent=12+S.day*2,utilities=5;
    const profit=Math.max(0,revenue-wage-rent-utilities);
    st.stats=st.stats||{};st.stats.revenue=(st.stats.revenue||0)+revenue;st.stats.totalProfit=(st.stats.totalProfit||0)+profit;st.stats.days=(st.stats.days||0)+1;
@@ -1108,9 +1113,9 @@ function getWaitRating(o){
   const sec=getCustomerWaitSeconds(o);
   let stars=sec<=20?5:sec<=30?4.5:sec<=40?4:sec<=50?3.5:3;
   // Công thức chuẩn: mỗi cấp cộng 0.25⭐ cho đơn giao đúng.
-  stars+=Math.max(0,Number(S.upgrades?.quality)||0)*0.25;
+  stars+=Math.max(0,Number(o.qualityLevel)||0)*0.25;
   // Máy lạnh giảm mức khách phàn nàn khi phải chờ lâu.
-  if(S.equipment?.ac && sec>20)stars+=0.25;
+  if(o.acActive && sec>20)stars+=0.25;
   return Math.min(5,stars);
 }
 
@@ -1453,6 +1458,8 @@ function customerArrivalDelay(){
  let delay=Math.max(2500,base+jitter);
  if(S.equipment?.led)delay/=1.20;
  if(S.equipment?.social)delay/=1.25;
+ const capacityLevel=Math.max(0,Number(S.upgrades?.capacity)||0);
+ if(capacityLevel)delay/=(1+capacityLevel*0.08);
  return Math.max(2500,Math.round(delay));
 }
 function scheduleNextCustomer(first=false){
@@ -1592,7 +1599,7 @@ function serve(){
  const waitSeconds=o.arrivedAt?Math.max(0,(servedAt-o.arrivedAt)/1000):0;
  let correct=cup.size===o.size&&cup.tea===o.tea&&Math.abs((cup.pour||0)-66)<=9&&cup.top===o.top&&cup.sweet===o.sweet&&cup.ice===o.ice&&cup.snack===o.snack;if(!correct){S.stats.wrong++;S.today.wrong++;S.cash=Math.max(0,S.cash-4);applyRatingChange(-0.08);toast("❌ Sai công thức · -4k");document.querySelector("#shop .grid").classList.add("shake");setTimeout(()=>document.querySelector("#shop .grid").classList.remove("shake"),300);resetCup();renderStats();save();return}
  let tea=TEAS[o.tea],top=TOPS[o.top],sn=o.snack?SNACKS[o.snack]:null,need=tea.ingredients||[];let sizeStock=S.stock.cups[o.size]||0;if(sizeStock<1)return toast("🥤 Hết ly "+o.size);for(const ing of need)if((S.stock.ingredients[ing]||0)<1)return toast("🧪 Hết nguyên liệu: "+ing);if((S.stock.toppings[o.top]||0)<1)return toast("🍡 Hết topping: "+o.top);if(o.snack&&(S.stock.snacks[o.snack]||0)<1)return toast("🍢 Hết món: "+o.snack);
- S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let baseSale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);let lidTip=S.equipment?.lid?Math.round(baseSale*0.30):0;let sale=baseSale+lidTip;S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;o.served=true;ensureEmployeeRoster();const activeStaff=["counter1","brewer","counter2"].filter(k=>S.employees?.[k]);activeStaff.forEach(k=>{if(S.employeeRoster?.[k])S.employeeRoster[k].totalOrders=(S.employeeRoster[k].totalOrders||0)+1});o.servedAt=servedAt;o.waitSeconds=waitSeconds;o.qualityLevel=Math.max(0,Number(S.upgrades?.quality)||0);o.waitRating=getWaitRating(o);S.quests.served++;S.quests.perfect++;gainXP(12);applyRatingChange(0.06);o.done=true;
+ S.stock.cups[o.size]--;for(const ing of need)S.stock.ingredients[ing]--;S.stock.toppings[o.top]--;if(o.snack)S.stock.snacks[o.snack]--;let baseSale=tea.price+top.price+(SIZES[o.size]?.price||0)+(sn?sn.price:0);let lidTip=S.equipment?.lid?Math.round(baseSale*0.30):0;let sale=baseSale+lidTip;S.cash+=sale;S.stats.revenue+=sale;S.today.revenue+=sale;S.stats.served++;S.today.served++;o.served=true;ensureEmployeeRoster();const activeStaff=["counter1","brewer","counter2"].filter(k=>S.employees?.[k]);activeStaff.forEach(k=>{if(S.employeeRoster?.[k])S.employeeRoster[k].totalOrders=(S.employeeRoster[k].totalOrders||0)+1});o.servedAt=servedAt;o.waitSeconds=waitSeconds;o.qualityLevel=Math.max(0,Number(S.upgrades?.quality)||0);o.acActive=!!S.equipment?.ac;o.waitRating=getWaitRating(o);S.quests.served++;S.quests.perfect++;gainXP(12);applyRatingChange(0.06);o.done=true;
  const quyt=Math.random()<0.025; if(quyt){ S.cash=Math.max(0,S.cash-sale); S.quits=S.quits||{count:0,lost:0,recovered:0}; S.quits.count++;S.quits.lost+=sale; toast(`🏃 Khách nhận đồ rồi bùng tiền ${money(sale)}!`); setTimeout(()=>policeCatchQuyt(sale),900); } else { toast("💖 Đơn hoàn hảo! +"+sale+"k"+(lidTip?` · 🏷️ Tip nắp +${lidTip}k`:"")); } fx("💖");resetCup();current=customers.findIndex(x=>!x.done);if(customers.filter(x=>!x.done).length<maxCustomerQueue())scheduleNextCustomer(false);renderShop();checkLevelMissions(false);save()}
 function renderStock(){let snackCount=Object.values(S.stock.snacks||{}).reduce((a,b)=>a+b,0),ingCount=Object.values(S.stock.ingredients||{}).reduce((a,b)=>a+b,0),topCount=Object.values(S.stock.toppings||{}).reduce((a,b)=>a+b,0);document.getElementById("stock").innerHTML=`🥤 Ly S/M/L/XL/XXL: <b>${S.unlockedSizes.map(n=>n+":"+(S.stock.cups[n]||0)).join(" · ")}</b><br>🧪 Nguyên liệu: <b>${ingCount}</b> phần<br>🍡 Topping: <b>${topCount}</b> phần<br>🍢 Đồ ăn vặt: <b>${snackCount}</b> phần`}
 function renderStats(){const t=S.today||{served:0,wrong:0,left:0,revenue:0};document.getElementById("served").textContent=t.served;document.getElementById("wrong").textContent=t.wrong;document.getElementById("left").textContent=t.left;document.getElementById("todayEarn").textContent=money(t.revenue)}
@@ -1772,7 +1779,7 @@ function applyUnpaidPenalty(){
 }
 function buyOnlinePlatform(){S.online=S.online||{platform:false,tablets:0};if(S.online.platform)return toast("✅ Đã mở nền tảng");const ok=(S.stats.totalProfit||0)>=15000&&S.stats.days>=60&&S.rating>=4;if(!ok)return toast("🔒 Chưa đủ điều kiện mở đơn online");if(S.cash<3000)return toast("💰 Cần 3.000k để gia nhập Soppi");S.cash-=3000;S.online.platform=true;checkLevelMissions(false);save();renderManage();updateTop();toast("🚚 Đã mở nền tảng Soppi")}
 function buyTablet(){S.online=S.online||{platform:false,tablets:0};if(!S.online.platform)return toast("🔒 Hãy mở nền tảng online trước");if((S.online.tablets||0)>=5)return toast("📱 Tối đa 5 tablet");if(S.cash<7000)return toast("💰 Cần 7.000k mua tablet");S.cash-=7000;S.online.tablets=(S.online.tablets||0)+1;checkLevelMissions(false);save();renderManage();updateTop();toast("📱 Đã mua tablet nhận đơn") }
-function employeeDailyCost(){ensureEmployeeRoster();const active=["counter1","brewer","online","counter2"].filter(k=>S.employees?.[k]===true);if(!active.length)return 0;if(S.employeePayEnabled===false)return 0;const hoursPerDay=5;return active.reduce((sum,k)=>sum+Number(S.employeeRoster?.[k]?.wage||employeeWage(k)),0)*hoursPerDay}
+function employeeDailyCost(){ensureEmployeeRoster();const active=["counter1","brewer","online","counter2"].filter(k=>S.employees?.[k]===true);if(!active.length)return 0;if(S.employeePayEnabled===false)return 0;const hoursPerDay=10;return active.reduce((sum,k)=>sum+Number(S.employeeRoster?.[k]?.wage||employeeWage(k)),0)*hoursPerDay}
 function hiredEmployeeCount(){return Object.values(S.employees||{}).filter(v=>v===true).length}
 function onlineDailyRevenue(){if(!S.online?.platform||!S.online?.tablets)return 0;let orders=Math.min(S.online.tablets,2+Math.floor(S.day/10));let gross=orders*45;let fee=Math.round(gross*.2);S.stats.onlineRevenue=(S.stats.onlineRevenue||0)+Math.max(0,gross-fee);return Math.max(0,gross-fee)}
 
@@ -1891,22 +1898,37 @@ if(openShopBtn){openShopBtn.addEventListener("pointerup",e=>{e.preventDefault();
 
 /* V78 — direct store-chain opening, works at Lv.1 and on mobile */
 window.forceOpenStoreChooser=function(){
+  // Chuỗi cửa hàng luôn mở được bảng thông tin. Điều kiện cấp/vốn chỉ áp dụng khi mở từng quán.
+  const modal=document.getElementById("storeModal");
+  if(!modal)return;
   try{
-    initStoreSystem();
-    renderStoreChooser();
-    const modal=document.getElementById("storeModal");
-    if(!modal)return toast("🏪 Không tìm thấy bảng Chuỗi cửa hàng");
-    modal.classList.add("show");
-    modal.removeAttribute("hidden");
-    modal.style.display="flex";
-    modal.style.visibility="visible";
-    modal.style.opacity="1";
-    modal.style.pointerEvents="auto";
-    modal.style.zIndex="99999";
+    // Không chặn ở Lv.1: chỉ bảo đảm dữ liệu tối thiểu rồi render bảng.
+    S.stores=S.stores||{};
+    S.activeStoreId=S.activeStoreId||"tea";
+    if(!S.stores.tea && typeof storeSnapshot==="function")S.stores.tea=storeSnapshot();
+    if(typeof renderStoreChooser==="function")renderStoreChooser();
   }catch(err){
-    console.error("store chooser",err);
-    toast("⚠️ Không thể mở Chuỗi cửa hàng");
+    // Nếu render phụ bị lỗi, vẫn hiển thị bảng tối thiểu thay vì báo "không thể mở".
+    console.error("store chooser render",err);
+    const box=document.getElementById("storeChoices");
+    if(box){
+      const level=Math.max(1,Number(S.companyLevel||S.level||1));
+      const cash=Number(S.cash||0);
+      box.innerHTML=Object.entries(STORE_DEFS).map(([id,d],i)=>{
+        const opened=id==="tea"||!!S.stores?.[id]?.opened;
+        const levelOk=id==="tea"||level>=d.unlockLevel;
+        const cashOk=id==="tea"||cash>=d.openCost;
+        return `<div class="card" data-store-id="${id}" style="text-align:left;cursor:pointer"><div style="font-size:42px">${d.icon}</div><h3>${d.name}</h3><p class="mini">${d.desc}</p><div class="mini">🎯 Cần Công ty Lv.${d.unlockLevel} · 💰 ${money(d.openCost)}</div><button class="btn secondary" type="button" onclick="showStoreRequirement('${id}')">ℹ️ Xem yêu cầu</button></div>`;
+      }).join("");
+    }
   }
+  modal.classList.add("show");
+  modal.removeAttribute("hidden");
+  modal.style.display="flex";
+  modal.style.visibility="visible";
+  modal.style.opacity="1";
+  modal.style.pointerEvents="auto";
+  modal.style.zIndex="99999";
 };
 function openStoreChooser(){ window.forceOpenStoreChooser(); }
 
