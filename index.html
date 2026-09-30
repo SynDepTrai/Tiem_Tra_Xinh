@@ -151,6 +151,10 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   .statPill,.statusPill{font-size:8px;padding:4px 5px}
   .storeTopBtn{font-size:8px;padding:5px 6px}
 }
+
+/* V82 — Chuỗi cửa hàng: luôn đóng được */
+#storeModal .modalActions{position:sticky;bottom:0;background:rgba(255,255,255,.96);padding-top:10px;z-index:5}
+#storeModal .modalActions .btn{min-height:48px;font-weight:800}
 </style><style>
 .assetImg{width:64px;height:64px;object-fit:contain;object-position:center;display:block;vertical-align:middle;border-radius:10px;filter:drop-shadow(0 4px 3px rgba(80,50,30,.15))}.menuItem .assetImg{width:64px;height:64px;float:none;margin:0;pointer-events:none}.snackChoice .assetImg,.choice .assetImg{width:42px;height:42px;object-fit:contain;object-position:center;vertical-align:middle}.customerImg{width:112px;height:112px;object-fit:contain;object-position:center;display:block;filter:drop-shadow(0 7px 3px rgba(80,50,30,.15))}.scene{background-image:linear-gradient(#ffe5bd88,#f3c89488),url("assets/backgrounds/bg_quaytra.png");background-size:cover;background-position:center}.scene .awning{opacity:.25}.scene .plant{opacity:0}
 .inlineIcon{width:30px;height:30px;object-fit:contain;object-position:center;vertical-align:middle;display:inline-block;margin:0 3px}.logo .inlineIcon{width:34px;height:34px}.pill .inlineIcon{width:22px;height:22px}.tag .inlineIcon{width:20px;height:20px}.upgrade .inlineIcon{width:34px;height:34px}</style><style> .customerImg,.order .assetImg{object-fit:contain!important;object-position:center!important;} .customerStage .customer{overflow:visible!important;} </style><!-- Tiệm Trà Xinh V69 favicon -->
@@ -423,7 +427,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   <p id="storeModalDesc" class="muted">Lần đầu chơi, bạn chọn cửa hàng để bắt đầu. Các cửa hàng khác sẽ mở dần khi đủ cấp và đủ vốn.</p>
   <div id="storeRequirement"></div>
   <div id="storeChoices" class="grid" style="margin-top:12px"></div>
-  <div class="modalActions"><button class="btn secondary" type="button" onclick="closeStoreChooser()">Đóng</button></div>
+  <div class="modalActions"><button class="btn secondary" type="button" onclick="closeStoreChooser()" aria-label="Đóng chuỗi cửa hàng">✕ Đóng</button></div>
  </div>
 </div>
 <div id="nameModal" class="nameModal" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
@@ -933,9 +937,19 @@ function snapshotActiveStore(){if(!S.activeStoreId)return;S.stores=S.stores||{};
 function loadStoreSnapshot(id){const snap=S.stores?.[id];if(!snap)return false;const global={stores:S.stores,companyLevel:S.companyLevel,activeStoreId:id,globalCash:Number(S.cash||S.globalCash||0),day:S.day};S=Object.assign(clone(DEFAULT),clone(snap));S.stores=global.stores;S.companyLevel=global.companyLevel;S.activeStoreId=id;S.globalCash=global.globalCash;S.cash=global.globalCash;S.day=global.day;S.shopOpen=false;normalizeSnackUnlocks();syncSpecialDrinks(false);syncLevelUnlocks(false);return true}
 function switchStore(id){if(!S.stores?.[id]?.opened)return toast("🔒 Quán này chưa được mở");if(S.shopOpen)return toast("🔒 Hãy đóng cửa trước khi đổi quán");snapshotActiveStore();if(!loadStoreSnapshot(id))return;save();renderPrep();updateTop();closeStoreChooser();toast(`🏪 Đã chuyển sang ${STORE_DEFS[id].icon} ${STORE_DEFS[id].name}`)}
 function closeStoreChooser(){
-  if(!S.storeSelectionDone)return toast("🏪 Hãy chọn quán để bắt đầu kinh doanh");
   const modal=document.getElementById("storeModal");
-  if(modal)modal.classList.remove("show");
+  if(!modal)return;
+  modal.classList.remove("show");
+  modal.style.display="none";
+  modal.style.visibility="hidden";
+  modal.style.pointerEvents="none";
+}
+
+// Chuỗi cửa hàng luôn có thể đóng, kể cả khi người chơi chưa chọn quán lần đầu.
+// Điều kiện mở quán chỉ được kiểm tra bên trong bảng thông tin.
+function closeStoreChooserByBackdrop(e){
+  const modal=document.getElementById("storeModal");
+  if(modal && e.target===modal)closeStoreChooser();
 }
 function selectInitialStore(id){
   initStoreSystem();
@@ -1944,6 +1958,10 @@ window.forceOpenStoreChooser=function(){
   modal.style.zIndex="99999";
 };
 function openStoreChooser(){ window.forceOpenStoreChooser(); }
+
+// Đóng bằng nút, bấm nền tối bên ngoài, hoặc phím Escape.
+document.addEventListener("click",closeStoreChooserByBackdrop);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeStoreChooser();});
 
 /* V77 — robust mobile store-chain interaction */
 function bindStoreChainInteractions(){
