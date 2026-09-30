@@ -31,9 +31,11 @@ const ROLES={
  counter2:{label:'Nhân viên phụ quầy 2',icon:'🧑‍🎤',base:.06,desc:'Hỗ trợ quầy thứ hai và tăng thêm tốc độ thao tác.'}
 };
 let data=null, activeRole=null;
-const money=n=>{n=Math.round(Number(n)||0);if(n>=1000){let tr=Math.floor(n/1000),k=n%1000;return tr+'Tr'+(k?k+'k':'')}return n+'k'};
+function getPlayerId(){return localStorage.getItem('TTX_PLAYER_ID')||''}
+function getPlayerSaveKey(){return getPlayerId()?'TTX_SAVE_V1_'+getPlayerId():'TTX_FULL_SAVE'}
+const money=n=>{n=Math.round(Number(n)||0);if(n>=1000){let tr=Math.floor(n/1000),k=n%1000;return tr+'tr'+(k?k+'k':'')}return n+'k'};
 function loadData(){
- try{const raw=localStorage.getItem('TTX_FULL_SAVE');if(!raw){renderEmpty('Chưa tìm thấy dữ liệu lưu của game. Hãy mở index.html và tạo/tiếp tục game trước.');return}data=JSON.parse(raw);migrate();render()}catch(e){renderEmpty('Dữ liệu lưu bị lỗi: '+e.message)}
+ try{const raw=localStorage.getItem(getPlayerSaveKey());if(!raw){renderEmpty('Chưa tìm thấy dữ liệu lưu của game. Hãy mở index.html và tạo/tiếp tục game trước.');return}data=JSON.parse(raw);migrate();render()}catch(e){renderEmpty('Dữ liệu lưu bị lỗi: '+e.message)}
 }
 function migrate(){
  data.employeeRoster=data.employeeRoster||{};data.employeeInfo=data.employeeInfo||{};data.employeeDeals=data.employeeDeals||{};data.employees=Object.assign({counter1:false,brewer:false,online:false,counter2:false},data.employees||{});
@@ -45,7 +47,7 @@ function migrate(){
 }
 function bonus(e){if(!e)return 0;return Math.min(.25,ROLES[e.role].base+Math.max(0,e.skill-1)*.025+Math.max(0,e.level-1)*.015)}
 function totalBonus(){return Math.min(.45,Object.values(data.employeeRoster||{}).reduce((a,e)=>a+bonus(e),0))}
-function save(){data.__employeeManagerUpdated=Date.now();localStorage.setItem('TTX_FULL_SAVE',JSON.stringify(data))}
+function save(){data.__employeeManagerUpdated=Date.now();localStorage.setItem(getPlayerSaveKey(),JSON.stringify(data))}
 function render(){
  document.getElementById('shopLabel').textContent=(data.shopName||'Tiệm Trà Xinh')+' · Ngày '+(data.day||1);
  const list=Object.values(data.employeeRoster||{});

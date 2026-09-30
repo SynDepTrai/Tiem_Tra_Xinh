@@ -53,6 +53,7 @@ body.settings-open{overflow:hidden}
 .settingsInfoCard{padding:15px 16px;border:2px solid #ead9ca;border-radius:20px;background:#fff7ed;margin-bottom:10px}
 .settingsInfoCard b{font-size:18px}.settingsInfoCard .mini{margin-top:5px}
 .settingsAction{width:100%;display:flex;align-items:center;gap:14px;text-align:left;padding:15px 16px;border:2px solid #ead9ca;border-radius:18px;background:#fffaf3;color:#4b3428;margin:8px 0;font:inherit;cursor:pointer}
+.adminBox{margin:10px 0;padding:14px;border:2px solid #e4b15f;border-radius:18px;background:#fff6dc}.adminBadge{display:inline-block;padding:6px 10px;border-radius:999px;background:#5d3523;color:#ffe7a6;font-weight:1000}.adminRow{display:grid;gap:6px;margin:9px 0}.adminRow>b{font-size:13px}
 .settingsAction:active{transform:scale(.99)}
 .settingsAction .settingIcon{font-size:30px;width:40px;text-align:center;flex:0 0 40px}
 .settingsAction .settingText{min-width:0;flex:1}.settingsAction .settingText b{display:block;font-size:17px}.settingsAction .settingText span{display:block;font-size:13px;color:#8d7465;margin-top:3px}
@@ -346,8 +347,8 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   <button class="settingsAction good" type="button" onclick="location.href=location.pathname+'?v='+Date.now()">
    <span class="settingIcon">🔄</span><span class="settingText"><b>Cập nhật bản mới</b><span>Tải lại web để nhận phiên bản mới nhất</span></span><span class="settingValue">Tải lại</span>
   </button>
-  <button class="settingsAction" type="button" onclick="openZaloSettings()">
-   <span class="settingIcon">💬</span><span class="settingText"><b>Nhóm Zalo Trà Thủ</b><span>Thêm hoặc mở liên kết nhóm Zalo đã lưu</span></span><span class="settingValue" id="zaloSettingValue">Thiết lập</span>
+  <button class="settingsAction" type="button" onclick="openFacebookSettings()">
+   <span class="settingIcon">📘</span><span class="settingText"><b>Facebook Admin</b><span>Mở trang Facebook chính thức của Admin</span></span><span class="settingValue" id="facebookSettingValue">Mở</span>
   </button>
   <button class="settingsAction" type="button" onclick="toggleGuideMode()">
    <span class="settingIcon">📖</span><span class="settingText"><b>Chỉ dẫn từng bước</b><span>Hiển thị gợi ý khi bắt đầu các phần chơi</span></span><span class="settingValue" id="guideModeValue">Tự động</span>
@@ -372,7 +373,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   </div>
   <div class="musicBox">
    <div class="musicTitle">🎧 Nhạc chill của bạn</div>
-   <div class="mini" style="margin-top:5px">Thêm MP3, M4A, WAV hoặc OGG. File được lưu riêng trên thiết bị bằng IndexedDB.</div>
+   <div class="mini" style="margin-top:5px">Nhạc Admin được nạp sẵn từ thư mục <b>music/</b>. Bạn cũng có thể thêm MP3, M4A, WAV hoặc OGG; nhạc tự thêm chỉ lưu trên thiết bị bằng IndexedDB.</div>
    <input id="musicFileInput" class="musicFile" type="file" accept="audio/*" multiple onchange="addMusicFiles(this.files)">
    <div class="musicControls">
     <button class="btn primary" type="button" onclick="document.getElementById('musicFileInput').click()">➕ Thêm nhạc</button>
@@ -387,6 +388,15 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
    <div class="settingMain"><b>🔊 Âm thanh (rót, múc...)</b><div class="mini">Bật/tắt âm thanh hiệu ứng trong game.</div></div>
    <button id="sfxToggle" class="settingToggle on" type="button" onclick="toggleSfxSetting()">Bật</button>
   </div>
+
+  <div class="settingsSectionTitle">👤 Người chơi & Admin</div>
+  <div class="settingsInfoCard">
+   <b>👤 Người chơi riêng</b>
+   <div class="mini">Mỗi người chơi có một kho save riêng trên thiết bị này.</div>
+   <div class="row" style="margin-top:8px"><span class="tag">Mã: <b id="playerIdValue"></b></span><span class="tag" id="playerNameValue"></span></div>
+   <div class="row" style="margin-top:8px"><button class="btn secondary" type="button" onclick="changePlayerProfile()">👤 Đổi người chơi</button><button class="btn gold" type="button" onclick="makeRecoveryCode()">🔐 Tạo mã khôi phục</button></div>
+  </div>
+  <div id="adminPanel"></div>
 
   <div class="settingsSectionTitle">💾 Dữ liệu trò chơi</div>
   <button class="settingsAction" type="button" onclick="save();toast('💾 Đã lưu tiến trình')">
@@ -407,7 +417,7 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   </button>
 
   <button class="settingsAction" type="button" onclick="resetSettingsOnly()">
-   <span class="settingIcon">♻️</span><span class="settingText"><b>Đặt lại cài đặt</b><span>Đưa giao diện, âm thanh, nhạc, chỉ dẫn và liên kết Zalo về mặc định; không xóa tiến trình.</span></span><span class="settingValue">Đặt lại</span>
+   <span class="settingIcon">♻️</span><span class="settingText"><b>Đặt lại cài đặt</b><span>Đưa giao diện, âm thanh, nhạc, chỉ dẫn và liên kết Facebook về mặc định; không xóa tiến trình.</span></span><span class="settingValue">Đặt lại</span>
   </button>
 
   <div class="settingsSectionTitle">⚠️ Quản lý dữ liệu</div>
@@ -430,6 +440,14 @@ body{padding-bottom:82px}.app{max-width:980px;padding:0 0 35px}.settingsFab{disp
   <div class="modalActions"><button class="btn secondary" type="button" onclick="closeStoreChooser()" aria-label="Đóng chuỗi cửa hàng">✕ Đóng</button></div>
  </div>
 </div>
+<div id="recoveryCodeModal" class="nameModal" role="dialog" aria-modal="true" aria-labelledby="recoveryCodeTitle">
+ <div class="modalCard" style="max-width:760px">
+  <div style="font-size:54px">🔐</div><h2 id="recoveryCodeTitle">Mã khôi phục tiến trình</h2>
+  <p class="muted">Cất mã này ở nơi an toàn. Sau khi xóa dữ liệu, bạn vẫn có thể dùng mã để khôi phục tiến trình.</p>
+  <textarea id="recoveryCodeText" class="backupCode" style="min-height:180px;width:100%;font-size:12px;line-height:1.4" readonly></textarea>
+  <div class="modalActions"><button class="btn secondary" type="button" onclick="closeRecoveryCode()">Đóng</button><button class="btn primary" type="button" onclick="copyRecoveryCode()">📋 Sao chép mã</button></div>
+ </div>
+</div>
 <div id="nameModal" class="nameModal" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
  <div class="modalCard">
   <div style="font-size:64px">🧋</div>
@@ -448,6 +466,95 @@ function imgIcon(src,alt=""){return src?`<img class="inlineIcon" src="${src}" al
 const ICONS={"🥤":"assets/drinks/trasua.png","🧋":"assets/drinks/trasua.png","🍵":"assets/drinks/matcha.png","🫖":"assets/drinks/olong.png","🍑":"assets/drinks/tradao.png","🍋":"assets/drinks/traxanh.png","🍊":"assets/drinks/travai.png","🍓":"assets/drinks/trathai.png","🍫":"assets/drinks/socola.png","🥭":"assets/drinks/traxanh.png","🍠":"assets/drinks/trasuakhoaimon.png","🍯":"assets/syrups/siro_dau.png","🥛":"assets/ingredients/suatuoi.png","☕":"assets/drinks/trasuaduongden.png","🥫":"assets/ingredients/suatuoi.png","🧀":"assets/toppings/thachphomai.png","🍮":"assets/toppings/thachcau.png","🥥":"assets/toppings/thachdao.png","🍡":"assets/toppings/thachtraicay.png","🍪":"assets/snacks/banhcacao.png","🍟":"assets/snacks/khoaitaychien.png","🌭":"assets/snacks/xiennuong.png","🥓":"assets/snacks/hotdog.png","🍢":"assets/snacks/xiennuong.png","🥟":"assets/snacks/gachien.png","🧪":"assets/ingredients/latra.png","🏆":"assets/ui/icon_cap.png","⚙️":"assets/ui/icon_menu.png","🛒":"assets/ui/icon_camera.png","📋":"assets/ui/icon_kinhnghiem.png","💾":"assets/ui/icon_ketnoibat.png","▶️":"assets/ui/icon_pause.png","✨":"assets/effects/fx_sao.png","🌿":"assets/backgrounds/bg_do.png","💖":"assets/effects/fx_sao.png","⚫":"assets/toppings/tranchaden.png","⚪":"assets/toppings/tranchautrang.png","🟢":"assets/syrups/siro_dau.png","🟡":"assets/toppings/thachphomai.png","🫘":"assets/toppings/tranchauhong.png","🌰":"assets/toppings/tranchaden.png","🍦":"assets/toppings/thachphomai.png","🍇":"assets/toppings/tranchauhong.png","🥢":"assets/snacks/banhmi.png","🧈":"assets/snacks/banhga.png"};
 function emojiImg(e){return ICONS[e]?imgIcon(ICONS[e],e):e}
 /* ===== V59 FULL SETTINGS + CHILL MUSIC ===== */
+/* V83 — ADMIN CONFIG + PER-USER SAVE + RECOVERY CODE */
+const ADMIN_CONFIG={
+  // Mã quản trị giao diện — không phải bảo mật server.
+  accessCode:"TTX-ADMIN-2026",
+  facebookLink:"https://www.facebook.com/share/1FXbXUeueJ/?mibextid=wwXIfr",
+  // Nhạc đóng gói sẵn trên website. Ví dụ:
+  // {name:"Nhạc quán 01", url:"music/nhac-quan-01.mp3"}
+  music:[]
+};
+function getPlayerId(){
+  let id=localStorage.getItem("TTX_PLAYER_ID");
+  if(!id){id="P"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,7).toUpperCase();try{localStorage.setItem("TTX_PLAYER_ID",id)}catch(e){}}
+  return id;
+}
+function getPlayerSaveKey(){return "TTX_SAVE_V1_"+getPlayerId()}
+function getPlayerName(){return localStorage.getItem("TTX_PLAYER_NAME_"+getPlayerId())||"Người chơi"}
+function setPlayerName(v){v=String(v||"").trim().replace(/\s+/g," ").slice(0,24);if(v)localStorage.setItem("TTX_PLAYER_NAME_"+getPlayerId(),v)}
+function legacySaveKey(){return "TTX_FULL_SAVE"}
+function migrateLegacyPlayerSave(){
+  const key=getPlayerSaveKey();
+  if(localStorage.getItem(key))return;
+  const old=localStorage.getItem(legacySaveKey());
+  if(old){try{localStorage.setItem(key,old);localStorage.removeItem(legacySaveKey());}catch(e){}}
+}
+function applyAdminConfig(){
+  try{
+    const adminFacebook=String(ADMIN_CONFIG.facebookLink||"").trim();
+    if(adminFacebook)setSetting("facebookLink",adminFacebook);
+    window.__ttxAdminMusic=Array.isArray(ADMIN_CONFIG.music)?ADMIN_CONFIG.music.filter(x=>x&&x.url):[];
+  }catch(e){window.__ttxAdminMusic=[]}
+}
+function isAdminUnlocked(){return sessionStorage.getItem("TTX_ADMIN_UNLOCKED")==="1"}
+function adminLogin(){
+  const code=prompt("👑 Nhập mã Admin:");
+  if(code===null)return;
+  if(code===ADMIN_CONFIG.accessCode){sessionStorage.setItem("TTX_ADMIN_UNLOCKED","1");toast("👑 Đã bật chế độ Admin");openSettings();renderAdminPanel();}
+  else toast("⛔ Mã Admin không đúng");
+}
+function adminLogout(){sessionStorage.removeItem("TTX_ADMIN_UNLOCKED");toast("👤 Đã thoát chế độ Admin");renderAdminPanel()}
+function renderAdminPanel(){
+  const box=document.getElementById("adminPanel");if(!box)return;
+  if(!isAdminUnlocked()){box.innerHTML='<button class="btn gold wide" type="button" onclick="adminLogin()">👑 Đăng nhập Admin</button>';return}
+  box.innerHTML=`<div class="adminBox">
+   <div class="adminBadge">👑 ADMIN ĐANG BẬT</div>
+   <p class="mini">Admin quản lý Facebook và danh sách nhạc đóng gói sẵn. Muốn thay đổi cho tất cả người chơi, sửa <b>ADMIN_CONFIG</b> rồi deploy lại web.</p>
+   <div class="adminRow"><b>📘 Facebook Admin</b><input id="adminFacebookInput" class="settingsLinkInput" value="${escapeAttr(getSetting("facebookLink",ADMIN_CONFIG.facebookLink||""))}" placeholder="https://www.facebook.com/..." /></div>
+   <div class="adminRow"><b>🎵 Nhạc có sẵn</b><span class="mini">Đặt MP3 vào thư mục <code>music/</code> và khai báo trong <code>ADMIN_CONFIG.music</code>. Người chơi sẽ tự thấy.</span></div>
+   <div class="row"><button class="btn primary" type="button" onclick="saveAdminFacebook()">💾 Lưu Facebook</button><button class="btn secondary" type="button" onclick="adminLogout()">Thoát Admin</button></div>
+  </div>`;
+}
+function saveAdminFacebook(){
+  if(!isAdminUnlocked())return adminLogin();
+  const v=(document.getElementById("adminFacebookInput")?.value||"").trim();
+  if(v&&!/^https?:\/\//i.test(v))return toast("⚠️ Link Facebook phải bắt đầu bằng https:// hoặc http://");
+  setSetting("facebookLink",v);syncSettingsUI();toast(v?"👑 Đã cập nhật Facebook Admin":"👑 Đã xóa Facebook Admin");
+}
+function openFacebookSettings(){
+  const link=String(getSetting("facebookLink",ADMIN_CONFIG.facebookLink||"")||"").trim();
+  if(link){window.open(link,"_blank","noopener,noreferrer");return;}
+  toast("📘 Facebook Admin chưa được cấu hình");
+}
+function getAdminMusic(){
+  let local=[];try{local=JSON.parse(localStorage.getItem("TTX_ADMIN_MUSIC_LOCAL")||"[]")}catch(e){}
+  return [...(window.__ttxAdminMusic||[]),...local].filter(x=>x&&x.url).map((x,i)=>({id:"admin-"+i,name:x.name||"Nhạc Admin",url:x.url,admin:true,type:"audio/mpeg"}));
+}
+function bytesToB64(bytes){let out="";const step=0x8000;for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,i+step));return btoa(out).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
+function b64ToBytes(str){str=str.replace(/-/g,"+").replace(/_/g,"/");while(str.length%4)str+="=";const bin=atob(str),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes}
+function recoveryChecksum(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,"0").toUpperCase()}
+function makeRecoveryCode(){
+  const payload={app:"TiemTraXinh",version:1,playerId:getPlayerId(),playerName:getPlayerName(),createdAt:new Date().toISOString(),state:S};
+  const json=JSON.stringify(payload),code="TTX1."+recoveryChecksum(json)+"."+bytesToB64(new TextEncoder().encode(json));
+  showRecoveryCode(code,"🔐 Mã khôi phục tiến trình");
+}
+function showRecoveryCode(code,title="Mã sao lưu"){
+  const m=document.getElementById("recoveryCodeModal"),t=document.getElementById("recoveryCodeTitle"),i=document.getElementById("recoveryCodeText");if(!m||!i)return prompt(title,code);t.textContent=title;i.value=code;m.classList.add("show");setTimeout(()=>{i.focus();i.select()},60)
+}
+function closeRecoveryCode(){document.getElementById("recoveryCodeModal")?.classList.remove("show")}
+async function copyRecoveryCode(){const i=document.getElementById("recoveryCodeText");if(!i)return;try{await navigator.clipboard.writeText(i.value);toast("📋 Đã sao chép mã khôi phục")}catch(e){i.focus();i.select();document.execCommand("copy");toast("📋 Đã sao chép mã")}}
+function restoreCodeDialog(){
+  const code=prompt("🔑 Dán mã khôi phục TTX1 vào đây:");if(!code)return;
+  try{
+    const parts=String(code).trim().split("."),json=new TextDecoder().decode(b64ToBytes(parts[2]||""));
+    if(parts[0]!=="TTX1"||parts[1]!==recoveryChecksum(json))throw new Error("checksum");
+    const data=JSON.parse(json),state=data.state;
+    if(!state||typeof state!=="object"||!state.shopName)throw new Error("state");
+    if(!confirm("🔐 Khôi phục tiến trình từ mã này? Tiến trình hiện tại sẽ được thay thế."))return;
+    S=Object.assign(clone(DEFAULT),state);normalizeSnackUnlocks();syncLevelUnlocks(false);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("🔐 Đã khôi phục tiến trình từ mã");
+  }catch(e){toast("⚠️ Mã khôi phục không hợp lệ hoặc đã bị thay đổi")}
+}
 const MUSIC_DB_NAME="TiemTraXinhMusicDB", MUSIC_DB_VERSION=1, MUSIC_STORE="tracks";
 let musicDB=null, musicTracks=[], musicIndex=0;
 let musicAudio=new Audio(); musicAudio.preload="metadata"; musicAudio.loop=false;
@@ -471,13 +578,13 @@ function openMusicDB(){
 async function loadMusicTracks(){
  try{
   const db=await openMusicDB();
-  musicTracks=await new Promise((resolve,reject)=>{
+  const local=await new Promise((resolve,reject)=>{
    const q=db.transaction(MUSIC_STORE,"readonly").objectStore(MUSIC_STORE).getAll();
    q.onsuccess=()=>resolve(q.result||[]);q.onerror=()=>reject(q.error);
   });
-  musicTracks.sort((a,b)=>a.id-b.id);
+  musicTracks=[...getAdminMusic(),...local];
   renderMusicList();
- }catch(e){renderMusicList();toast("⚠️ Không mở được kho nhạc trên thiết bị")}
+ }catch(e){musicTracks=getAdminMusic();renderMusicList();toast("⚠️ Không mở được kho nhạc trên thiết bị")}
 }
 function openSettings(){
  document.getElementById("settingsModal").classList.add("show");
@@ -491,8 +598,10 @@ function syncSettingsUI(){
  const a=document.getElementById("sfxToggle"),b=document.getElementById("musicToggle");
  if(a){a.textContent=sfx?"Bật":"Tắt";a.classList.toggle("on",sfx)}
  if(b){b.textContent=music?"Bật":"Tắt";b.classList.toggle("on",music)}
- const zv=document.getElementById("zaloSettingValue");if(zv)zv.textContent=getSetting("zaloLink","")?"Mở / sửa":"Thiết lập";
+ const fv=document.getElementById("facebookSettingValue");if(fv)fv.textContent=getSetting("facebookLink",ADMIN_CONFIG.facebookLink||"")?"Mở":"Thiết lập";
  const v=getSetting("musicVolume",0.35), r=document.getElementById("musicVolume");if(r)r.value=v;
+ const pid=document.getElementById("playerIdValue");if(pid)pid.textContent=getPlayerId();const pn=document.getElementById("playerNameValue");if(pn)pn.textContent=getPlayerName();
+ renderAdminPanel();
 }
 
 function setDayTime(v){setSetting("dayTime",10);toast("⏱️ Một ngày bán hàng kéo dài 10 phút · 07:00–17:00");}
@@ -522,22 +631,10 @@ function showGuide(){
 function showWhatsNew(){
   alert("🎁 CÓ GÌ MỚI — V69\\n\\n• Cài đặt được mở rộng đầy đủ.\\n• Thêm nhạc chill riêng từ MP3/M4A/WAV/OGG.\\n• Bật/tắt nhạc và âm thanh.\\n• Chọn giao diện Kem sữa / Đêm chill.\\n• Sao lưu và khôi phục tiến trình.\\n• Khôi phục từ file hoặc mã sao lưu.\\n• Quản lý chỉ dẫn từng bước.\\n• Thêm đánh giá khách hàng ngẫu nhiên.\\n• Khách có thể khen, góp ý hoặc chê.\\n• Chủ quán có thể phản hồi từng đánh giá.");
 }
-function openZaloSettings(){
-  const old=getSetting("zaloLink","");
-  if(old && /^https?:\/\//i.test(old)){
-    if(confirm("💬 Đã có link nhóm Zalo. Nhấn OK để mở nhóm, Hủy để sửa link.")){window.open(old,"_blank","noopener");return;}
-  }
-  const link=prompt("💬 Dán link nhóm Zalo của bạn (để trống để xóa):",old);
-  if(link===null)return;
-  const clean=link.trim();
-  if(clean && !/^https?:\/\//i.test(clean))return toast("⚠️ Link phải bắt đầu bằng https:// hoặc http://");
-  setSetting("zaloLink",clean); syncSettingsUI();
-  toast(clean?"💬 Đã lưu link nhóm Zalo":"💬 Đã xóa link nhóm Zalo");
-}
 function resetSettingsOnly(){
  if(!confirm("♻️ Đặt lại toàn bộ cài đặt về mặc định? Tiến trình quán sẽ không bị xóa."))return;
- ["dayTime","theme","music","musicVolume","sfx","guideMode","zaloLink"].forEach(k=>localStorage.removeItem("ttx_setting_"+k));
- setSetting("dayTime",10);setSetting("theme","cream");setSetting("music",true);setSetting("musicVolume",0.35);setSetting("sfx",true);setSetting("guideMode",true);
+ ["dayTime","theme","music","musicVolume","sfx","guideMode","facebookLink"].forEach(k=>localStorage.removeItem("ttx_setting_"+k));
+ setSetting("dayTime",10);setSetting("theme","cream");setSetting("music",true);setSetting("musicVolume",0.35);setSetting("sfx",true);setSetting("guideMode",true);setSetting("facebookLink",ADMIN_CONFIG.facebookLink||"");
  document.body.classList.remove("nightTheme");
  syncSettingsUI();applyStoredSettings();toast("♻️ Đã đặt lại cài đặt · tiến trình vẫn được giữ");
 }
@@ -565,7 +662,7 @@ function exportBackup(){
   }catch(e){toast("⚠️ Không thể xuất sao lưu")}
 }
 function restoreAutoSave(){
-  const raw=localStorage.getItem("TTX_FULL_SAVE");
+  const raw=localStorage.getItem(getPlayerSaveKey());
   if(!raw)return toast("📭 Chưa có bản tự lưu");
   if(!confirm("Khôi phục bản tự lưu hiện tại? Dữ liệu đang chơi sẽ được thay thế."))return;
   try{S=Object.assign(clone(DEFAULT),JSON.parse(raw));normalizeSnackUnlocks();syncLevelUnlocks(false);save();updateTop();renderReviews();renderPrep();closeSettings();toast("📅 Đã khôi phục bản tự lưu");}
@@ -580,22 +677,27 @@ async function importBackup(file){
     S=Object.assign(clone(DEFAULT),state);normalizeSnackUnlocks();syncLevelUnlocks(false);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("📥 Đã khôi phục bản sao lưu");
   }catch(e){toast("⚠️ File sao lưu không hợp lệ")}
 }
-function restoreCodeDialog(){
-  const code=prompt("🔑 Dán mã sao lưu JSON:");
-  if(!code)return;
-  try{
-    const data=JSON.parse(code),state=data.state||data;
-    if(!state || typeof state!=="object" || !state.shopName)throw new Error("invalid");
-    if(!confirm("Khôi phục dữ liệu từ mã này?"))return;
-    S=Object.assign(clone(DEFAULT),state);normalizeSnackUnlocks();syncLevelUnlocks(false);if(typeof S.renameUsed!=="boolean")S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";S.today=Object.assign({served:0,wrong:0,left:0,revenue:0},S.today||{});S.cardGame=Object.assign({bet:20,played:0,wins:0},S.cardGame||{});save();updateTop();renderPrep();closeSettings();toast("🔑 Đã khôi phục từ mã");
-  }catch(e){toast("⚠️ Mã sao lưu không hợp lệ")}
-}
 function confirmDeleteAll(){
   if(!confirm("⚠️ XÓA TOÀN BỘ DỮ LIỆU?\n\nTiền, ngày, nâng cấp, menu, lịch sử và tiến trình sẽ bị xóa."))return;
   if(!confirm("🚨 XÁC NHẬN LẦN CUỐI\n\nBạn chắc chắn muốn bắt đầu lại từ đầu?"))return;
-  localStorage.removeItem("TTX_FULL_SAVE");
+  localStorage.removeItem(getPlayerSaveKey());
   Object.keys(localStorage).filter(k=>k.startsWith("ttx_setting_")).forEach(k=>localStorage.removeItem(k));
   location.reload();
+}
+function changePlayerProfile(){
+ save();
+ const oldId=getPlayerId();
+ const raw=prompt("👤 Mã người chơi mới\n\n- Bỏ trống để tạo người chơi mới.\n- Nhập mã P... để quay lại người chơi đã có.","");
+  if(raw===null)return;
+  let id=raw.trim().toUpperCase();
+  if(!id){id="P"+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,7).toUpperCase();}
+  if(!/^P[A-Z0-9_-]{6,40}$/.test(id))return toast("⚠️ Mã người chơi không hợp lệ");
+  if(id===oldId)return toast("👤 Bạn đang ở người chơi này");
+  localStorage.setItem("TTX_PLAYER_ID",id);
+  const rawSave=localStorage.getItem(getPlayerSaveKey());
+  if(rawSave){location.reload();return;}
+  S=clone(DEFAULT);S.shopName="Tiệm Trà Xinh";S.renameUsed=false;S.cash=500;S.globalCash=500;S.rating=0;S.reviews=[];S.day=1;S.companyLevel=1;S.activeStoreId="tea";S.storeSelectionDone=false;S.stores={};
+  save();location.reload();
 }
 function toggleSfxSetting(){setSetting("sfx",!getSetting("sfx",true));syncSettingsUI();toast(getSetting("sfx",true)?"🔊 Đã bật âm thanh":"🔇 Đã tắt âm thanh")}
 function toggleMusicSetting(){
@@ -607,16 +709,16 @@ function renderMusicList(){
  const box=document.getElementById("musicList"), now=document.getElementById("musicNow");
  if(!box)return;
  if(!musicTracks.length){box.innerHTML='<div class="musicEmpty">🎵 Chưa có nhạc. Hãy bấm <b>➕ Thêm nhạc</b> để đưa nhạc chill vào quán.</div>';if(now)now.textContent="Chưa có bài nhạc";return}
- box.innerHTML=musicTracks.map((m,i)=>`<div class="musicItem ${i===musicIndex?"active":""}">
-   <button class="btn secondary" type="button" onclick="selectMusic(${i})">▶</button>
-   <div class="musicItemName" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</div>
-   <button class="btn danger" type="button" onclick="removeMusic(${m.id})">Xóa</button>
- </div>`).join("");
+ box.innerHTML=musicTracks.map((m,i)=>{
+   const del=m.admin?'<span class="mini">Chung</span>':`<button class="btn danger" type="button" onclick="removeMusic(${m.id})">Xóa</button>`;
+   return `<div class="musicItem ${i===musicIndex?"active":""}"><button class="btn secondary" type="button" onclick="selectMusic(${i})">▶</button><div class="musicItemName" title="${escapeHtml(m.name)}">${escapeHtml(m.name)} ${m.admin?'<span class="tag">ADMIN</span>':''}</div>${del}</div>`;
+ }).join("");
  const cur=musicTracks[musicIndex];if(now)now.textContent=cur?"🎶 "+cur.name:"Chưa có bài nhạc";
  updateMusicButton();
 }
 function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
 async function removeMusic(id){
+  if(String(id).startsWith("admin-"))return toast("🔒 Nhạc Admin không thể xóa ở máy người chơi");
   try{
     const db=await openMusicDB();
     await new Promise((resolve,reject)=>{
@@ -650,7 +752,7 @@ async function addMusicFiles(files){
  const inp=document.getElementById("musicFileInput");if(inp)inp.value="";
 }
 async function getMusicBlob(index){
- const m=musicTracks[index];if(!m)return null;
+ const m=musicTracks[index];if(!m||m.admin)return null;
  try{
   const db=await openMusicDB();
   return await new Promise((resolve,reject)=>{
@@ -660,11 +762,12 @@ async function getMusicBlob(index){
  }catch(e){return null}
 }
 async function selectMusic(i,autoplay=true){
- if(!musicTracks.length)return toast("🎵 Chưa có bài nhạc");
+ if(!musicTracks.length)return toast("🎵 Chưa có nhạc");
  musicIndex=(i+musicTracks.length)%musicTracks.length;
- const blob=await getMusicBlob(musicIndex);if(!blob)return toast("⚠️ Không đọc được bài nhạc");
- if(musicObjectUrl)URL.revokeObjectURL(musicObjectUrl);
- musicObjectUrl=URL.createObjectURL(blob);musicAudio.src=musicObjectUrl;
+ const track=musicTracks[musicIndex];
+ if(musicObjectUrl){URL.revokeObjectURL(musicObjectUrl);musicObjectUrl=null}
+ if(track?.admin){musicAudio.src=track.url;}
+ else {const blob=await getMusicBlob(musicIndex);if(!blob)return toast("⚠️ Không đọc được bài nhạc");musicObjectUrl=URL.createObjectURL(blob);musicAudio.src=musicObjectUrl;}
  musicAudio.volume=Number(getSetting("musicVolume",0.35));
  renderMusicList();
  if(autoplay&&getSetting("music",true)){try{await musicAudio.play()}catch(e){toast("▶️ Bấm Phát để bắt đầu nhạc trên iPhone")}}
@@ -809,7 +912,8 @@ function normalizeSnackUnlocks(){
   S.menuSnacks=S.menuSnacks.filter(n=>S.unlockedSnacks.includes(n) && (S.stock.snacks[n]||0)>0);
 }
 function load(){
- let x=localStorage.getItem("TTX_FULL_SAVE");if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
+ migrateLegacyPlayerSave();
+ let x=localStorage.getItem(getPlayerSaveKey());if(x)S=Object.assign(clone(DEFAULT),JSON.parse(x));
  if(typeof S.renameUsed!=="boolean") S.renameUsed=(S.shopName||"Tiệm Trà Xinh")!=="Tiệm Trà Xinh";
  S.shopName=(S.shopName||"Tiệm Trà Xinh").trim()||"Tiệm Trà Xinh"; S.ratingPenalty=Number(S.ratingPenalty)||0; S.ratingBonus=Math.max(0,Number(S.ratingBonus)||0); ensureLevelMissionState(); S.employeeInfo=S.employeeInfo||{}; S.employeeRoster=S.employeeRoster||{}; S.snackSystemUnlocked=!!S.snackSystemUnlocked;
  recalcRatingFromReviews();
@@ -929,7 +1033,7 @@ function initStoreSystem(){
  S.stores.tea.opened=true;S.stores[S.activeStoreId]=S.stores[S.activeStoreId]||genericStoreSnapshot(STORE_DEFS[S.activeStoreId]||STORE_DEFS.tea);S.stores[S.activeStoreId].opened=true;save();
 }
 function syncGlobalCash(){S.globalCash=Number(S.cash)||0}
-function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem("TTX_FULL_SAVE",JSON.stringify(S))}
+function save(){syncGlobalCash();S.__employeeManagerUpdated=Number(S.__employeeManagerUpdated||0);localStorage.setItem(getPlayerSaveKey(),JSON.stringify(S))}
 function storeIsUnlocked(id){const d=STORE_DEFS[id];if(!d)return false;if(id==="tea")return true;return S.companyLevel>=d.unlockLevel&&S.stores?.[id]?.opened===true}
 function storeCanOpen(id){const d=STORE_DEFS[id];return !!d&&id!=="tea"&&S.companyLevel>=d.unlockLevel&&Number(S.cash||0)>=d.openCost&&!S.stores?.[id]?.opened}
 function openStore(id){const d=STORE_DEFS[id];if(!d)return;if(S.stores[id]?.opened)return switchStore(id);if(S.companyLevel<d.unlockLevel)return showStoreRequirement(id);if(S.cash<d.openCost)return showStoreRequirement(id);S.cash-=d.openCost;S.stores[id].opened=true;S.stores[id].storeBusiness=S.stores[id].storeBusiness||{kind:d.kind,menu:[d.tag],dailyBase:120,dailyPerEmployee:55,active:false};syncGlobalCash();save();renderStoreChooser();toast(`🎉 Chúc mừng! Bạn đã mở ${d.icon} ${d.name} · -${money(d.openCost)}`);fx("🎉");}
@@ -1086,7 +1190,7 @@ function wipe(){
   const first=confirm("⚠️ CẢNH BÁO XÓA DỮ LIỆU\n\nTất cả tiến trình của Tiệm Trà Xinh sẽ bị xóa vĩnh viễn trên thiết bị này, gồm: tên quán, tiền, cấp độ, EXP, công thức, nguyên liệu, topping, đồ ăn vặt và các nâng cấp.\n\nBạn có chắc chắn muốn tiếp tục?");
   if(!first) return;
   const second=confirm("🚨 XÁC NHẬN LẦN CUỐI\n\nThao tác này không thể hoàn tác. Nhấn OK để xóa toàn bộ dữ liệu, hoặc Hủy để giữ nguyên tiến trình.");
-  if(second){localStorage.removeItem("TTX_FULL_SAVE");location.reload();}
+  if(second){localStorage.removeItem(getPlayerSaveKey());Object.keys(localStorage).filter(k=>k.startsWith("ttx_setting_")).forEach(k=>localStorage.removeItem(k));location.reload();}
 }
 function startPrep(){try{renderPrep()}catch(err){console.error("renderPrep error",err);try{renderPrepFallback()}catch(_){}}show("prep");if(getSetting("guideMode",true)&&Number(S.day||1)<=2)toast("📖 Hướng dẫn: vào Kho/Nâng cấp để nhập hàng → chỉnh Menu → Mở cửa")}
 
@@ -1844,7 +1948,7 @@ function renderManage(){
     const speed=Math.round(employeeSpeedBonus(key)*100);const train=employeeTrainCost(key);
     return `<div class="upgrade" style="align-items:flex-start"><div style="flex:1"><div class="row between"><b>${employeeRoleIcon(key)} ${r.name}</b><span class="tag">${role.label}</span></div><div class="mini">ID: ${r.id} · Lv.${r.level}/5 · Kỹ năng ${r.skill}/5 · ${r.wage}k/giờ</div><div class="mini">⚡ Tốc độ pha chế: <b>+${speed}%</b> · Đã xử lý: ${r.totalOrders||0} đơn</div><div class="progress" style="margin-top:7px"><i style="width:${Math.min(100,(speed/25)*100)}%"></i></div></div><div class="row"><button class="btn gold" onclick="trainEmployee('${key}')">📚 ${money(train)}</button><button class="btn secondary" onclick="negotiateEmployee('${key}')">🤝 Deal</button><button class="btn danger" onclick="fireEmployee('${key}')">👋 Nghỉ</button></div></div>`;
   }).join("");
-  b.innerHTML=staffPayPanel+`<div class="sectionTitle"><div><h3>👨‍🍳 Quản lý nhân viên</h3><div class="mini">Mỗi người có hồ sơ, vai trò, cấp độ và kỹ năng riêng. Nhân viên trong quầy giúp rút ngắn thời gian rót/làm đồ uống.</div></div><span class="tag">⚡ Tổng +${Math.round(totalEmployeePrepBonus()*100)}%</span></div>${staffCards}<div class="snackBox" style="margin-top:12px"><b>⚡ Cơ chế tốc độ</b><div class="mini">Phụ quầy +8% · Pha chế +15% · Phụ quầy 2 +6%. Mỗi cấp thêm +1,5% và mỗi điểm kỹ năng thêm +2,5%. Tổng cộng tối đa +45%. Nhân viên online không ảnh hưởng quầy tại chỗ.</div><button class="btn secondary" style="margin-top:8px" onclick="window.open('employee-manager.html','_blank')">📋 Mở file quản lý nhân viên</button></div>`;
+  b.innerHTML=staffPayPanel+`<div class="sectionTitle"><div><h3>👨‍🍳 Quản lý nhân viên</h3><div class="mini">Mỗi người có hồ sơ, vai trò, cấp độ và kỹ năng riêng. Nhân viên trong quầy giúp rút ngắn thời gian rót/làm đồ uống.</div></div><span class="tag">⚡ Tổng +${Math.round(totalEmployeePrepBonus()*100)}%</span></div>${staffCards}<div class="snackBox" style="margin-top:12px"><b>⚡ Cơ chế tốc độ</b><div class="mini">Phụ quầy +8% · Pha chế +15% · Phụ quầy 2 +6%. Mỗi cấp thêm +1,5% và mỗi điểm kỹ năng thêm +2,5%. Tổng cộng tối đa +45%. Nhân viên online không ảnh hưởng quầy tại chỗ.</div><button class="btn secondary" style="margin-top:8px" onclick="window.open('employee-manager-v2.html','_blank')">📋 Mở file quản lý nhân viên</button></div>`;
   return;
  }
  if(manageMode==="online"){
@@ -1974,10 +2078,10 @@ function bindStoreChainInteractions(){
 }
 
 
-const __hadSave=!!localStorage.getItem("TTX_FULL_SAVE");load();initStoreSystem();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
+migrateLegacyPlayerSave();const __hadSave=!!localStorage.getItem(getPlayerSaveKey());load();initStoreSystem();updateTop();bindStoreChainInteractions();if(!S.storeSelectionDone){renderPrep();openStoreChooser();}else{startPrep();}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNameModal();if(e.key==="Enter"&&document.getElementById("nameModal").classList.contains("show"))confirmShopName()});
 // Đồng bộ khi file quản lý nhân viên được mở ở tab khác.
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem('TTX_FULL_SAVE');if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{const raw=localStorage.getItem(getPlayerSaveKey());if(raw){const external=JSON.parse(raw);if(external&&Number(external.__employeeManagerUpdated||0)>Number(S.__employeeManagerUpdated||0)){const keepOpen=S.shopOpen;S=Object.assign(clone(DEFAULT),external);S.shopOpen=keepOpen;ensureEmployeeRoster();updateTop();renderPrep();if(manageMode==='staff')renderManage();}}}catch(_){}}});
 document.getElementById("nameModal").addEventListener("click",e=>{if(e.target.id==="nameModal")closeNameModal()});
 updateTop();
 
@@ -1988,7 +2092,7 @@ document.addEventListener("click",e=>{
  if(t)playSfx("click");
 });
 
-try{applyStoredSettings()}catch(e){}
+try{applyAdminConfig();applyStoredSettings()}catch(e){}
 
 /* V39 — Sâm Lốc fictional in-game money mini-game */
 S.cardGame=S.cardGame||{bet:20,played:0,wins:0};
